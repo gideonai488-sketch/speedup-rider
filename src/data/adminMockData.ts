@@ -130,7 +130,15 @@ export const mockPricing: ServicePricing[] = [
   { id: 'SVC-005', serviceName: 'Sneaker Cleaning', pricePerKg: 80, minWeight: 1, expressMultiplier: 1.5, isActive: true },
   { id: 'SVC-006', serviceName: 'Bedding & Linens', pricePerKg: 35, minWeight: 3, expressMultiplier: 1.4, isActive: true },
   { id: 'SVC-007', serviceName: 'Eco-Friendly Wash', pricePerKg: 30, minWeight: 2, expressMultiplier: 1.3, isActive: true },
-  { id: 'SVC-008', serviceName: 'Bulk Order', pricePerKg: 20, minWeight: 10, expressMultiplier: 1.2, isActive: false },
+  { id: 'SVC-008', serviceName: 'Bulk Order', pricePerKg: 20, minWeight: 10, expressMultiplier: 1.2, isActive: true },
+  { id: 'SVC-009', serviceName: 'Wedding Dress Care', pricePerKg: 200, minWeight: 1, expressMultiplier: 1.5, isActive: true },
+  { id: 'SVC-010', serviceName: 'Curtains & Drapes', pricePerKg: 45, minWeight: 2, expressMultiplier: 1.3, isActive: true },
+  { id: 'SVC-011', serviceName: 'Leather & Suede Care', pricePerKg: 120, minWeight: 1, expressMultiplier: 1.6, isActive: true },
+  { id: 'SVC-012', serviceName: 'Corporate Uniforms', pricePerKg: 18, minWeight: 5, expressMultiplier: 1.4, isActive: true },
+  { id: 'SVC-013', serviceName: 'African Wear', pricePerKg: 55, minWeight: 1, expressMultiplier: 1.5, isActive: true },
+  { id: 'SVC-014', serviceName: 'Stain Removal', pricePerKg: 40, minWeight: 1, expressMultiplier: 1.8, isActive: true },
+  { id: 'SVC-015', serviceName: 'Carpet & Rug Cleaning', pricePerKg: 65, minWeight: 3, expressMultiplier: 1.4, isActive: true },
+  { id: 'SVC-016', serviceName: 'Baby Clothes', pricePerKg: 28, minWeight: 2, expressMultiplier: 1.3, isActive: true },
 ];
 
 export const mockAnalytics: AnalyticsData = {
@@ -156,9 +164,11 @@ export const mockAnalytics: AnalyticsData = {
   ],
   topServices: [
     { name: 'Wash & Fold', orders: 456, revenue: 36480 },
+    { name: 'African Wear', orders: 328, revenue: 26240 },
     { name: 'Dry Cleaning', orders: 312, revenue: 24960 },
     { name: 'Express Wash', orders: 234, revenue: 18720 },
+    { name: 'Baby Clothes', orders: 189, revenue: 15120 },
     { name: 'Sneaker Cleaning', orders: 145, revenue: 11600 },
-    { name: 'Ironing Only', orders: 100, revenue: 6240 },
+    { name: 'Wedding Dress Care', orders: 67, revenue: 10050 },
   ],
 };
