@@ -46,10 +46,10 @@ const AdminOrders: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const formatCurrency = (value: number) => `₦${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `GH₵ ${value.toLocaleString()}`;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-NG', {
+    return new Date(dateString).toLocaleDateString('en-GH', {
       day: 'numeric',
       month: 'short',
       hour: '2-digit',

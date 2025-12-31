@@ -28,7 +28,7 @@ const chartConfig = {
 
 const AdminDashboard: React.FC = () => {
   const formatCurrency = (value: number) => {
-    return `₦${value.toLocaleString()}`;
+    return `GH₵ ${value.toLocaleString()}`;
   };
 
   const recentOrders = mockOrders.slice(0, 4);
