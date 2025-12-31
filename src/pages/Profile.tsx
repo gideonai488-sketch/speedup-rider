@@ -1,11 +1,12 @@
 import React from 'react';
 import { 
   User, MapPin, CreditCard, Bell, HelpCircle, 
-  Settings, ChevronRight, LogOut, Star, Gift
+  Settings, ChevronRight, LogOut, Star, Gift, ShieldCheck
 } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAdmin } from '@/context/AdminContext';
 
 const menuItems = [
   { icon: MapPin, label: 'Saved Addresses', badge: '2' },
@@ -18,6 +19,8 @@ const menuItems = [
 ];
 
 const Profile: React.FC = () => {
+  const { toggleAdminMode } = useAdmin();
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Profile Header */}
@@ -91,6 +94,18 @@ const Profile: React.FC = () => {
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </button>
         ))}
+
+        {/* Admin Mode */}
+        <button 
+          onClick={toggleAdminMode}
+          className="w-full flex items-center gap-4 p-4 rounded-xl bg-primary/5 border border-primary/20"
+        >
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-primary" />
+          </div>
+          <span className="flex-1 text-left font-medium text-primary">Admin Dashboard</span>
+          <ChevronRight className="w-5 h-5 text-primary" />
+        </button>
 
         {/* Logout */}
         <button className="w-full flex items-center gap-4 p-4 rounded-xl bg-destructive/5 border border-destructive/20 mt-4">
