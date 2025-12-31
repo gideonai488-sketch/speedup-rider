@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle2, Truck, Sparkles, Droplets } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Package, Clock, CheckCircle2, Truck, Sparkles, Droplets, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BottomNav from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,7 @@ const statusSteps = [
 ];
 
 const Orders: React.FC = () => {
+  const navigate = useNavigate();
   const currentStepIndex = statusSteps.findIndex((s) => s.key === mockOrder.status);
 
   return (
@@ -132,6 +133,15 @@ const Orders: React.FC = () => {
                   );
                 })}
               </div>
+
+              {/* Track Order Button */}
+              <Button 
+                onClick={() => navigate('/track/ORD-2024-001')}
+                className="w-full mt-4 gradient-coral text-coral-foreground shadow-coral"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Track Live Location
+              </Button>
             </div>
           </div>
         </section>
