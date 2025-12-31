@@ -24,7 +24,7 @@ const AdminPricing: React.FC = () => {
     service.serviceName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatCurrency = (value: number) => `₦${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `GH₵ ${value.toLocaleString()}`;
 
   const handleEdit = (service: ServicePricing) => {
     setEditingId(service.id);

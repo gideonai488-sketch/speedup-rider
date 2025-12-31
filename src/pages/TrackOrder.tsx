@@ -13,8 +13,8 @@ const mockTrackingData = {
   status: 'out_for_delivery',
   estimatedTime: '15 mins',
   rider: {
-    name: 'Olumide Bello',
-    phone: '+234 810 111 2222',
+    name: 'Kwaku Frimpong',
+    phone: '+233 20 111 2222',
     rating: 4.8,
     photo: null,
   },
@@ -22,22 +22,22 @@ const mockTrackingData = {
     { name: 'Wash & Fold', quantity: 5 },
     { name: 'Dry Cleaning', quantity: 2 },
   ],
-  total: 5500,
+  total: 275,
   destination: {
-    address: '15 Victoria Island, Lagos',
-    lat: 6.4281,
-    lng: 3.4219,
+    address: '15 Oxford Street, Osu, Accra',
+    lat: 5.5560,
+    lng: -0.1869,
   },
 };
 
-// Simulated rider movement
+// Simulated rider movement (Accra coordinates)
 const riderPath = [
-  { lat: 6.4350, lng: 3.4150 },
-  { lat: 6.4330, lng: 3.4170 },
-  { lat: 6.4315, lng: 3.4190 },
-  { lat: 6.4300, lng: 3.4200 },
-  { lat: 6.4285, lng: 3.4215 },
-  { lat: 6.4281, lng: 3.4219 },
+  { lat: 5.5620, lng: -0.1920 },
+  { lat: 5.5600, lng: -0.1900 },
+  { lat: 5.5585, lng: -0.1885 },
+  { lat: 5.5570, lng: -0.1875 },
+  { lat: 5.5565, lng: -0.1870 },
+  { lat: 5.5560, lng: -0.1869 },
 ];
 
 const TrackOrder: React.FC = () => {
@@ -76,7 +76,7 @@ const TrackOrder: React.FC = () => {
     }
   };
 
-  const formatCurrency = (value: number) => `₦${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `GH₵ ${value.toLocaleString()}`;
 
   return (
     <div className="min-h-screen bg-background">
