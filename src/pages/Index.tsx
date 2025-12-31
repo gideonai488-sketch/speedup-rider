@@ -5,6 +5,7 @@ import HeroBanner from '@/components/home/HeroBanner';
 import QuickActions from '@/components/home/QuickActions';
 import ServiceSection from '@/components/home/ServiceSection';
 import PromoCard from '@/components/home/PromoCard';
+import PromoVideo from '@/components/home/PromoVideo';
 import ServiceDetailSheet from '@/components/service/ServiceDetailSheet';
 import { laundryServices } from '@/data/services';
 import { LaundryService } from '@/types/laundry';
@@ -38,6 +39,8 @@ const Index: React.FC = () => {
           onServiceClick={handleServiceClick}
           variant="large"
         />
+        
+        <PromoVideo />
         
         <PromoCard />
         
