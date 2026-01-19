@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -50,9 +50,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        coral: {
-          DEFAULT: "hsl(var(--coral))",
-          foreground: "hsl(var(--coral-foreground))",
+        speed: {
+          DEFAULT: "hsl(var(--speed))",
+          foreground: "hsl(var(--speed-foreground))",
+        },
+        rush: {
+          DEFAULT: "hsl(var(--rush))",
+          foreground: "hsl(var(--rush-foreground))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
@@ -106,6 +110,10 @@ export default {
           from: { backgroundPosition: "200% 0" },
           to: { backgroundPosition: "-200% 0" },
         },
+        bounce: {
+          "0%, 100%": { transform: "translateY(-5%)", animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)" },
+          "50%": { transform: "translateY(0)", animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -114,11 +122,12 @@ export default {
         "slide-in-up": "slide-in-up 0.4s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
         shimmer: "shimmer 2s infinite linear",
+        bounce: "bounce 1s infinite",
       },
       boxShadow: {
         card: "var(--shadow-md)",
         glow: "var(--shadow-glow)",
-        coral: "var(--shadow-coral)",
+        rush: "var(--shadow-rush)",
       },
     },
   },
