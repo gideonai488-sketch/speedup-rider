@@ -2,12 +2,32 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
-  Zap, MapPin, Clock, Search, Bell, User, Menu,
-  ChevronRight, Star, Navigation
+  Zap, MapPin, Clock, Search, Bell, User,
+  ChevronRight, Star, Navigation, UtensilsCrossed,
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink
 } from 'lucide-react';
-import { serviceCategories } from '@/data/deliveryData';
+import { serviceCategories, popularStores } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
+
+const serviceIcons: Record<string, React.ReactNode> = {
+  food: <UtensilsCrossed className="w-6 h-6" />,
+  groceries: <ShoppingCart className="w-6 h-6" />,
+  pharmacy: <Pill className="w-6 h-6" />,
+  errands: <ClipboardList className="w-6 h-6" />,
+  packages: <Package className="w-6 h-6" />,
+  documents: <FileText className="w-6 h-6" />,
+};
+
+const serviceColors: Record<string, string> = {
+  food: 'bg-orange-500/10 text-orange-500',
+  groceries: 'bg-green-500/10 text-green-500',
+  pharmacy: 'bg-red-500/10 text-red-500',
+  errands: 'bg-purple-500/10 text-purple-500',
+  packages: 'bg-blue-500/10 text-blue-500',
+  documents: 'bg-cyan-500/10 text-cyan-500',
+};
 
 const CustomerHome: React.FC = () => {
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
@@ -71,7 +91,7 @@ const CustomerHome: React.FC = () => {
           </div>
         </div>
 
-        {/* Services Grid */}
+        {/* Services Grid with Icons */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-foreground">Our Services</h2>
@@ -90,8 +110,100 @@ const CustomerHome: React.FC = () => {
                 }`}
                 onClick={() => setSelectedService(service.id)}
               >
-                <span className="text-3xl mb-2">{service.icon}</span>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${serviceColors[service.id]}`}>
+                  {serviceIcons[service.id]}
+                </div>
                 <span className="text-xs font-medium text-foreground text-center">{service.name}</span>
+                <span className="text-[10px] text-muted-foreground mt-0.5">From GH₵{service.basePrice}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Featured Stores - Netflix Style */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground">Featured Stores</h2>
+            <button className="text-sm text-primary font-medium">See all</button>
+          </div>
+          
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex gap-4 pb-4">
+              {popularStores.filter(s => s.featured).map((store) => (
+                <Link
+                  key={store.id}
+                  to={`/customer/book?service=${store.category}&store=${store.id}`}
+                  className="group flex-shrink-0 w-40"
+                >
+                  <div className={`h-24 rounded-xl ${store.coverColor} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
+                    <img 
+                      src={store.logo} 
+                      alt={store.name}
+                      className="max-h-16 max-w-28 object-contain filter brightness-0 invert"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement!.innerHTML = `<span class="text-white text-2xl font-bold">${store.name}</span>`;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                  </div>
+                  <h3 className="font-semibold text-foreground text-sm truncate">{store.name}</h3>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-0.5">
+                      <Star className="w-3 h-3 text-warning fill-warning" />
+                      {store.rating}
+                    </div>
+                    <span>•</span>
+                    <span>{store.deliveryTime}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </section>
+
+        {/* Popular Stores Grid */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground">Popular Near You</h2>
+            <button className="text-sm text-primary font-medium">See all</button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {popularStores.map((store) => (
+              <Link
+                key={store.id}
+                to={`/customer/book?service=${store.category}&store=${store.id}`}
+                className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
+              >
+                <div className={`h-20 ${store.coverColor} flex items-center justify-center p-3 relative`}>
+                  <img 
+                    src={store.logo} 
+                    alt={store.name}
+                    className="max-h-12 max-w-20 object-contain filter brightness-0 invert"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = `<span class="text-white text-xl font-bold">${store.name}</span>`;
+                    }}
+                  />
+                  <div className="absolute top-2 right-2 bg-black/30 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ExternalLink className="w-3 h-3 text-white" />
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h3 className="font-semibold text-foreground text-sm">{store.name}</h3>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                    <Star className="w-3 h-3 text-warning fill-warning" />
+                    <span>{store.rating}</span>
+                    <span className="mx-1">•</span>
+                    <Clock className="w-3 h-3" />
+                    <span>{store.deliveryTime}</span>
+                  </div>
+                  <div className="text-xs text-primary mt-1.5 font-medium">
+                    GH₵{store.deliveryFee} delivery
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
@@ -162,7 +274,7 @@ const CustomerHome: React.FC = () => {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border px-6 py-3">
         <div className="flex items-center justify-around">
-          <Link to="/customer/home" className="flex flex-col items-center gap-1 text-primary">
+          <Link to="/customer" className="flex flex-col items-center gap-1 text-primary">
             <Zap className="w-5 h-5" />
             <span className="text-xs font-medium">Home</span>
           </Link>
