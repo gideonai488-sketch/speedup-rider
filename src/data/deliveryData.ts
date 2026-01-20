@@ -1,5 +1,17 @@
 import { ServiceCategory } from '@/types/delivery';
 
+export interface Store {
+  id: string;
+  name: string;
+  category: 'food' | 'groceries' | 'electronics' | 'pharmacy';
+  logo: string;
+  coverColor: string;
+  rating: number;
+  deliveryTime: string;
+  deliveryFee: number;
+  featured?: boolean;
+}
+
 export const serviceCategories: ServiceCategory[] = [
   {
     id: 'food',
@@ -57,6 +69,92 @@ export const serviceCategories: ServiceCategory[] = [
   },
 ];
 
+export const popularStores: Store[] = [
+  {
+    id: 'kfc',
+    name: 'KFC',
+    category: 'food',
+    logo: 'https://upload.wikimedia.org/wikipedia/sco/thumb/b/bf/KFC_logo.svg/1200px-KFC_logo.svg.png',
+    coverColor: 'bg-red-600',
+    rating: 4.5,
+    deliveryTime: '25-35 min',
+    deliveryFee: 8,
+    featured: true,
+  },
+  {
+    id: 'shoprite',
+    name: 'Shoprite',
+    category: 'groceries',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Shoprite_%28South_Africa%29_logo.svg/1200px-Shoprite_%28South_Africa%29_logo.svg.png',
+    coverColor: 'bg-red-500',
+    rating: 4.3,
+    deliveryTime: '30-45 min',
+    deliveryFee: 12,
+    featured: true,
+  },
+  {
+    id: 'melcom',
+    name: 'Melcom',
+    category: 'groceries',
+    logo: 'https://melcomgroup.com/wp-content/uploads/2023/03/melcom-logo.png',
+    coverColor: 'bg-blue-600',
+    rating: 4.4,
+    deliveryTime: '35-50 min',
+    deliveryFee: 15,
+    featured: true,
+  },
+  {
+    id: 'pizza-man',
+    name: 'Pizza Man',
+    category: 'food',
+    logo: 'https://images.deliveryhero.io/image/fd-gh/LH/z7wf-hero.jpg',
+    coverColor: 'bg-yellow-500',
+    rating: 4.6,
+    deliveryTime: '30-40 min',
+    deliveryFee: 10,
+  },
+  {
+    id: 'chicken-inn',
+    name: 'Chicken Inn',
+    category: 'food',
+    logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvSjnG4N7zHGPhYXmY4b7TxR7UL4ZH1xSqsg&s',
+    coverColor: 'bg-orange-500',
+    rating: 4.4,
+    deliveryTime: '20-30 min',
+    deliveryFee: 8,
+  },
+  {
+    id: 'hisense',
+    name: 'Hisense',
+    category: 'electronics',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Hisense_logo.svg/2560px-Hisense_logo.svg.png',
+    coverColor: 'bg-green-600',
+    rating: 4.2,
+    deliveryTime: '1-2 days',
+    deliveryFee: 50,
+  },
+  {
+    id: 'pharmacy-1',
+    name: 'Ernest Chemists',
+    category: 'pharmacy',
+    logo: 'https://ernestchemist.com/cdn/shop/files/logo_dark.png',
+    coverColor: 'bg-teal-600',
+    rating: 4.7,
+    deliveryTime: '20-30 min',
+    deliveryFee: 6,
+  },
+  {
+    id: 'papaye',
+    name: 'Papaye',
+    category: 'food',
+    logo: 'https://papayeghana.com/wp-content/uploads/2020/06/papaye-logo.png',
+    coverColor: 'bg-amber-500',
+    rating: 4.5,
+    deliveryTime: '25-35 min',
+    deliveryFee: 8,
+  },
+];
+
 export const mockRiders = [
   {
     id: 'rider-1',
@@ -93,5 +191,56 @@ export const mockRiders = [
     totalDeliveries: 650,
     isOnline: false,
     currentLocation: { lat: 5.6145, lng: -0.2050, address: 'Kaneshie, Accra' },
+  },
+];
+
+export const availableOrders = [
+  {
+    id: 'order-1',
+    type: 'food',
+    icon: '🍔',
+    storeName: 'KFC Osu',
+    pickupAddress: 'Oxford Street, Osu',
+    dropoffAddress: 'East Legon, American House',
+    distance: 4.2,
+    estimatedEarning: 18,
+    estimatedTime: '15 mins',
+    expiresIn: 30,
+  },
+  {
+    id: 'order-2',
+    type: 'groceries',
+    icon: '🛒',
+    storeName: 'Shoprite Accra Mall',
+    pickupAddress: 'Accra Mall, Spintex',
+    dropoffAddress: 'Airport Residential',
+    distance: 6.5,
+    estimatedEarning: 25,
+    estimatedTime: '25 mins',
+    expiresIn: 45,
+  },
+  {
+    id: 'order-3',
+    type: 'pharmacy',
+    icon: '💊',
+    storeName: 'Ernest Chemists',
+    pickupAddress: 'Ring Road Central',
+    dropoffAddress: 'Labone',
+    distance: 2.8,
+    estimatedEarning: 12,
+    estimatedTime: '10 mins',
+    expiresIn: 60,
+  },
+  {
+    id: 'order-4',
+    type: 'packages',
+    icon: '📦',
+    storeName: 'Customer Pickup',
+    pickupAddress: 'Dzorwulu',
+    dropoffAddress: 'Tema Community 1',
+    distance: 15.2,
+    estimatedEarning: 45,
+    estimatedTime: '40 mins',
+    expiresIn: 120,
   },
 ];
