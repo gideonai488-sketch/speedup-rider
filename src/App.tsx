@@ -54,11 +54,14 @@ const App = () => {
             
             {/* Customer Routes */}
             <Route path="/customer" element={<CustomerHome />} />
+            <Route path="/customer/home" element={<CustomerHome />} />
+            <Route path="/customer/dashboard" element={<CustomerHome />} />
             <Route path="/customer/book" element={<BookDelivery />} />
             <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
             
             {/* Rider Routes */}
             <Route path="/rider" element={<RiderDashboard />} />
+            <Route path="/rider/dashboard" element={<RiderDashboard />} />
             
             {/* Fallback */}
             <Route path="*" element={<NotFound />} />
