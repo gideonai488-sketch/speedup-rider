@@ -130,9 +130,9 @@ const CustomerHome: React.FC = () => {
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex gap-4 pb-4">
               {popularStores.filter(s => s.featured).map((store) => (
-                <Link
+              <Link
                   key={store.id}
-                  to={`/customer/book?service=${store.category}&store=${store.id}`}
+                  to={`/customer/store/${store.id}`}
                   className="group flex-shrink-0 w-40"
                 >
                   <div className={`h-24 rounded-xl ${store.coverColor} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
@@ -174,7 +174,7 @@ const CustomerHome: React.FC = () => {
             {popularStores.map((store) => (
               <Link
                 key={store.id}
-                to={`/customer/book?service=${store.category}&store=${store.id}`}
+                to={`/customer/store/${store.id}`}
                 className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
               >
                 <div className={`h-20 ${store.coverColor} flex items-center justify-center p-3 relative`}>
