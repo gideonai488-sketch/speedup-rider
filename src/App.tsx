@@ -4,53 +4,19 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "@/context/CartContext";
-import { AdminProvider, useAdmin } from "@/context/AdminContext";
 import SplashScreen from "@/components/SplashScreen";
-import Index from "./pages/Index";
-import Search from "./pages/Search";
-import Cart from "./pages/Cart";
-import Orders from "./pages/Orders";
-import Profile from "./pages/Profile";
-import Checkout from "./pages/Checkout";
-import TrackOrder from "./pages/TrackOrder";
+
+// SpeedRush Pages
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import CustomerHome from "./pages/customer/CustomerHome";
+import BookDelivery from "./pages/customer/BookDelivery";
+import TrackDelivery from "./pages/customer/TrackDelivery";
+import RiderDashboard from "./pages/rider/RiderDashboard";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminPricing from "./pages/admin/AdminPricing";
-import AdminRiders from "./pages/admin/AdminRiders";
 
 const queryClient = new QueryClient();
-
-const AppRoutes = () => {
-  const { isAdmin } = useAdmin();
-
-  if (isAdmin) {
-    return (
-      <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
-        <Route path="/admin/pricing" element={<AdminPricing />} />
-        <Route path="/admin/riders" element={<AdminRiders />} />
-        <Route path="*" element={<AdminDashboard />} />
-      </Routes>
-    );
-  }
-
-  return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/search" element={<Search />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/track/:orderId" element={<TrackOrder />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-};
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -72,20 +38,32 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CartProvider>
-          <AdminProvider>
-            <Toaster />
-            <Sonner position="top-center" />
+        <Toaster />
+        <Sonner position="top-center" />
+        
+        {showSplash && isFirstVisit && (
+          <SplashScreen onComplete={handleSplashComplete} duration={3000} />
+        )}
+        
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
             
-            {showSplash && isFirstVisit && (
-              <SplashScreen onComplete={handleSplashComplete} duration={3000} />
-            )}
+            {/* Customer Routes */}
+            <Route path="/customer" element={<CustomerHome />} />
+            <Route path="/customer/book" element={<BookDelivery />} />
+            <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
             
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-          </AdminProvider>
-        </CartProvider>
+            {/* Rider Routes */}
+            <Route path="/rider" element={<RiderDashboard />} />
+            
+            {/* Fallback */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
