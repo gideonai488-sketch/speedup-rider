@@ -13,6 +13,7 @@ import SignupPage from "./pages/SignupPage";
 import CustomerHome from "./pages/customer/CustomerHome";
 import BookDelivery from "./pages/customer/BookDelivery";
 import TrackDelivery from "./pages/customer/TrackDelivery";
+import StorePage from "./pages/customer/StorePage";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -56,6 +57,7 @@ const App = () => {
             <Route path="/customer" element={<CustomerHome />} />
             <Route path="/customer/home" element={<CustomerHome />} />
             <Route path="/customer/dashboard" element={<CustomerHome />} />
+            <Route path="/customer/store/:storeId" element={<StorePage />} />
             <Route path="/customer/book" element={<BookDelivery />} />
             <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
             
