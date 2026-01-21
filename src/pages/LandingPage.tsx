@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown } from 'lucide-react';
+import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink } from 'lucide-react';
 import heroRider from '@/assets/hero-rider.jpg';
+import { popularStores } from '@/data/deliveryData';
 
 const LandingPage: React.FC = () => {
   const scrollToServices = () => {
@@ -15,8 +16,19 @@ const LandingPage: React.FC = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
+            {/* SpeedRush Owl Logo */}
+            <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
+              <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+                <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
+                <circle cx="20" cy="14" r="10" fill="white" />
+                <path d="M11 7 L14 14 L8 12 Z" fill="white" />
+                <path d="M29 7 L26 14 L32 12 Z" fill="white" />
+                <circle cx="16" cy="14" r="4" fill="#1e293b" />
+                <circle cx="24" cy="14" r="4" fill="#1e293b" />
+                <circle cx="17" cy="13" r="2" fill="white" />
+                <circle cx="25" cy="13" r="2" fill="white" />
+                <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
+              </svg>
             </div>
             <span className="text-xl font-bold text-foreground">
               Speed<span className="text-primary">Rush</span>
@@ -212,6 +224,58 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Brand Partners Section */}
+      <section id="partners" className="py-20 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Our <span className="text-gradient">Partner Brands</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Order from your favorite restaurants and stores. We deliver from the best brands in Ghana.
+            </p>
+          </div>
+          
+          {/* Logo Cloud */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-12">
+            {popularStores.map((store) => (
+              <div 
+                key={store.id}
+                className="group bg-card rounded-2xl p-6 border border-border hover:border-primary/50 hover:shadow-lg transition-all hover:-translate-y-1"
+              >
+                <div className={`h-16 ${store.coverColor} rounded-xl flex items-center justify-center mb-4 overflow-hidden`}>
+                  <img 
+                    src={store.logo} 
+                    alt={store.name}
+                    className="max-h-10 max-w-24 object-contain filter brightness-0 invert"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = `<span class="text-white text-lg font-bold">${store.name}</span>`;
+                    }}
+                  />
+                </div>
+                <h3 className="font-semibold text-foreground text-center mb-1">{store.name}</h3>
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Star className="w-3.5 h-3.5 text-warning fill-warning" />
+                  <span>{store.rating}</span>
+                  <span>•</span>
+                  <span>{store.deliveryTime}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Partner CTA */}
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">Want to partner with SpeedRush?</p>
+            <Button variant="outline" className="border-2">
+              Become a Partner
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Become a Rider CTA */}
       <section id="riders" className="py-20 gradient-dark text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -262,8 +326,17 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
+              {/* Owl Logo */}
               <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
+                <svg viewBox="0 0 40 40" className="w-6 h-6" fill="none">
+                  <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
+                  <circle cx="20" cy="14" r="10" fill="white" />
+                  <circle cx="16" cy="14" r="4" fill="#1e293b" />
+                  <circle cx="24" cy="14" r="4" fill="#1e293b" />
+                  <circle cx="17" cy="13" r="2" fill="white" />
+                  <circle cx="25" cy="13" r="2" fill="white" />
+                  <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
+                </svg>
               </div>
               <span className="text-xl font-bold text-foreground">
                 Speed<span className="text-primary">Rush</span>

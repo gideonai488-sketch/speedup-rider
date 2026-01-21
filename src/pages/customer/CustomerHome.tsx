@@ -34,29 +34,53 @@ const CustomerHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
+      {/* Header with SpeedRush branding */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
+              {/* SpeedRush Owl Logo */}
+              <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
+                <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
+                  <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
+                  <circle cx="20" cy="14" r="10" fill="white" />
+                  <path d="M11 7 L14 14 L8 12 Z" fill="white" />
+                  <path d="M29 7 L26 14 L32 12 Z" fill="white" />
+                  <circle cx="16" cy="14" r="4" fill="#1e293b" />
+                  <circle cx="24" cy="14" r="4" fill="#1e293b" />
+                  <circle cx="17" cy="13" r="2" fill="white" />
+                  <circle cx="25" cy="13" r="2" fill="white" />
+                  <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
+                </svg>
+                {/* Speed indicator */}
+                <div className="absolute -right-0.5 top-1/2 -translate-y-1/2 flex gap-0.5">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="w-0.5 bg-white/60 rounded-full" style={{ height: `${4 + i * 3}px` }} />
+                  ))}
+                </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Deliver to</p>
-                <button className="flex items-center gap-1 font-medium text-foreground">
-                  <MapPin className="w-3.5 h-3.5 text-primary" />
+                <h1 className="text-lg font-bold text-foreground">
+                  Speed<span className="text-primary">Rush</span>
+                </h1>
+                <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <MapPin className="w-3 h-3 text-primary" />
                   Osu, Accra
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Link to="/customer/wallet">
+                <Button variant="ghost" size="sm" className="text-primary font-semibold">
+                  GH₵ 245
+                </Button>
+              </Link>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
               </Button>
-              <Link to="/customer/profile">
+              <Link to="/profile">
                 <Button variant="ghost" size="icon">
                   <User className="w-5 h-5" />
                 </Button>
@@ -69,7 +93,7 @@ const CustomerHome: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               placeholder="Search for services, restaurants, stores..."
-              className="pl-10 bg-secondary/50"
+              className="pl-10 bg-secondary/50 rounded-xl"
             />
           </div>
         </div>
