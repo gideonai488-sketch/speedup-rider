@@ -1,5 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
+/* Custom animations for SpeedRush */
+@keyframes speed-line {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes loading-bar {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.animate-speed-line {
+  animation: speed-line 1.5s ease-in-out infinite;
+}
+
+.animate-loading-bar {
+  animation: loading-bar 2.5s ease-out forwards;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

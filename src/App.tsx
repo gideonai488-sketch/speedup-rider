@@ -15,6 +15,7 @@ import BookDelivery from "./pages/customer/BookDelivery";
 import TrackDelivery from "./pages/customer/TrackDelivery";
 import StorePage from "./pages/customer/StorePage";
 import RiderDashboard from "./pages/rider/RiderDashboard";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,9 @@ const App = () => {
             {/* Rider Routes */}
             <Route path="/rider" element={<RiderDashboard />} />
             <Route path="/rider/dashboard" element={<RiderDashboard />} />
+            
+            {/* Profile */}
+            <Route path="/profile" element={<Profile />} />
             
             {/* Fallback */}
             <Route path="*" element={<NotFound />} />
