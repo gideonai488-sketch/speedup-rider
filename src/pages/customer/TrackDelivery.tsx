@@ -3,121 +3,76 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, Phone, MessageSquare, MapPin, Navigation,
-  Clock, Star, Shield, ChevronUp
+  Clock, Star, Shield
 } from 'lucide-react';
 import { mockRiders } from '@/data/deliveryData';
+import LiveMap from '@/components/tracking/LiveMap';
+
+type DeliveryStatus = 'searching' | 'accepted' | 'arriving' | 'picked_up' | 'delivering' | 'delivered';
 
 const TrackDelivery: React.FC = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
-  const [riderProgress, setRiderProgress] = useState(0);
-  const [status, setStatus] = useState<'accepted' | 'arriving' | 'picked_up' | 'delivering'>('accepted');
+  const [status, setStatus] = useState<DeliveryStatus>('searching');
   const [showDetails, setShowDetails] = useState(false);
+  const [eta, setEta] = useState(15);
 
   const rider = mockRiders[0];
 
-  // Simulate rider movement
+  // Simulate delivery progress
   useEffect(() => {
+    const statusSequence: DeliveryStatus[] = ['searching', 'accepted', 'arriving', 'picked_up', 'delivering', 'delivered'];
+    let currentIndex = 0;
+
     const interval = setInterval(() => {
-      setRiderProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        
-        // Update status based on progress
-        if (prev >= 75) setStatus('delivering');
-        else if (prev >= 50) setStatus('picked_up');
-        else if (prev >= 25) setStatus('arriving');
-        
-        return prev + 2;
-      });
-    }, 500);
+      if (currentIndex < statusSequence.length - 1) {
+        currentIndex++;
+        setStatus(statusSequence[currentIndex]);
+        setEta(Math.max(1, 15 - currentIndex * 3));
+      } else {
+        clearInterval(interval);
+      }
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const statusInfo = {
-    accepted: { text: 'Rider accepted your order', color: 'text-primary' },
-    arriving: { text: 'Rider is arriving at pickup', color: 'text-warning' },
-    picked_up: { text: 'Package picked up', color: 'text-accent' },
-    delivering: { text: 'On the way to you', color: 'text-success' },
+  const statusInfo: Record<DeliveryStatus, { text: string; color: string; icon: string }> = {
+    searching: { text: 'Finding a rider...', color: 'text-warning', icon: '🔍' },
+    accepted: { text: 'Rider accepted your order', color: 'text-primary', icon: '✅' },
+    arriving: { text: 'Rider arriving at pickup', color: 'text-accent', icon: '🏍️' },
+    picked_up: { text: 'Package picked up!', color: 'text-primary', icon: '📦' },
+    delivering: { text: 'On the way to you', color: 'text-success', icon: '🚀' },
+    delivered: { text: 'Order delivered!', color: 'text-success', icon: '🎉' },
   };
+
+  const pickupLocation = { lat: 5.6037, lng: -0.1870 };
+  const dropoffLocation = { lat: 5.6145, lng: -0.2050 };
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Map Area (simulated) */}
-      <div className="h-[60vh] bg-gradient-to-b from-secondary to-background relative overflow-hidden">
+      {/* Map Area */}
+      <div className="h-[55vh] relative">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-10 p-4">
+        <div className="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between">
           <button 
-            onClick={() => navigate('/customer/home')}
+            onClick={() => navigate('/customer')}
             className="w-10 h-10 rounded-full bg-background shadow-lg flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* Simulated Map with moving rider */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {/* Route line */}
-          <svg className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
-            <defs>
-              <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="hsl(var(--primary))" />
-                <stop offset="100%" stopColor="hsl(var(--rush))" />
-              </linearGradient>
-            </defs>
-            <path 
-              d="M 80,300 Q 200,200 320,350 T 520,280" 
-              stroke="url(#routeGradient)" 
-              strokeWidth="4" 
-              fill="none"
-              strokeDasharray="8 8"
-              className="animate-pulse"
-            />
-          </svg>
-
-          {/* Pickup point */}
-          <div className="absolute left-[15%] top-[50%]">
-            <div className="relative">
-              <div className="w-4 h-4 rounded-full bg-primary shadow-glow" />
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-background px-2 py-1 rounded text-xs font-medium whitespace-nowrap shadow-md">
-                Pickup
-              </div>
-            </div>
-          </div>
-
-          {/* Dropoff point */}
-          <div className="absolute right-[15%] top-[45%]">
-            <div className="relative">
-              <div className="w-4 h-4 rounded-full bg-rush shadow-rush">
-                <div className="absolute inset-0 rounded-full bg-rush animate-ping-location opacity-50" />
-              </div>
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-background px-2 py-1 rounded text-xs font-medium whitespace-nowrap shadow-md">
-                Dropoff
-              </div>
-            </div>
-          </div>
-
-          {/* Rider marker */}
-          <div 
-            className="absolute transition-all duration-500 ease-out"
-            style={{ 
-              left: `${15 + (riderProgress * 0.7)}%`,
-              top: `${50 - Math.sin(riderProgress / 20) * 10}%`
-            }}
-          >
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center shadow-glow animate-float">
-                <span className="text-xl">🏍️</span>
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-success flex items-center justify-center border-2 border-background">
-                <Navigation className="w-3 h-3 text-white" />
-              </div>
-            </div>
+          <div className="bg-background rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+            <span className="text-sm font-medium text-foreground">Order #{orderId}</span>
+            <div className={`w-2 h-2 rounded-full ${status === 'delivered' ? 'bg-success' : 'bg-primary animate-pulse'}`} />
           </div>
         </div>
+
+        {/* Live Map Component */}
+        <LiveMap
+          pickupLocation={pickupLocation}
+          dropoffLocation={dropoffLocation}
+          status={status}
+        />
       </div>
 
       {/* Bottom Sheet */}
@@ -134,77 +89,121 @@ const TrackDelivery: React.FC = () => {
         </button>
 
         <div className="px-6 pb-8">
-          {/* Status */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center">
-              <Navigation className="w-6 h-6 text-white" />
-            </div>
+          {/* Status Banner */}
+          <div className="flex items-center gap-4 p-4 bg-secondary/50 rounded-2xl mb-6">
+            <div className="text-3xl">{statusInfo[status].icon}</div>
             <div className="flex-1">
               <p className={`font-semibold ${statusInfo[status].color}`}>
                 {statusInfo[status].text}
               </p>
-              <p className="text-sm text-muted-foreground">
-                Estimated arrival: {Math.max(5, 15 - Math.floor(riderProgress / 7))} mins
-              </p>
+              {status !== 'delivered' && status !== 'searching' && (
+                <p className="text-sm text-muted-foreground">
+                  Estimated arrival: {eta} mins
+                </p>
+              )}
             </div>
+            {status !== 'searching' && status !== 'delivered' && (
+              <div className="text-right">
+                <p className="text-2xl font-bold text-primary">{eta}</p>
+                <p className="text-xs text-muted-foreground">min</p>
+              </div>
+            )}
           </div>
 
-          {/* Progress bar */}
+          {/* Progress Steps */}
           <div className="mb-6">
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className="h-full gradient-hero transition-all duration-500"
-                style={{ width: `${riderProgress}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>Order accepted</span>
-              <span>Picked up</span>
-              <span>Delivered</span>
+            <div className="flex items-center justify-between relative">
+              {(['accepted', 'picked_up', 'delivering', 'delivered'] as const).map((step, index) => {
+                const stepIndex = ['searching', 'accepted', 'arriving', 'picked_up', 'delivering', 'delivered'].indexOf(status);
+                const currentStepIndex = ['accepted', 'picked_up', 'delivering', 'delivered'].indexOf(step);
+                const isCompleted = stepIndex > ['searching', 'accepted', 'arriving', 'picked_up', 'delivering', 'delivered'].indexOf(step);
+                const isCurrent = status === step || (step === 'accepted' && (status === 'accepted' || status === 'arriving'));
+                
+                return (
+                  <div key={step} className="flex flex-col items-center z-10">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                      isCompleted || isCurrent
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary text-muted-foreground'
+                    }`}>
+                      {step === 'accepted' && '✓'}
+                      {step === 'picked_up' && '📦'}
+                      {step === 'delivering' && '🚀'}
+                      {step === 'delivered' && '🎉'}
+                    </div>
+                    <p className={`text-xs mt-2 ${isCompleted || isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                      {step === 'accepted' && 'Accepted'}
+                      {step === 'picked_up' && 'Picked up'}
+                      {step === 'delivering' && 'Delivering'}
+                      {step === 'delivered' && 'Delivered'}
+                    </p>
+                  </div>
+                );
+              })}
+              
+              {/* Progress line */}
+              <div className="absolute top-5 left-5 right-5 h-0.5 bg-secondary -z-0">
+                <div 
+                  className="h-full bg-primary transition-all duration-500"
+                  style={{ 
+                    width: status === 'delivered' ? '100%' 
+                      : status === 'delivering' ? '75%'
+                      : status === 'picked_up' ? '50%'
+                      : status === 'arriving' || status === 'accepted' ? '25%'
+                      : '0%'
+                  }}
+                />
+              </div>
             </div>
           </div>
 
           {/* Rider Info */}
-          <div className="bg-card rounded-2xl border border-border p-4 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center text-white font-bold text-xl">
-                {rider.name.charAt(0)}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">{rider.name}</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                  <span>{rider.rating}</span>
-                  <span>•</span>
-                  <span>{rider.vehiclePlate}</span>
+          {status !== 'searching' && (
+            <div className="bg-card rounded-2xl border border-border p-4 mb-6 animate-fade-in">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center text-white font-bold text-xl">
+                  {rider.name.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">{rider.name}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Star className="w-3.5 h-3.5 text-warning fill-warning" />
+                    <span>{rider.rating}</span>
+                    <span>•</span>
+                    <span>{rider.vehiclePlate}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" className="rounded-full">
+                    <MessageSquare className="w-4 h-4" />
+                  </Button>
+                  <Button size="icon" className="rounded-full gradient-hero text-white">
+                    <Phone className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <MessageSquare className="w-4 h-4" />
-                </Button>
-                <Button size="icon" className="rounded-full gradient-hero text-white">
-                  <Phone className="w-4 h-4" />
-                </Button>
-              </div>
             </div>
-          </div>
+          )}
 
           {/* Order Details */}
           {showDetails && (
-            <div className="space-y-4 animate-slide-up">
+            <div className="space-y-4 animate-fade-in">
               <h3 className="font-semibold text-foreground">Delivery Details</h3>
               
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-primary mt-0.5" />
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-primary" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">PICKUP</p>
                     <p className="text-sm font-medium">KFC Osu, Oxford Street</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-rush mt-0.5" />
+                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-accent" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">DROPOFF</p>
                     <p className="text-sm font-medium">East Legon, American House</p>

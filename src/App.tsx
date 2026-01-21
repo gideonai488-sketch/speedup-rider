@@ -14,6 +14,8 @@ import CustomerHome from "./pages/customer/CustomerHome";
 import BookDelivery from "./pages/customer/BookDelivery";
 import TrackDelivery from "./pages/customer/TrackDelivery";
 import StorePage from "./pages/customer/StorePage";
+import Wallet from "./pages/customer/Wallet";
+import Referral from "./pages/customer/Referral";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -61,6 +63,8 @@ const App = () => {
             <Route path="/customer/store/:storeId" element={<StorePage />} />
             <Route path="/customer/book" element={<BookDelivery />} />
             <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
+            <Route path="/customer/wallet" element={<Wallet />} />
+            <Route path="/customer/referral" element={<Referral />} />
             
             {/* Rider Routes */}
             <Route path="/rider" element={<RiderDashboard />} />
