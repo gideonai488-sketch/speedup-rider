@@ -3,9 +3,11 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ClipboardList, 
-  DollarSign, 
+  Store, 
   Bike, 
   ArrowLeft,
+  Users,
+  Settings,
   BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -17,10 +19,11 @@ interface AdminLayoutProps {
 }
 
 const adminNavItems = [
-  { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/admin', icon: LayoutDashboard, label: 'Home' },
   { path: '/admin/orders', icon: ClipboardList, label: 'Orders' },
-  { path: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
-  { path: '/admin/riders', icon: Bike, label: 'Riders' },
+  { path: '/admin/stores', icon: Store, label: 'Stores' },
+  { path: '/admin/users', icon: Users, label: 'Users' },
+  { path: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {

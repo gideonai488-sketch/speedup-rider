@@ -20,6 +20,16 @@ import RiderDashboard from "./pages/rider/RiderDashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminStores from "./pages/admin/AdminStores";
+import AdminRiders from "./pages/admin/AdminRiders";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminPricing from "./pages/admin/AdminPricing";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -72,6 +82,16 @@ const App = () => {
             
             {/* Profile */}
             <Route path="/profile" element={<Profile />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/stores" element={<AdminStores />} />
+            <Route path="/admin/riders" element={<AdminRiders />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/pricing" element={<AdminPricing />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
             
             {/* Fallback */}
             <Route path="*" element={<NotFound />} />
