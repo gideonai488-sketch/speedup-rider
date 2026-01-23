@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import StoreLogo from '@/components/ui/store-logo';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
@@ -30,6 +32,7 @@ const serviceColors: Record<string, string> = {
 };
 
 const CustomerHome: React.FC = () => {
+  const location = useLocation();
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
 
   return (
@@ -160,14 +163,11 @@ const CustomerHome: React.FC = () => {
                   className="group flex-shrink-0 w-40"
                 >
                   <div className={`h-24 rounded-xl ${store.coverColor} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
-                    <img 
+                    <StoreLogo 
                       src={store.logo} 
-                      alt={store.name}
-                      className="max-h-16 max-w-28 object-contain filter brightness-0 invert"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement!.innerHTML = `<span class="text-white text-2xl font-bold">${store.name}</span>`;
-                      }}
+                      name={store.name}
+                      className="max-h-16 max-w-28"
+                      textClassName="text-2xl"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                   </div>
@@ -202,14 +202,11 @@ const CustomerHome: React.FC = () => {
                 className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
               >
                 <div className={`h-20 ${store.coverColor} flex items-center justify-center p-3 relative`}>
-                  <img 
+                  <StoreLogo 
                     src={store.logo} 
-                    alt={store.name}
-                    className="max-h-12 max-w-20 object-contain filter brightness-0 invert"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerHTML = `<span class="text-white text-xl font-bold">${store.name}</span>`;
-                    }}
+                    name={store.name}
+                    className="max-h-12 max-w-20"
+                    textClassName="text-xl"
                   />
                   <div className="absolute top-2 right-2 bg-black/30 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <ExternalLink className="w-3 h-3 text-white" />
@@ -296,13 +293,13 @@ const CustomerHome: React.FC = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border px-6 py-3">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border px-6 py-3 safe-area-pb">
         <div className="flex items-center justify-around">
-          <Link to="/customer" className="flex flex-col items-center gap-1 text-primary">
+          <Link to="/customer" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <Zap className="w-5 h-5" />
             <span className="text-xs font-medium">Home</span>
           </Link>
-          <Link to="/customer/orders" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
+          <Link to="/customer/orders" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/orders' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <Clock className="w-5 h-5" />
             <span className="text-xs">Orders</span>
           </Link>
@@ -311,11 +308,11 @@ const CustomerHome: React.FC = () => {
               <Navigation className="w-6 h-6 text-white" />
             </div>
           </Link>
-          <Link to="/customer/notifications" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
+          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <Bell className="w-5 h-5" />
             <span className="text-xs">Alerts</span>
           </Link>
-          <Link to="/customer/profile" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground">
+          <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <User className="w-5 h-5" />
             <span className="text-xs">Profile</span>
           </Link>
