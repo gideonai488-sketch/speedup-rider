@@ -83,6 +83,9 @@ const App = () => {
                 <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
                 <Route path="/customer/wallet" element={<Wallet />} />
                 <Route path="/customer/referral" element={<Referral />} />
+                <Route path="/customer/orders" element={<Orders />} />
+                <Route path="/customer/profile" element={<Profile />} />
+                <Route path="/customer/notifications" element={<Orders />} />
                 
                 {/* Shared Routes (Bottom Nav) */}
                 <Route path="/search" element={<Search />} />
@@ -93,6 +96,9 @@ const App = () => {
                 {/* Rider Routes */}
                 <Route path="/rider" element={<RiderDashboard />} />
                 <Route path="/rider/dashboard" element={<RiderDashboard />} />
+                <Route path="/rider/profile" element={<Profile />} />
+                <Route path="/rider/earnings" element={<Wallet />} />
+                <Route path="/rider/deliveries" element={<Orders />} />
                 
                 {/* Admin Routes - Access via /admin */}
                 <Route path="/admin" element={<AdminDashboard />} />
