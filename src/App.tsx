@@ -18,6 +18,9 @@ import Wallet from "./pages/customer/Wallet";
 import Referral from "./pages/customer/Referral";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import Profile from "./pages/Profile";
+import Search from "./pages/Search";
+import Cart from "./pages/Cart";
+import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -76,12 +79,15 @@ const App = () => {
             <Route path="/customer/wallet" element={<Wallet />} />
             <Route path="/customer/referral" element={<Referral />} />
             
+            {/* Shared Routes (Bottom Nav) */}
+            <Route path="/search" element={<Search />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/profile" element={<Profile />} />
+            
             {/* Rider Routes */}
             <Route path="/rider" element={<RiderDashboard />} />
             <Route path="/rider/dashboard" element={<RiderDashboard />} />
-            
-            {/* Profile */}
-            <Route path="/profile" element={<Profile />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
