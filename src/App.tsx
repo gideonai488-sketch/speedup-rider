@@ -43,7 +43,8 @@ const App = () => {
 
   useEffect(() => {
     const hasVisited = sessionStorage.getItem('hasVisited');
-    if (hasVisited) {
+    const isAdminRoute = window.location.pathname.startsWith('/admin');
+    if (hasVisited || isAdminRoute) {
       setShowSplash(false);
       setIsFirstVisit(false);
     }

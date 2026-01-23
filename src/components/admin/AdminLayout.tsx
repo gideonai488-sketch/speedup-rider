@@ -22,7 +22,9 @@ const adminNavItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Home' },
   { path: '/admin/orders', icon: ClipboardList, label: 'Orders' },
   { path: '/admin/stores', icon: Store, label: 'Stores' },
+  { path: '/admin/riders', icon: Bike, label: 'Riders' },
   { path: '/admin/users', icon: Users, label: 'Users' },
+  { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
