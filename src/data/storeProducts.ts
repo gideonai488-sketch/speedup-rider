@@ -1,3 +1,12 @@
+import kfcLogo from '@/assets/stores/kfc-logo.png';
+import shopriteLogo from '@/assets/stores/shoprite-logo.png';
+import melcomLogo from '@/assets/stores/melcom-logo.png';
+import pizzaManLogo from '@/assets/stores/pizza-man-logo.png';
+import chickenInnLogo from '@/assets/stores/chicken-inn-logo.png';
+import ernestChemistsLogo from '@/assets/stores/ernest-chemists-logo.png';
+import papayeLogo from '@/assets/stores/papaye-logo.png';
+import hisenseLogo from '@/assets/stores/hisense-logo.png';
+
 export interface Product {
   id: string;
   name: string;
@@ -33,7 +42,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'kfc',
     name: 'KFC',
     description: 'Finger Lickin\' Good - The world\'s favorite fried chicken',
-    logo: 'https://upload.wikimedia.org/wikipedia/sco/thumb/b/bf/KFC_logo.svg/1200px-KFC_logo.svg.png',
+    logo: kfcLogo,
     coverImage: 'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=800',
     coverColor: 'bg-red-600',
     category: 'food',
@@ -57,7 +66,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'shoprite',
     name: 'Shoprite',
     description: 'Africa\'s largest supermarket chain - Quality products at low prices',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Shoprite_%28South_Africa%29_logo.svg/1200px-Shoprite_%28South_Africa%29_logo.svg.png',
+    logo: shopriteLogo,
     coverImage: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800',
     coverColor: 'bg-red-500',
     category: 'groceries',
@@ -81,7 +90,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'melcom',
     name: 'Melcom',
     description: 'Ghana\'s leading retail chain - Everything you need under one roof',
-    logo: 'https://melcomgroup.com/wp-content/uploads/2023/03/melcom-logo.png',
+    logo: melcomLogo,
     coverImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
     coverColor: 'bg-blue-600',
     category: 'groceries',
@@ -105,7 +114,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'pizza-man',
     name: 'Pizza Man',
     description: 'Authentic Italian pizzas made fresh with the finest ingredients',
-    logo: 'https://images.deliveryhero.io/image/fd-gh/LH/z7wf-hero.jpg',
+    logo: pizzaManLogo,
     coverImage: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800',
     coverColor: 'bg-yellow-500',
     category: 'food',
@@ -129,7 +138,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'chicken-inn',
     name: 'Chicken Inn',
     description: 'Delicious fried chicken and tasty sides for the whole family',
-    logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvSjnG4N7zHGPhYXmY4b7TxR7UL4ZH1xSqsg&s',
+    logo: chickenInnLogo,
     coverImage: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800',
     coverColor: 'bg-orange-500',
     category: 'food',
@@ -153,7 +162,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'pharmacy-1',
     name: 'Ernest Chemists',
     description: 'Your trusted pharmacy for medicines and health products',
-    logo: 'https://ernestchemist.com/cdn/shop/files/logo_dark.png',
+    logo: ernestChemistsLogo,
     coverImage: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800',
     coverColor: 'bg-teal-600',
     category: 'pharmacy',
@@ -177,7 +186,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'papaye',
     name: 'Papaye',
     description: 'Ghana\'s favorite fast food - Fresh, tasty and affordable',
-    logo: 'https://papayeghana.com/wp-content/uploads/2020/06/papaye-logo.png',
+    logo: papayeLogo,
     coverImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800',
     coverColor: 'bg-amber-500',
     category: 'food',
@@ -201,7 +210,7 @@ export const storeDetails: Record<string, StoreDetail> = {
     id: 'hisense',
     name: 'Hisense',
     description: 'Premium electronics and home appliances - Quality meets innovation',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Hisense_logo.svg/2560px-Hisense_logo.svg.png',
+    logo: hisenseLogo,
     coverImage: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800',
     coverColor: 'bg-emerald-600',
     category: 'electronics',
