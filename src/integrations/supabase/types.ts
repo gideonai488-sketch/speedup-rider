@@ -581,7 +581,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_featured: boolean | null
+          latitude: number | null
           logo_url: string | null
+          longitude: number | null
           min_order: number | null
           name: string
           opening_hours: string | null
@@ -602,7 +604,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           min_order?: number | null
           name: string
           opening_hours?: string | null
@@ -623,7 +627,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           min_order?: number | null
           name?: string
           opening_hours?: string | null

@@ -73,8 +73,11 @@ const StoreCheckout: React.FC = () => {
     }
   }, [storeId, cartItems, navigate]);
 
-  // Default store location (Accra center) - stores don't have lat/lng in DB
-  const defaultStoreCoords = { lat: 5.6037, lng: -0.1870 };
+  // Get store coordinates (fallback to Accra center if not set)
+  const storeCoords = React.useMemo(() => ({
+    lat: store?.latitude ?? 5.6037,
+    lng: store?.longitude ?? -0.1870
+  }), [store?.latitude, store?.longitude]);
 
   // Calculate delivery fee when address is selected
   const handleAddressSelect = async (address: string, coords?: { lat: number; lng: number }) => {
@@ -83,7 +86,7 @@ const StoreCheckout: React.FC = () => {
 
     if (coords && store) {
       const breakdown = await calculateFee(
-        defaultStoreCoords,
+        storeCoords,
         coords
       );
       
@@ -123,8 +126,8 @@ const StoreCheckout: React.FC = () => {
         delivery_lat: deliveryCoords?.lat,
         delivery_lng: deliveryCoords?.lng,
         pickup_address: store?.address || `${store?.name} Store`,
-        pickup_lat: defaultStoreCoords.lat,
-        pickup_lng: defaultStoreCoords.lng,
+        pickup_lat: storeCoords.lat,
+        pickup_lng: storeCoords.lng,
         notes: notes || undefined,
         delivery_fee: deliveryFee,
         payment_status: 'pending',
