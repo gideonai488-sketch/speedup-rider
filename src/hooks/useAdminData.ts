@@ -273,7 +273,7 @@ export const useAdminAnalytics = () => {
   });
 };
 
-// Pending orders for riders
+// Pending orders for riders - includes 'pending' status since delivery orders need riders immediately
 export const useRiderPendingOrders = () => {
   return useQuery({
     queryKey: ['rider-pending-orders'],
@@ -283,15 +283,17 @@ export const useRiderPendingOrders = () => {
         .select(`
           *,
           order_items(*),
-          stores(name, address, logo_url)
+          stores(name, address, logo_url),
+          profiles!orders_customer_id_fkey(full_name, phone, address)
         `)
-        .in('status', ['confirmed', 'ready_for_pickup'])
+        .in('status', ['pending', 'confirmed', 'ready_for_pickup'])
         .is('rider_id', null)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data;
     },
+    refetchInterval: 5000, // Refetch every 5 seconds to get new orders quickly
   });
 };
 

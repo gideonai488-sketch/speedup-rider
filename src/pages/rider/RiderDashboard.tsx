@@ -289,23 +289,40 @@ const RiderDashboard: React.FC = () => {
                 </div>
               </div>
               
-              <div className="space-y-2.5 mb-4 text-sm bg-secondary/50 rounded-xl p-3">
+              {/* Pickup & Dropoff Details as Text */}
+              <div className="space-y-3 mb-4 text-sm bg-secondary/50 rounded-xl p-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">PICKUP</p>
-                    <p className="font-medium text-foreground">{selectedOrder.stores?.name || 'Store'}</p>
-                    <p className="text-muted-foreground text-xs">{selectedOrder.pickup_address || selectedOrder.stores?.address}</p>
+                  <div className="w-3 h-3 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground font-medium">PICKUP LOCATION</p>
+                    <p className="font-semibold text-foreground">{selectedOrder.stores?.name || 'Pickup Point'}</p>
+                    <p className="text-muted-foreground">{selectedOrder.pickup_address || selectedOrder.stores?.address || 'Address not specified'}</p>
                   </div>
                 </div>
-                <div className="border-l-2 border-dashed border-border ml-1 h-4" />
+                
+                <div className="border-l-2 border-dashed border-border ml-1.5 h-6" />
+                
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-success mt-1.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">DROPOFF</p>
-                    <p className="font-medium text-foreground">{selectedOrder.delivery_address}</p>
+                  <div className="w-3 h-3 rounded-full bg-success mt-1.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground font-medium">DROPOFF LOCATION</p>
+                    <p className="font-semibold text-foreground">{selectedOrder.delivery_address}</p>
+                    {selectedOrder.profiles?.full_name && (
+                      <p className="text-muted-foreground">Customer: {selectedOrder.profiles.full_name}</p>
+                    )}
+                    {selectedOrder.profiles?.phone && (
+                      <p className="text-muted-foreground text-xs">{selectedOrder.profiles.phone}</p>
+                    )}
                   </div>
                 </div>
+                
+                {/* Distance & Estimated Earning */}
+                {selectedOrder.distance_km && (
+                  <div className="pt-2 border-t border-border mt-2 flex justify-between text-xs">
+                    <span className="text-muted-foreground">Distance</span>
+                    <span className="font-medium text-foreground">{Number(selectedOrder.distance_km).toFixed(1)} km</span>
+                  </div>
+                )}
               </div>
               
               <div className="flex gap-3">
@@ -338,7 +355,7 @@ const RiderDashboard: React.FC = () => {
               {activeOrders.map((order: any) => (
                 <Link 
                   key={order.id}
-                  to={`/customer/track/${order.order_number}`}
+                  to={`/rider/delivery/${order.id}`}
                   className="block bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -353,9 +370,17 @@ const RiderDashboard: React.FC = () => {
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span className="truncate">{order.delivery_address}</span>
+                  
+                  {/* Pickup/Dropoff details */}
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
+                      <span className="text-muted-foreground truncate">{order.pickup_address || order.stores?.address || 'Pickup'}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success mt-1 flex-shrink-0" />
+                      <span className="text-foreground truncate">{order.delivery_address}</span>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -381,30 +406,51 @@ const RiderDashboard: React.FC = () => {
                   onClick={() => handleSelectOrder(order)}
                   className="w-full text-left bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                      {order.stores?.logo_url ? (
-                        <img src={order.stores.logo_url} alt="" className="w-8 h-8 object-contain" />
-                      ) : (
-                        <span className="text-xl">📦</span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{order.stores?.name || 'Pickup'}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {order.order_items?.length || 0} items
-                      </p>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                        {order.stores?.logo_url ? (
+                          <img src={order.stores.logo_url} alt="" className="w-8 h-8 object-contain" />
+                        ) : (
+                          <span className="text-xl">📦</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{order.stores?.name || 'Delivery Request'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {order.order_items?.length || 1} item{(order.order_items?.length || 1) > 1 ? 's' : ''}
+                          {order.distance_km && ` • ${Number(order.distance_km).toFixed(1)} km`}
+                        </p>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-success">{formatCurrency(Number(order.delivery_fee) * 1.5)}</p>
-                      <p className="text-xs text-muted-foreground">Est. earning</p>
+                      <p className="font-bold text-success">{formatCurrency((Number(order.delivery_fee) || 10) - 5)}</p>
+                      <p className="text-xs text-muted-foreground">Your earning</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="truncate">{order.pickup_address || order.stores?.address}</span>
-                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="truncate">{order.delivery_address}</span>
+                  
+                  {/* Pickup/Dropoff as text details */}
+                  <div className="space-y-2 text-xs bg-secondary/30 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-muted-foreground">Pickup: </span>
+                        <span className="text-foreground font-medium truncate block">{order.pickup_address || order.stores?.address || 'N/A'}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success mt-1 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-muted-foreground">Dropoff: </span>
+                        <span className="text-foreground font-medium truncate block">{order.delivery_address}</span>
+                      </div>
+                    </div>
+                    {order.profiles?.full_name && (
+                      <div className="flex items-center gap-2 pt-1 border-t border-border">
+                        <User className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-muted-foreground">Customer: {order.profiles.full_name}</span>
+                      </div>
+                    )}
                   </div>
                 </button>
               ))}

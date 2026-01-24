@@ -7,7 +7,6 @@ import { Navigation, ChevronRight } from 'lucide-react';
 interface UberStyleMapProps {
   riderLocation?: { lat: number; lng: number; heading?: number };
   destinationLocation: { lat: number; lng: number };
-  pickupLocation?: { lat: number; lng: number };
   eta?: number;
   currentStreet?: string;
   isMoving?: boolean;
@@ -16,7 +15,6 @@ interface UberStyleMapProps {
 const UberStyleMap: React.FC<UberStyleMapProps> = ({
   riderLocation,
   destinationLocation,
-  pickupLocation,
   eta = 15,
   currentStreet = 'En route',
   isMoving = true,
@@ -72,19 +70,6 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
       .setLngLat([destinationLocation.lng, destinationLocation.lat])
       .addTo(map.current);
 
-    // Add pickup marker if provided - Blue pin
-    if (pickupLocation) {
-      const pickupEl = document.createElement('div');
-      pickupEl.innerHTML = `
-        <div style="width: 28px; height: 28px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(59,130,246,0.4);">
-          <div style="width: 10px; height: 10px; background: white; border-radius: 50%;"></div>
-        </div>
-      `;
-      new mapboxgl.Marker({ element: pickupEl })
-        .setLngLat([pickupLocation.lng, pickupLocation.lat])
-        .addTo(map.current);
-    }
-
     // Add rider marker - Uber-style car icon
     if (riderLocation) {
       const riderEl = document.createElement('div');
@@ -108,19 +93,16 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
       const bounds = new mapboxgl.LngLatBounds();
       if (riderLocation) bounds.extend([riderLocation.lng, riderLocation.lat]);
       bounds.extend([destinationLocation.lng, destinationLocation.lat]);
-      if (pickupLocation) bounds.extend([pickupLocation.lng, pickupLocation.lat]);
 
       map.current.fitBounds(bounds, {
         padding: { top: 120, bottom: 200, left: 50, right: 50 },
         maxZoom: 16,
       });
 
-      // Fetch route
+      // Fetch route between rider and customer
       if (riderLocation) {
         try {
-          const waypoints = pickupLocation
-            ? `${riderLocation.lng},${riderLocation.lat};${pickupLocation.lng},${pickupLocation.lat};${destinationLocation.lng},${destinationLocation.lat}`
-            : `${riderLocation.lng},${riderLocation.lat};${destinationLocation.lng},${destinationLocation.lat}`;
+          const waypoints = `${riderLocation.lng},${riderLocation.lat};${destinationLocation.lng},${destinationLocation.lat}`;
 
           const response = await fetch(
             `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${mapboxToken}`
@@ -128,8 +110,8 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
           const data = await response.json();
 
           if (data.routes && data.routes[0]) {
-            // Store distance for fee calculation
-            setRouteDistance(data.routes[0].distance / 1000); // Convert to km
+            // Store distance for display
+            setRouteDistance(data.routes[0].distance / 1000);
 
             map.current.addSource('route', {
               type: 'geojson',
@@ -165,7 +147,7 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
     return () => {
       map.current?.remove();
     };
-  }, [mapboxToken, destinationLocation, pickupLocation]);
+  }, [mapboxToken, destinationLocation]);
 
   // Update rider position smoothly
   useEffect(() => {
