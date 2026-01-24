@@ -1,10 +1,11 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Search, ClipboardList, ShoppingBag, User } from 'lucide-react';
+import { Home, Search, ClipboardList, ShoppingBag, User, Zap, Wallet, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
-const navItems = [
+const customerNavItems = [
   { path: '/customer', icon: Home, label: 'Home' },
   { path: '/search', icon: Search, label: 'Search' },
   { path: '/orders', icon: ClipboardList, label: 'Orders' },
@@ -12,15 +13,29 @@ const navItems = [
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 
+const riderNavItems = [
+  { path: '/rider', icon: Zap, label: 'Home' },
+  { path: '/rider/earnings', icon: Wallet, label: 'Earnings' },
+  { path: '/rider/deliveries', icon: Clock, label: 'History' },
+  { path: '/rider/profile', icon: User, label: 'Profile' },
+];
+
 const BottomNav: React.FC = () => {
   const location = useLocation();
   const { totalItems } = useCart();
+  const { profile } = useAuth();
+
+  // Determine if user is a rider based on profile role or current route
+  const isRider = profile?.role === 'rider' || location.pathname.startsWith('/rider');
+  const navItems = isRider ? riderNavItems : customerNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 gradient-glass border-t border-border/50 safe-area-pb">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {navItems.map(({ path, icon: Icon, label }) => {
-          const isActive = location.pathname === path;
+          const isActive = location.pathname === path || 
+            (path === '/profile' && location.pathname === '/profile') ||
+            (path === '/rider/profile' && location.pathname === '/rider/profile');
           const isCart = path === '/cart';
 
           return (

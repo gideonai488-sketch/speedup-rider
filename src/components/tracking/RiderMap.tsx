@@ -67,18 +67,47 @@ const RiderMap: React.FC<RiderMapProps> = ({
         .addTo(map.current);
     }
 
-    // Add rider marker with custom element
+    // Add rider marker with animated motorcycle
     const riderEl = document.createElement('div');
     riderEl.className = 'rider-marker';
     riderEl.innerHTML = `
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #f97316, #ea580c); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4); animation: pulse 2s infinite;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="18.5" cy="17.5" r="3.5"/>
-          <circle cx="5.5" cy="17.5" r="3.5"/>
-          <circle cx="15" cy="5" r="1"/>
-          <path d="M12 17.5V14l-3-3 4-3 2 3h2"/>
-        </svg>
+      <style>
+        @keyframes riderPulse {
+          0%, 100% { box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4); }
+          50% { box-shadow: 0 4px 20px rgba(249, 115, 22, 0.6), 0 0 30px rgba(249, 115, 22, 0.3); }
+        }
+        @keyframes riderBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        .rider-marker-container {
+          animation: riderPulse 2s ease-in-out infinite;
+        }
+        .rider-icon {
+          animation: riderBounce 1s ease-in-out infinite;
+        }
+      </style>
+      <div class="rider-marker-container" style="width: 52px; height: 52px; background: linear-gradient(135deg, #f97316, #ea580c); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white;">
+        <div class="rider-icon" style="display: flex; flex-direction: column; align-items: center;">
+          <!-- Rider on motorcycle -->
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Motorcycle wheels -->
+            <circle cx="5" cy="18" r="3" fill="none"/>
+            <circle cx="19" cy="18" r="3" fill="none"/>
+            <!-- Motorcycle body -->
+            <path d="M5 18h2l1-3h8l1 3h2"/>
+            <path d="M8 15l2-4h4l1 2"/>
+            <!-- Rider body -->
+            <circle cx="12" cy="6" r="2" fill="white"/>
+            <path d="M12 8v3"/>
+            <path d="M10 10l2 1 2-1"/>
+            <!-- Helmet -->
+            <path d="M10 5.5c0-1.5 1-2.5 2-2.5s2 1 2 2.5" fill="white"/>
+          </svg>
+        </div>
       </div>
+      <!-- Direction indicator -->
+      <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #ea580c;"></div>
     `;
 
     riderMarker.current = new mapboxgl.Marker({ element: riderEl })
