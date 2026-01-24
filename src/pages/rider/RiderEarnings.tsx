@@ -1,28 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { 
-  ArrowLeft, Wallet, Zap, Clock, User, TrendingUp, ArrowUpRight,
-  ArrowDownLeft, Calendar, ChevronRight, Loader2, DollarSign, Bike
+  ArrowLeft, Wallet, Zap, Clock, User, TrendingUp, ArrowDownLeft,
+  Calendar, ChevronRight, Loader2, DollarSign, Bike, Building2, 
+  CheckCircle2, CreditCard
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRiderWallet } from '@/hooks/useWallet';
 import { useRiderDeliveryStats } from '@/hooks/useAdminData';
+import { supabase } from '@/integrations/supabase/client';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 
 // Note: Platform fee is handled separately - rider keeps full delivery fee
+
+interface BankDetails {
+  bank_name: string | null;
+  bank_code: string | null;
+  account_number: string | null;
+  account_name: string | null;
+  subaccount_code: string | null;
+}
 
 const RiderEarnings: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
+  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   
   const { data: walletData, isLoading: walletLoading } = useRiderWallet();
   const { data: stats, isLoading: statsLoading } = useRiderDeliveryStats(profile?.id || '');
 
   const isLoading = walletLoading || statsLoading;
+
+  // Fetch bank details
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      if (!profile?.id) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('bank_name, bank_code, account_number, account_name, subaccount_code')
+        .eq('id', profile.id)
+        .single();
+      
+      if (data) {
+        setBankDetails(data);
+      }
+    };
+    
+    fetchBankDetails();
+  }, [profile?.id]);
 
   // Calculate daily earnings for the week chart
   const weekDays = eachDayOfInterval({
@@ -60,7 +89,7 @@ const RiderEarnings: React.FC = () => {
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-white/70 text-sm mb-1">Available Balance</p>
+              <p className="text-white/70 text-sm mb-1">Total Earnings</p>
               {isLoading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
               ) : (
@@ -71,10 +100,34 @@ const RiderEarnings: React.FC = () => {
               <Wallet className="w-7 h-7 text-success" />
             </div>
           </div>
-          <Button className="w-full bg-white text-foreground hover:bg-white/90">
-            <ArrowUpRight className="w-4 h-4 mr-2" />
-            Withdraw to Bank/MoMo
-          </Button>
+          
+          {/* Bank Details Display */}
+          {bankDetails?.subaccount_code ? (
+            <div className="bg-white/10 rounded-xl p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <span className="text-sm font-medium">Payout Account Active</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/80 text-sm">
+                <Building2 className="w-4 h-4" />
+                <span>{bankDetails.bank_name}</span>
+              </div>
+              <p className="text-white/60 text-xs mt-1 ml-6">
+                {bankDetails.account_number} • {bankDetails.account_name}
+              </p>
+            </div>
+          ) : (
+            <button 
+              onClick={() => navigate('/rider/profile')}
+              className="w-full bg-warning/20 text-warning rounded-xl p-3 text-sm text-left"
+            >
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                <span className="font-medium">Set up bank details to receive payouts</span>
+                <ChevronRight className="w-4 h-4 ml-auto" />
+              </div>
+            </button>
+          )}
         </div>
       </header>
 
@@ -143,16 +196,16 @@ const RiderEarnings: React.FC = () => {
           </div>
         </div>
 
-        {/* Earnings Info */}
+        {/* Payout Info */}
         <div className="bg-success/10 rounded-xl border border-success/20 p-4">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center flex-shrink-0">
               <DollarSign className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="font-medium text-foreground">You keep 100% of delivery fees!</p>
+              <p className="font-medium text-foreground">Direct bank payouts!</p>
               <p className="text-sm text-muted-foreground mt-1">
-                All delivery fees go directly to your wallet. No deductions from your earnings.
+                Earnings are sent directly to your bank/MoMo account after each completed delivery.
               </p>
             </div>
           </div>
