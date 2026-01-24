@@ -228,11 +228,13 @@ const AdminStores: React.FC = () => {
               className="w-full text-left bg-card rounded-2xl border border-border/50 overflow-hidden shadow-card hover:shadow-lg transition-all"
             >
               <div className={`h-20 ${store.coverColor} relative`}>
-                <img 
-                  src={store.logo} 
-                  alt={store.name}
-                  className="absolute bottom-0 left-4 translate-y-1/2 w-16 h-16 rounded-xl bg-white object-contain p-2 shadow-lg border-2 border-white"
-                />
+                <div className="absolute bottom-0 left-4 translate-y-1/2 w-16 h-16 rounded-xl bg-white shadow-lg border-2 border-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={store.logo} 
+                    alt={store.name}
+                    className="w-full h-full object-contain p-2"
+                  />
+                </div>
               </div>
               <div className="pt-10 pb-4 px-4">
                 <div className="flex items-start justify-between mb-2">
@@ -282,11 +284,13 @@ const AdminStores: React.FC = () => {
           {selectedStore && (
             <>
               <div className={`h-24 ${selectedStore.coverColor} relative`}>
-                <img 
-                  src={selectedStore.logo} 
-                  alt={selectedStore.name}
-                  className="absolute bottom-0 left-4 translate-y-1/2 w-20 h-20 rounded-xl bg-white object-contain p-2 shadow-lg border-2 border-white"
-                />
+                <div className="absolute bottom-0 left-4 translate-y-1/2 w-20 h-20 rounded-xl bg-white shadow-lg border-2 border-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={selectedStore.logo} 
+                    alt={selectedStore.name}
+                    className="w-full h-full object-contain p-2"
+                  />
+                </div>
                 <Button 
                   size="icon" 
                   variant="ghost" 
