@@ -39,6 +39,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminPricing from "./pages/admin/AdminPricing";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminSubaccounts from "./pages/admin/AdminSubaccounts";
 
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
@@ -126,10 +127,9 @@ const App = () => {
                   <Route path="/admin/stores" element={<AdminStores />} />
                   <Route path="/admin/riders" element={<AdminRiders />} />
                   <Route path="/admin/rider-approvals" element={<AdminRiderApprovals />} />
+                  <Route path="/admin/subaccounts" element={<AdminSubaccounts />} />
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/pricing" element={<AdminPricing />} />
-                  <Route path="/admin/settings" element={<AdminSettings />} />
-                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
                   <Route path="/admin/settings" element={<AdminSettings />} />
                   <Route path="/admin/analytics" element={<AdminAnalytics />} />
                   
