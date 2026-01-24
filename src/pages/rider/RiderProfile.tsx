@@ -12,24 +12,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-// Ghana banks list
+// Ghana banks list with Paystack bank codes
 const GHANA_BANKS = [
-  { code: 'GCB', name: 'GCB Bank' },
-  { code: 'ECOBANK', name: 'Ecobank Ghana' },
-  { code: 'STANBIC', name: 'Stanbic Bank' },
-  { code: 'ABSA', name: 'Absa Bank Ghana' },
-  { code: 'UBA', name: 'United Bank for Africa' },
-  { code: 'ZENITH', name: 'Zenith Bank Ghana' },
-  { code: 'FIDELITY', name: 'Fidelity Bank Ghana' },
-  { code: 'CBG', name: 'Consolidated Bank Ghana' },
-  { code: 'ADB', name: 'Agricultural Development Bank' },
-  { code: 'ACCESS', name: 'Access Bank Ghana' },
-  { code: 'CALBANK', name: 'CalBank' },
-  { code: 'GTB', name: 'Guaranty Trust Bank' },
-  { code: 'REPUBLIC', name: 'Republic Bank' },
-  { code: 'SOCIETE', name: 'Société Générale Ghana' },
-  { code: 'PRUDENTIAL', name: 'Prudential Bank' },
-  { code: 'MOMO', name: 'Mobile Money (MTN/Vodafone/AirtelTigo)' },
+  { code: '050', name: 'Ecobank Ghana' },
+  { code: '130', name: 'GCB Bank' },
+  { code: '190', name: 'Stanbic Bank Ghana' },
+  { code: '030', name: 'Absa Bank Ghana' },
+  { code: '060', name: 'United Bank for Africa' },
+  { code: '120', name: 'Zenith Bank Ghana' },
+  { code: '240', name: 'Fidelity Bank Ghana' },
+  { code: '280', name: 'Consolidated Bank Ghana' },
+  { code: '080', name: 'Agricultural Development Bank' },
+  { code: '042', name: 'Access Bank Ghana' },
+  { code: '140', name: 'CalBank' },
+  { code: '230', name: 'Guaranty Trust Bank Ghana' },
+  { code: '900554', name: 'MTN Mobile Money' },
+  { code: '900553', name: 'Vodafone Cash' },
+  { code: '900556', name: 'AirtelTigo Money' },
 ];
 
 const RiderProfile: React.FC = () => {
@@ -77,6 +76,7 @@ const RiderProfile: React.FC = () => {
     
     setIsSaving(true);
     try {
+      // First update profile
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -92,10 +92,34 @@ const RiderProfile: React.FC = () => {
         .eq('id', profile.id);
 
       if (error) throw error;
+
+      // If bank details are provided, create/update Paystack subaccount
+      if (bankCode && accountNumber && accountName) {
+        toast.loading('Setting up payment account...');
+        
+        const { data, error: subaccountError } = await supabase.functions.invoke('create-subaccount', {
+          body: {
+            bank_code: bankCode,
+            account_number: accountNumber,
+            business_name: `${fullName} - SpeedRush Rider`,
+          }
+        });
+
+        if (subaccountError) {
+          console.error('Subaccount error:', subaccountError);
+          toast.dismiss();
+          toast.warning('Profile saved, but payment account setup failed. You can retry later.');
+        } else if (data?.success) {
+          toast.dismiss();
+          toast.success('Payment account set up successfully!');
+        }
+      } else {
+        toast.success('Profile updated successfully');
+      }
       
-      toast.success('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to update profile');
     } finally {
       setIsSaving(false);

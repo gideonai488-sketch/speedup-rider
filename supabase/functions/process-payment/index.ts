@@ -30,10 +30,10 @@ serve(async (req) => {
       throw new Error("Missing required fields: orderId, paymentMethod, or customerId");
     }
 
-    // Get the order details with rider info
+    // Get the order details with rider info including subaccount
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("*, rider:rider_id(id, user_id)")
+      .select("*, rider:rider_id(id, user_id, subaccount_code, full_name)")
       .eq("id", orderId)
       .single();
 
@@ -41,6 +41,9 @@ serve(async (req) => {
       console.error("Order fetch error:", orderError);
       throw new Error("Order not found");
     }
+
+    // Get rider's subaccount code for split payment
+    const riderSubaccountCode = order.rider?.subaccount_code;
 
     if (order.payment_status === "paid") {
       return new Response(
@@ -122,7 +125,8 @@ serve(async (req) => {
       // Determine channel based on payment method
       const channels = paymentMethod === "momo" ? ["mobile_money"] : ["card"];
       
-      const paystackPayload = {
+      // Build payload - with split payment if rider has subaccount
+      const paystackPayload: Record<string, unknown> = {
         email: customerEmail,
         amount: Math.round(totalAmount * 100), // Paystack uses pesewas (smallest unit)
         currency: "GHS",
@@ -138,6 +142,19 @@ serve(async (req) => {
           order_number: order.order_number,
         },
       };
+
+      // If rider has a subaccount, use split payment
+      // Rider receives the delivery fee directly, platform keeps the rest
+      if (riderSubaccountCode) {
+        console.log(`Using split payment with rider subaccount: ${riderSubaccountCode}`);
+        paystackPayload.subaccount = riderSubaccountCode;
+        // Flat fee: platform keeps everything except rider's delivery fee
+        // Rider gets delivery fee, platform gets (total - delivery_fee)
+        paystackPayload.transaction_charge = Math.round((totalAmount - deliveryFee) * 100);
+        paystackPayload.bearer = "account"; // Platform (main account) bears the Paystack fee
+      } else {
+        console.log("No rider subaccount - payment goes to main account");
+      }
 
       console.log("Paystack payload:", JSON.stringify(paystackPayload, null, 2));
 
