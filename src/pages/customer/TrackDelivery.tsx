@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,7 +8,7 @@ import {
 import UberStyleMap from '@/components/tracking/UberStyleMap';
 import FindingRider from '@/components/tracking/FindingRider';
 import RatingModal from '@/components/rating/RatingModal';
-import { useOrder } from '@/hooks/useOrders';
+import { useOrder, useUpdateOrderStatus } from '@/hooks/useOrders';
 import { useRiderLocation } from '@/hooks/useRiderLocation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -21,6 +21,7 @@ const TrackDelivery: React.FC = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
   const { data: order, isLoading: orderLoading, refetch } = useOrder(orderId || '');
+  const { mutateAsync: updateOrderStatus } = useUpdateOrderStatus();
   const { data: riderLocation } = useRiderLocation(order?.rider_id || '');
   const [showPayment, setShowPayment] = useState(false);
   const [showRating, setShowRating] = useState(false);
@@ -98,6 +99,19 @@ const TrackDelivery: React.FC = () => {
     }
   };
 
+  const handleCancelOrder = useCallback(async () => {
+    if (!orderId) return;
+    try {
+      await updateOrderStatus({ orderId, status: 'cancelled' });
+      toast.success('Order cancelled successfully');
+      navigate('/orders');
+    } catch (err) {
+      console.error('Failed to cancel order:', err);
+      toast.error('Failed to cancel order. Please try again.');
+      throw err;
+    }
+  }, [orderId, updateOrderStatus, navigate]);
+
   const currentStatus = (order?.status as DeliveryStatus) || 'pending';
   const paymentStatus = (order as any)?.payment_status || 'pending';
   const isDelivered = currentStatus === 'delivered';
@@ -156,6 +170,7 @@ const TrackDelivery: React.FC = () => {
         orderNumber={order.order_number || `#${orderId?.slice(0, 8)}`}
         totalAmount={Number(order.total)}
         onBack={() => navigate('/orders')}
+        onCancel={handleCancelOrder}
       />
     );
   }
