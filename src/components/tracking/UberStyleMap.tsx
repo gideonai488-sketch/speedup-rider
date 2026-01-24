@@ -262,11 +262,10 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
   }
 
   return (
-    <div className="relative w-full h-full" style={{ minHeight: '300px' }}>
+    <div className="w-full h-full relative">
       <div 
         ref={mapContainer} 
-        className="absolute inset-0" 
-        style={{ width: '100%', height: '100%', minHeight: '300px' }}
+        className="w-full h-full"
       />
 
       {/* Recenter Button */}
@@ -297,7 +296,7 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
 
       {/* Current status overlay */}
       {isMoving && riderLocation && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
           <div className="bg-card rounded-full shadow-lg px-4 py-2 flex items-center gap-2">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">DRIVING</p>

@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, AlertCircle, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOnlineRiders } from '@/hooks/useRiderLocation';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface FindingRiderProps {
   pickupLat?: number;
@@ -12,6 +22,7 @@ interface FindingRiderProps {
   orderNumber?: string;
   totalAmount: number;
   onBack: () => void;
+  onCancel?: () => Promise<void>;
 }
 
 const SEARCH_RADII = [5, 10, 15, 20]; // km
@@ -38,10 +49,13 @@ const FindingRider: React.FC<FindingRiderProps> = ({
   orderNumber,
   totalAmount,
   onBack,
+  onCancel,
 }) => {
   const [currentRadiusIndex, setCurrentRadiusIndex] = useState(0);
   const [searchComplete, setSearchComplete] = useState(false);
   const [ridersInRange, setRidersInRange] = useState(0);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const { data: onlineRiders } = useOnlineRiders();
 
   const currentRadius = SEARCH_RADII[currentRadiusIndex];
@@ -95,6 +109,17 @@ const FindingRider: React.FC<FindingRiderProps> = ({
   const handleRetrySearch = () => {
     setCurrentRadiusIndex(0);
     setSearchComplete(false);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!onCancel) return;
+    setIsCancelling(true);
+    try {
+      await onCancel();
+    } finally {
+      setIsCancelling(false);
+      setShowCancelDialog(false);
+    }
   };
 
   const formatCurrency = (value: number) => `GH₵ ${value?.toFixed(2) || '0.00'}`;
@@ -262,7 +287,41 @@ const FindingRider: React.FC<FindingRiderProps> = ({
             <span className="font-bold text-primary">{formatCurrency(totalAmount)}</span>
           </div>
         </div>
+
+        {/* Cancel Order Button */}
+        {onCancel && (
+          <Button
+            variant="ghost"
+            className="mt-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => setShowCancelDialog(true)}
+          >
+            <X className="w-4 h-4 mr-2" />
+            Cancel Order
+          </Button>
+        )}
       </div>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancelling}>Keep Searching</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelOrder}
+              disabled={isCancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isCancelling ? 'Cancelling...' : 'Yes, Cancel Order'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
