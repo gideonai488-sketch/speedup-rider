@@ -22,35 +22,63 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get authorization header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
-
-    // Verify user
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      throw new Error("Unauthorized");
-    }
-
-    const { bank_code, account_number, business_name, percentage_charge } = await req.json();
+    const { bank_code, account_number, business_name, rider_id } = await req.json();
 
     if (!bank_code || !account_number || !business_name) {
       throw new Error("Missing required fields: bank_code, account_number, business_name");
     }
 
-    // Get rider profile
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, full_name, phone, subaccount_code")
-      .eq("user_id", user.id)
-      .single();
+    let profile;
+    let userEmail = "";
 
-    if (profileError || !profile) {
-      throw new Error("Profile not found");
+    // If rider_id is provided (admin creating for rider), use that
+    if (rider_id) {
+      console.log(`Admin creating subaccount for rider: ${rider_id}`);
+      
+      const { data: riderProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, phone, subaccount_code, user_id")
+        .eq("id", rider_id)
+        .single();
+
+      if (profileError || !riderProfile) {
+        throw new Error("Rider profile not found");
+      }
+      
+      profile = riderProfile;
+      
+      // Get email from auth
+      if (profile.user_id) {
+        const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
+        userEmail = authUser?.user?.email || "";
+      }
+    } else {
+      // Get authorization header for self-service
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) {
+        throw new Error("No authorization header");
+      }
+
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      
+      if (authError || !user) {
+        throw new Error("Unauthorized");
+      }
+
+      userEmail = user.email || "";
+
+      const { data: userProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, phone, subaccount_code")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profileError || !userProfile) {
+        throw new Error("Profile not found");
+      }
+      
+      profile = userProfile;
     }
 
     console.log(`Creating/updating subaccount for rider: ${profile.full_name}`);
@@ -71,7 +99,7 @@ serve(async (req) => {
             business_name,
             settlement_bank: bank_code,
             account_number,
-            percentage_charge: percentage_charge || 0, // Platform takes flat fee, not percentage
+            percentage_charge: 0,
           }),
         }
       );
@@ -104,8 +132,8 @@ serve(async (req) => {
         business_name,
         settlement_bank: bank_code,
         account_number,
-        percentage_charge: percentage_charge || 0,
-        primary_contact_email: user.email,
+        percentage_charge: 0,
+        primary_contact_email: userEmail || `rider_${profile.id}@speedrush.app`,
         primary_contact_name: profile.full_name,
         primary_contact_phone: profile.phone,
       }),

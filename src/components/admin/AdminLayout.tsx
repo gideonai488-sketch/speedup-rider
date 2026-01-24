@@ -10,7 +10,8 @@ import {
   Settings,
   BarChart3,
   ChevronLeft,
-  Menu
+  Menu,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
@@ -41,6 +42,7 @@ const adminNavItems = [
   { path: '/admin/stores', icon: Store, label: 'Stores' },
   { path: '/admin/riders', icon: Bike, label: 'Riders' },
   { path: '/admin/rider-approvals', icon: Users, label: 'Approvals' },
+  { path: '/admin/subaccounts', icon: CreditCard, label: 'Subaccounts' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
