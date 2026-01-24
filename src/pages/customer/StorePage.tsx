@@ -127,7 +127,7 @@ const StorePage: React.FC = () => {
       unit_price: Number(item.price),
     }));
     
-    navigate(`/customer/book?service=${store.category}&store=${store.id}&items=${encodeURIComponent(JSON.stringify(cartData))}`);
+    navigate(`/customer/store-checkout?store=${store.id}&items=${encodeURIComponent(JSON.stringify(cartData))}`);
   };
 
   return (

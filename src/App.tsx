@@ -15,6 +15,7 @@ import CustomerAuth from "./pages/auth/CustomerAuth";
 import RiderAuth from "./pages/auth/RiderAuth";
 import CustomerHome from "./pages/customer/CustomerHome";
 import BookDelivery from "./pages/customer/BookDelivery";
+import StoreCheckout from "./pages/customer/StoreCheckout";
 import TrackDelivery from "./pages/customer/TrackDelivery";
 import StorePage from "./pages/customer/StorePage";
 import Wallet from "./pages/customer/Wallet";
@@ -96,6 +97,7 @@ const App = () => {
                   <Route path="/customer/home" element={<CustomerHome />} />
                   <Route path="/customer/dashboard" element={<CustomerHome />} />
                   <Route path="/customer/store/:storeId" element={<StorePage />} />
+                  <Route path="/customer/store-checkout" element={<StoreCheckout />} />
                   <Route path="/customer/book" element={<BookDelivery />} />
                   <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
                   <Route path="/track/:orderId" element={<TrackDelivery />} />
