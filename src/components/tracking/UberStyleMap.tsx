@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
-import { Navigation, ChevronRight } from 'lucide-react';
+import { ChevronRight, Locate } from 'lucide-react';
 
 interface UberStyleMapProps {
   riderLocation?: { lat: number; lng: number; heading?: number };
@@ -10,21 +10,41 @@ interface UberStyleMapProps {
   eta?: number;
   currentStreet?: string;
   isMoving?: boolean;
+  showRecenterButton?: boolean;
 }
 
-const UberStyleMap: React.FC<UberStyleMapProps> = ({
+export interface UberStyleMapRef {
+  recenterToRider: () => void;
+}
+
+const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
   riderLocation,
   destinationLocation,
   eta = 15,
   currentStreet = 'En route',
   isMoving = true,
-}) => {
+  showRecenterButton = true,
+}, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const riderMarker = useRef<mapboxgl.Marker | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [routeDistance, setRouteDistance] = useState<number | null>(null);
+
+  const recenterToRider = useCallback(() => {
+    if (map.current && riderLocation) {
+      map.current.flyTo({
+        center: [riderLocation.lng, riderLocation.lat],
+        zoom: 16,
+        duration: 1000,
+      });
+    }
+  }, [riderLocation]);
+
+  useImperativeHandle(ref, () => ({
+    recenterToRider,
+  }), [recenterToRider]);
 
   // Fetch Mapbox token
   useEffect(() => {
@@ -249,6 +269,17 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
         style={{ width: '100%', height: '100%', minHeight: '300px' }}
       />
 
+      {/* Recenter Button */}
+      {showRecenterButton && riderLocation && (
+        <button
+          onClick={recenterToRider}
+          className="absolute top-4 right-4 z-10 w-10 h-10 bg-card rounded-full shadow-lg flex items-center justify-center hover:bg-muted transition-colors"
+          aria-label="Recenter to rider"
+        >
+          <Locate className="w-5 h-5 text-foreground" />
+        </button>
+      )}
+
       {/* ETA Bubble - Uber style */}
       {riderLocation && (
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-full z-10">
@@ -276,6 +307,8 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
       )}
     </div>
   );
-};
+});
+
+UberStyleMap.displayName = 'UberStyleMap';
 
 export default UberStyleMap;
