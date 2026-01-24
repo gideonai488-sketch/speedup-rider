@@ -96,6 +96,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          base_fee: number | null
           created_at: string
           customer_id: string
           delivered_at: string | null
@@ -103,10 +104,15 @@ export type Database = {
           delivery_fee: number
           delivery_lat: number | null
           delivery_lng: number | null
+          distance_km: number | null
           estimated_delivery: string | null
           id: string
           notes: string | null
           order_number: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_status: string
+          per_km_fee: number | null
           pickup_address: string | null
           pickup_lat: number | null
           pickup_lng: number | null
@@ -114,10 +120,12 @@ export type Database = {
           status: Database["public"]["Enums"]["order_status"]
           store_id: string | null
           subtotal: number
+          surge_multiplier: number | null
           total: number
           updated_at: string
         }
         Insert: {
+          base_fee?: number | null
           created_at?: string
           customer_id: string
           delivered_at?: string | null
@@ -125,10 +133,15 @@ export type Database = {
           delivery_fee?: number
           delivery_lat?: number | null
           delivery_lng?: number | null
+          distance_km?: number | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
           order_number?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          per_km_fee?: number | null
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
@@ -136,10 +149,12 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string | null
           subtotal?: number
+          surge_multiplier?: number | null
           total?: number
           updated_at?: string
         }
         Update: {
+          base_fee?: number | null
           created_at?: string
           customer_id?: string
           delivered_at?: string | null
@@ -147,10 +162,15 @@ export type Database = {
           delivery_fee?: number
           delivery_lat?: number | null
           delivery_lng?: number | null
+          distance_km?: number | null
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
           order_number?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          per_km_fee?: number | null
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
@@ -158,6 +178,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string | null
           subtotal?: number
+          surge_multiplier?: number | null
           total?: number
           updated_at?: string
         }
@@ -561,7 +582,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_delivery_fee: {
+        Args: {
+          p_base_fee?: number
+          p_distance_km: number
+          p_per_km_fee?: number
+          p_surge_multiplier?: number
+        }
+        Returns: number
+      }
       get_profile_id: { Args: { check_user_id: string }; Returns: string }
+      get_surge_multiplier: { Args: never; Returns: number }
       is_admin: { Args: { check_user_id: string }; Returns: boolean }
       is_rider: { Args: { check_user_id: string }; Returns: boolean }
     }

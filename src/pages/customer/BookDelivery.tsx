@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { 
-  ArrowLeft, MapPin, Navigation, CreditCard, 
-  ChevronRight, Loader2, Zap
+  ArrowLeft, MapPin, Navigation, 
+  ChevronRight, Loader2, Zap, TrendingUp, Clock
 } from 'lucide-react';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
@@ -15,6 +15,8 @@ import { useCreateOrder } from '@/hooks/useOrders';
 import { useAuth } from '@/context/AuthContext';
 import AddressAutocomplete from '@/components/location/AddressAutocomplete';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+import useDeliveryFee from '@/hooks/useDeliveryFee';
 
 const BookDelivery: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ const BookDelivery: React.FC = () => {
   const preselectedService = searchParams.get('service') as ServiceType | null;
   const { profile } = useAuth();
   const createOrder = useCreateOrder();
+  const { calculateFee, feeBreakdown, isCalculating, formatFee } = useDeliveryFee();
   
   const [step, setStep] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -42,6 +45,9 @@ const BookDelivery: React.FC = () => {
     distance: 0,
     duration: '',
     fee: 0,
+    baseFee: 5,
+    distanceFee: 0,
+    surgeMultiplier: 1,
   });
 
   const selectedService = serviceCategories.find(s => s.id === formData.serviceType);
@@ -72,29 +78,43 @@ const BookDelivery: React.FC = () => {
       return;
     }
 
-    const basePrice = selectedService?.basePrice || 5;
-    const pricePerKm = selectedService?.pricePerKm || 1.5;
+    if (!formData.pickupCoords || !formData.dropoffCoords) {
+      toast.error('Please select addresses from the suggestions');
+      return;
+    }
+
+    // Calculate real fee using Mapbox directions API
+    const breakdown = await calculateFee(formData.pickupCoords, formData.dropoffCoords);
     
-    let distance = 5; // Default estimate
-    
-    // Calculate real distance if we have coordinates
-    if (formData.pickupCoords && formData.dropoffCoords) {
-      distance = calculateDistance(
+    if (breakdown) {
+      setEstimate({
+        distance: breakdown.distanceKm,
+        duration: `${breakdown.estimatedMinutes} mins`,
+        fee: breakdown.totalFee,
+        baseFee: breakdown.baseFee,
+        distanceFee: breakdown.distanceFee,
+        surgeMultiplier: breakdown.surgeMultiplier,
+      });
+      setStep(3);
+    } else {
+      // Fallback calculation
+      const distance = calculateDistance(
         formData.pickupCoords.lat,
         formData.pickupCoords.lng,
         formData.dropoffCoords.lat,
         formData.dropoffCoords.lng
       );
+      const fee = 5 + (distance * 2);
+      setEstimate({
+        distance: Math.round(distance * 10) / 10,
+        duration: `${Math.round(distance * 3)}-${Math.round(distance * 4)} mins`,
+        fee: Math.round(fee),
+        baseFee: 5,
+        distanceFee: Math.round(distance * 2 * 100) / 100,
+        surgeMultiplier: 1,
+      });
+      setStep(3);
     }
-    
-    const fee = basePrice + (distance * pricePerKm);
-    
-    setEstimate({
-      distance: Math.round(distance * 10) / 10,
-      duration: `${Math.round(distance * 3)}-${Math.round(distance * 4)} mins`,
-      fee: Math.round(fee),
-    });
-    setStep(3);
   };
 
   const handleFindRider = async () => {
@@ -107,7 +127,7 @@ const BookDelivery: React.FC = () => {
     setIsSearching(true);
     
     try {
-      // Create the order in the database
+      // Create the order in the database with Uber-style fee data
       const orderData = {
         store_id: null as any, // Delivery orders don't have a store
         items: [{
@@ -124,6 +144,12 @@ const BookDelivery: React.FC = () => {
         pickup_lng: formData.pickupCoords?.lng,
         notes: formData.description || `${selectedService?.name} delivery. Contact: ${formData.contactName} ${formData.contactPhone}`.trim(),
         delivery_fee: estimate.fee,
+        // Uber-style fee breakdown
+        distance_km: estimate.distance,
+        base_fee: estimate.baseFee,
+        per_km_fee: 2,
+        surge_multiplier: estimate.surgeMultiplier,
+        payment_status: 'pending', // Pay after delivery
       };
 
       const order = await createOrder.mutateAsync(orderData);
@@ -276,9 +302,19 @@ const BookDelivery: React.FC = () => {
               <Button 
                 onClick={handleLocationSubmit}
                 className="w-full gradient-hero text-white shadow-glow"
+                disabled={isCalculating}
               >
-                Continue
-                <ChevronRight className="w-4 h-4 ml-2" />
+                {isCalculating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Calculating fare...
+                  </>
+                ) : (
+                  <>
+                    Continue
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -332,35 +368,46 @@ const BookDelivery: React.FC = () => {
               />
             </div>
 
-            {/* Fare Breakdown */}
-            <div className="bg-secondary/50 rounded-2xl p-4 space-y-3">
+            {/* Uber-style Fare Breakdown */}
+            <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
+              {/* Surge indicator */}
+              {estimate.surgeMultiplier > 1 && (
+                <div className="flex items-center gap-2 p-3 bg-warning/10 rounded-xl border border-warning/20 mb-2">
+                  <TrendingUp className="w-5 h-5 text-warning" />
+                  <div>
+                    <p className="text-sm font-medium text-warning">High demand pricing</p>
+                    <p className="text-xs text-muted-foreground">
+                      {((estimate.surgeMultiplier - 1) * 100).toFixed(0)}% surge due to high demand
+                    </p>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Base fare</span>
-                <span className="text-foreground">GH₵ {selectedService?.basePrice}</span>
+                <span className="text-foreground">GH₵ {estimate.baseFee.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Distance ({estimate.distance} km)</span>
-                <span className="text-foreground">GH₵ {Math.round(estimate.distance * (selectedService?.pricePerKm || 1.5))}</span>
+                <span className="text-muted-foreground">Distance ({estimate.distance} km × GH₵ 2/km)</span>
+                <span className="text-foreground">GH₵ {estimate.distanceFee.toFixed(2)}</span>
               </div>
+              {estimate.surgeMultiplier > 1 && (
+                <div className="flex justify-between text-sm text-warning">
+                  <span>Surge ({estimate.surgeMultiplier.toFixed(1)}×)</span>
+                  <span>+GH₵ {((estimate.baseFee + estimate.distanceFee) * (estimate.surgeMultiplier - 1)).toFixed(2)}</span>
+                </div>
+              )}
               <div className="border-t border-border pt-3 flex justify-between">
                 <span className="font-semibold text-foreground">Total</span>
-                <span className="font-bold text-xl text-primary">GH₵ {estimate.fee}</span>
+                <span className="font-bold text-xl text-primary">GH₵ {estimate.fee.toFixed(2)}</span>
+              </div>
+              
+              {/* Pay after delivery note */}
+              <div className="flex items-center gap-2 pt-2 text-sm text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span>Pay after delivery - no payment required now</span>
               </div>
             </div>
-
-            {/* Payment Method */}
-            <button className="w-full flex items-center justify-between p-4 bg-card rounded-xl border border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-warning" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-foreground">Mobile Money</p>
-                  <p className="text-xs text-muted-foreground">MTN MoMo ••••4567</p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
 
             {/* Find Rider Button */}
             <Button 
