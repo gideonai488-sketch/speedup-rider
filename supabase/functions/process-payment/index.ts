@@ -18,11 +18,13 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    const paystackPublicKey = Deno.env.get("PAYSTACK_PUBLIC_KEY");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { orderId, paymentMethod, customerId } = await req.json();
+    const { orderId, paymentMethod, customerId, callbackUrl } = await req.json();
 
     console.log(`Processing payment for order: ${orderId}, method: ${paymentMethod}`);
+    console.log(`Paystack keys configured: secret=${!!paystackSecretKey}, public=${!!paystackPublicKey}`);
 
     if (!orderId || !paymentMethod || !customerId) {
       throw new Error("Missing required fields: orderId, paymentMethod, or customerId");
@@ -53,21 +55,36 @@ serve(async (req) => {
 
     console.log(`Order total: ${totalAmount}, Delivery fee: ${deliveryFee}, Rider earnings: ${riderEarnings}`);
 
-    // Get customer profile
-    const { data: customerProfile } = await supabase
+    // Get customer profile - customerId can be either profile.id or auth.user.id
+    let customerProfile = await supabase
       .from("profiles")
-      .select("id")
-      .eq("user_id", customerId)
-      .single();
+      .select("id, user_id")
+      .eq("id", customerId)
+      .maybeSingle();
 
-    if (!customerProfile) {
+    // If not found by profile.id, try by user_id
+    if (!customerProfile.data) {
+      customerProfile = await supabase
+        .from("profiles")
+        .select("id, user_id")
+        .eq("user_id", customerId)
+        .single();
+    }
+
+    if (!customerProfile.data) {
       throw new Error("Customer profile not found");
     }
+
+    const profile = customerProfile.data;
+
+    // Get customer email from auth.users via service role
+    const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
+    const customerEmail = authUser?.user?.email || `customer_${profile.id}@speedrush.app`;
 
     const { data: customerWallet } = await supabase
       .from("wallets")
       .select("*")
-      .eq("user_id", customerProfile.id)
+      .eq("user_id", profile.id)
       .single();
 
     // Process payment based on method
@@ -92,57 +109,70 @@ serve(async (req) => {
       
       console.log(`Deducted GH₵${totalAmount} from customer wallet`);
     } else if (paymentMethod === "momo" || paymentMethod === "card") {
-      // Paystack payment - will be processed when API key is added
-      if (paystackSecretKey) {
-        console.log("Paystack key found - initiating payment...");
-        
-        // Initialize Paystack transaction
-        const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${paystackSecretKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: `customer_${customerId}@speedrush.app`, // Replace with actual email from profile
-            amount: totalAmount * 100, // Paystack uses kobo/pesewas
-            currency: "GHS",
-            reference: `order_${orderId}_${Date.now()}`,
-            callback_url: `${supabaseUrl}/functions/v1/paystack-webhook`,
-            metadata: {
-              order_id: orderId,
-              customer_id: customerId,
-              rider_id: order.rider_id,
-              delivery_fee: deliveryFee,
-              platform_fee: PLATFORM_FEE,
-            },
-          }),
-        });
-
-        const paystackData = await paystackResponse.json();
-        
-        if (!paystackData.status) {
-          console.error("Paystack error:", paystackData);
-          throw new Error(paystackData.message || "Paystack initialization failed");
-        }
-
-        console.log("Paystack transaction initialized:", paystackData.data.reference);
-        
-        // Return authorization URL for frontend to redirect
-        return new Response(
-          JSON.stringify({
-            success: true,
-            requiresRedirect: true,
-            authorizationUrl: paystackData.data.authorization_url,
-            reference: paystackData.data.reference,
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      } else {
-        // No Paystack key - log and simulate success for development
-        console.log("PAYSTACK_SECRET_KEY not configured - simulating payment success");
-        console.log("In production, this would redirect to Paystack for MoMo/Card payment");
+      // Paystack payment
+      if (!paystackSecretKey) {
+        throw new Error("Payment gateway not configured. Please contact support.");
       }
+
+      console.log("Initiating Paystack payment...");
+      
+      const reference = `SR_${orderId.slice(0, 8)}_${Date.now()}`;
+      const frontendCallback = callbackUrl || `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/track/${orderId}`;
+      
+      // Determine channel based on payment method
+      const channels = paymentMethod === "momo" ? ["mobile_money"] : ["card"];
+      
+      const paystackPayload = {
+        email: customerEmail,
+        amount: Math.round(totalAmount * 100), // Paystack uses pesewas (smallest unit)
+        currency: "GHS",
+        reference,
+        callback_url: frontendCallback,
+        channels,
+        metadata: {
+          order_id: orderId,
+          customer_id: customerId,
+          rider_id: order.rider_id,
+          delivery_fee: deliveryFee,
+          platform_fee: PLATFORM_FEE,
+          order_number: order.order_number,
+        },
+      };
+
+      console.log("Paystack payload:", JSON.stringify(paystackPayload, null, 2));
+
+      const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${paystackSecretKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(paystackPayload),
+      });
+
+      const paystackData = await paystackResponse.json();
+      
+      console.log("Paystack response:", JSON.stringify(paystackData, null, 2));
+      
+      if (!paystackData.status) {
+        console.error("Paystack error:", paystackData);
+        throw new Error(paystackData.message || "Payment initialization failed");
+      }
+
+      console.log("Paystack transaction initialized:", paystackData.data.reference);
+      
+      // Return authorization URL for frontend to redirect
+      return new Response(
+        JSON.stringify({
+          success: true,
+          requiresRedirect: true,
+          authorizationUrl: paystackData.data.authorization_url,
+          accessCode: paystackData.data.access_code,
+          reference: paystackData.data.reference,
+          publicKey: paystackPublicKey,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Credit rider earnings (100% of delivery fee) - will use Paystack transfer when key is added

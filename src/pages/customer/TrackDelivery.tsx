@@ -78,12 +78,22 @@ const TrackDelivery: React.FC = () => {
           orderId: order.id,
           paymentMethod: method,
           customerId: order.customer_id,
+          callbackUrl: window.location.href, // Return to this page after payment
         },
       });
 
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Payment failed');
 
+      // Handle Paystack redirect for MoMo/Card
+      if (data.requiresRedirect && data.authorizationUrl) {
+        toast.info('Redirecting to payment page...');
+        // Open Paystack in same window for better mobile experience
+        window.location.href = data.authorizationUrl;
+        return;
+      }
+
+      // Wallet payment completed immediately
       toast.success('Payment successful!');
       setShowPayment(false);
       refetch();
@@ -98,6 +108,42 @@ const TrackDelivery: React.FC = () => {
       setIsProcessingPayment(false);
     }
   };
+
+  // Check for Paystack callback on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reference = urlParams.get('reference');
+    const trxref = urlParams.get('trxref');
+    
+    if (reference || trxref) {
+      // Payment callback - verify and update
+      const verifyPayment = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-payment', {
+            body: { reference: reference || trxref, orderId },
+          });
+          
+          if (error) throw error;
+          
+          if (data?.success) {
+            toast.success('Payment verified successfully!');
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname);
+            refetch();
+            setTimeout(() => setShowRating(true), 500);
+          } else {
+            toast.error(data?.error || 'Payment verification failed');
+          }
+        } catch (err) {
+          console.error('Payment verification error:', err);
+          // Still refetch to check if webhook already updated
+          refetch();
+        }
+      };
+      
+      verifyPayment();
+    }
+  }, [orderId, refetch]);
 
   const handleCancelOrder = useCallback(async () => {
     if (!orderId) return;
