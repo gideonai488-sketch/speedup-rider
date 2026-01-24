@@ -3,53 +3,91 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Zap, MapPin, Clock, Bell, User, Navigation, Star,
-  Wallet, ChevronRight, Phone, CheckCircle2, X, Timer
+  Wallet, ChevronRight, CheckCircle2, X, Timer
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { availableOrders } from '@/data/deliveryData';
-
-interface OrderRequest {
-  id: string;
-  type: string;
-  icon: string;
-  storeName: string;
-  pickupAddress: string;
-  dropoffAddress: string;
-  distance: number;
-  estimatedEarning: number;
-  estimatedTime: string;
-  expiresIn: number;
-}
+import { useAuth } from '@/context/AuthContext';
+import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
+import { useRiderPendingOrders, useAcceptOrder, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
+import { supabase } from '@/integrations/supabase/client';
 
 const RiderDashboard: React.FC = () => {
   const location = useLocation();
+  const { profile, user } = useAuth();
   const [isOnline, setIsOnline] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<OrderRequest | null>(null);
   const [orderTimer, setOrderTimer] = useState(0);
-  const [orders, setOrders] = useState<OrderRequest[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
-  // Simulate receiving orders when online
-  useEffect(() => {
-    if (isOnline && !currentOrder) {
-      const timer = setTimeout(() => {
-        const randomOrder = availableOrders[Math.floor(Math.random() * availableOrders.length)];
-        setCurrentOrder({ ...randomOrder, expiresIn: 30 });
-        setOrderTimer(30);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOnline, currentOrder]);
+  const updateLocation = useUpdateRiderLocation();
+  const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders();
+  const acceptOrder = useAcceptOrder();
+  const { data: activeOrders = [] } = useRiderActiveOrders(profile?.id || '');
+  const { data: earnings } = useRiderEarnings(profile?.id || '');
 
-  // Countdown timer for order
+  // Watch for real-time order updates
   useEffect(() => {
-    if (currentOrder && orderTimer > 0) {
+    const channel = supabase
+      .channel('rider-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+        },
+        () => {
+          refetchPending();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchPending]);
+
+  // Update rider location periodically when online
+  useEffect(() => {
+    if (!isOnline || !profile) return;
+
+    const updateRiderLocation = () => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            updateLocation.mutate({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              heading: position.coords.heading || undefined,
+              speed: position.coords.speed || undefined,
+              is_online: true,
+            });
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+          },
+          { enableHighAccuracy: true }
+        );
+      }
+    };
+
+    // Update immediately
+    updateRiderLocation();
+
+    // Then update every 10 seconds
+    const interval = setInterval(updateRiderLocation, 10000);
+
+    return () => clearInterval(interval);
+  }, [isOnline, profile, updateLocation]);
+
+  // Countdown timer for selected order
+  useEffect(() => {
+    if (selectedOrder && orderTimer > 0) {
       const interval = setInterval(() => {
         setOrderTimer((prev) => {
           if (prev <= 1) {
-            setCurrentOrder(null);
+            setSelectedOrder(null);
             toast.error('Order expired. Looking for new orders...');
             return 0;
           }
@@ -58,30 +96,52 @@ const RiderDashboard: React.FC = () => {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [currentOrder, orderTimer]);
+  }, [selectedOrder, orderTimer]);
 
-  const toggleOnline = () => {
+  const toggleOnline = async () => {
     const newStatus = !isOnline;
     setIsOnline(newStatus);
+    
+    if (profile) {
+      await updateLocation.mutateAsync({
+        latitude: 5.6037, // Default Accra coordinates
+        longitude: -0.1870,
+        is_online: newStatus,
+      });
+    }
+    
     toast.success(newStatus ? 'You are now online and receiving orders!' : 'You are now offline');
     if (!newStatus) {
-      setCurrentOrder(null);
-      setOrders([]);
+      setSelectedOrder(null);
     }
   };
 
-  const acceptOrder = () => {
-    if (currentOrder) {
-      toast.success(`Order accepted! Navigate to ${currentOrder.storeName}`);
-      setOrders([currentOrder, ...orders.slice(0, 4)]);
-      setCurrentOrder(null);
+  const handleSelectOrder = (order: any) => {
+    setSelectedOrder(order);
+    setOrderTimer(30);
+  };
+
+  const handleAcceptOrder = async () => {
+    if (!selectedOrder || !profile) return;
+    
+    try {
+      await acceptOrder.mutateAsync({
+        orderId: selectedOrder.id,
+        riderId: profile.id,
+      });
+      toast.success(`Order accepted! Navigate to ${selectedOrder.stores?.name || 'pickup'}`);
+      setSelectedOrder(null);
+    } catch (error) {
+      toast.error('Failed to accept order');
     }
   };
 
-  const declineOrder = () => {
-    setCurrentOrder(null);
+  const handleDeclineOrder = () => {
+    setSelectedOrder(null);
     toast.info('Order declined. Looking for new orders...');
   };
+
+  const formatCurrency = (value: number) => `GH₵ ${value?.toLocaleString() || 0}`;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -89,19 +149,23 @@ const RiderDashboard: React.FC = () => {
       <header className="gradient-dark text-white px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-xl">K</div>
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-xl">
+              {profile?.full_name?.charAt(0) || 'R'}
+            </div>
             <div>
-              <p className="font-semibold">Kwame Asante</p>
+              <p className="font-semibold">{profile?.full_name || 'Rider'}</p>
               <div className="flex items-center gap-1 text-sm text-white/70">
                 <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                4.9 • 1,250 deliveries
+                4.9 • {activeOrders.length} active
               </div>
             </div>
           </div>
           <Button variant="ghost" size="icon" className="text-white relative">
             <Bell className="w-5 h-5" />
-            {isOnline && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+            {pendingOrders.length > 0 && isOnline && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full text-xs flex items-center justify-center">
+                {pendingOrders.length}
+              </span>
             )}
           </Button>
         </div>
@@ -112,7 +176,9 @@ const RiderDashboard: React.FC = () => {
         }`}>
           <div>
             <p className="font-semibold">{isOnline ? 'You are Online' : 'You are Offline'}</p>
-            <p className="text-sm text-white/70">{isOnline ? 'Receiving delivery requests' : 'Go online to start earning'}</p>
+            <p className="text-sm text-white/70">
+              {isOnline ? `${pendingOrders.length} orders available` : 'Go online to start earning'}
+            </p>
           </div>
           <Switch 
             checked={isOnline} 
@@ -125,23 +191,26 @@ const RiderDashboard: React.FC = () => {
       <main className="px-4 py-6 space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Today's Earnings", value: 'GH₵ 245', icon: Wallet },
-            { label: 'Deliveries', value: '12', icon: Navigation },
-            { label: 'Hours Online', value: '6.5h', icon: Clock },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-card rounded-xl border border-border p-4 text-center">
-              <stat.icon className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <Wallet className="w-5 h-5 text-primary mx-auto mb-2" />
+            <p className="font-bold text-foreground">{formatCurrency(earnings?.todayEarnings || 0)}</p>
+            <p className="text-xs text-muted-foreground">Today's Earnings</p>
+          </div>
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <Navigation className="w-5 h-5 text-primary mx-auto mb-2" />
+            <p className="font-bold text-foreground">{earnings?.todayDeliveries || 0}</p>
+            <p className="text-xs text-muted-foreground">Deliveries</p>
+          </div>
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <Clock className="w-5 h-5 text-primary mx-auto mb-2" />
+            <p className="font-bold text-foreground">{activeOrders.length}</p>
+            <p className="text-xs text-muted-foreground">Active Orders</p>
+          </div>
         </div>
 
-        {/* New Order Alert */}
-        {currentOrder && (
+        {/* Selected Order Alert */}
+        {selectedOrder && (
           <div className="bg-card rounded-2xl border-2 border-primary shadow-glow overflow-hidden animate-slide-up">
-            {/* Timer bar */}
             <div className="h-1 bg-border">
               <div 
                 className="h-full bg-primary transition-all duration-1000"
@@ -153,12 +222,20 @@ const RiderDashboard: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 rounded-xl gradient-hero flex items-center justify-center">
-                    <span className="text-2xl">{currentOrder.icon}</span>
+                    {selectedOrder.stores?.logo_url ? (
+                      <img 
+                        src={selectedOrder.stores.logo_url} 
+                        alt="" 
+                        className="w-10 h-10 object-contain"
+                      />
+                    ) : (
+                      <span className="text-2xl">📦</span>
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">New Delivery Request!</p>
                     <p className="text-sm text-primary font-medium">
-                      GH₵ {currentOrder.estimatedEarning} • {currentOrder.distance} km
+                      {formatCurrency(Number(selectedOrder.delivery_fee) * 1.5)}
                     </p>
                   </div>
                 </div>
@@ -173,17 +250,16 @@ const RiderDashboard: React.FC = () => {
                   <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">PICKUP</p>
-                    <p className="font-medium text-foreground">{currentOrder.storeName}</p>
-                    <p className="text-muted-foreground text-xs">{currentOrder.pickupAddress}</p>
+                    <p className="font-medium text-foreground">{selectedOrder.stores?.name || 'Store'}</p>
+                    <p className="text-muted-foreground text-xs">{selectedOrder.pickup_address || selectedOrder.stores?.address}</p>
                   </div>
                 </div>
                 <div className="border-l-2 border-dashed border-border ml-1 h-4" />
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-rush mt-1.5 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-success mt-1.5 flex-shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">DROPOFF</p>
-                    <p className="font-medium text-foreground">{currentOrder.dropoffAddress}</p>
-                    <p className="text-xs text-muted-foreground">{currentOrder.estimatedTime} estimated</p>
+                    <p className="font-medium text-foreground">{selectedOrder.delivery_address}</p>
                   </div>
                 </div>
               </div>
@@ -192,58 +268,101 @@ const RiderDashboard: React.FC = () => {
                 <Button 
                   variant="outline" 
                   className="flex-1 h-12" 
-                  onClick={declineOrder}
+                  onClick={handleDeclineOrder}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Decline
                 </Button>
                 <Button 
                   className="flex-1 h-12 gradient-hero text-white" 
-                  onClick={acceptOrder}
+                  onClick={handleAcceptOrder}
+                  disabled={acceptOrder.isPending}
                 >
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Accept
+                  {acceptOrder.isPending ? 'Accepting...' : 'Accept'}
                 </Button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Available Orders Section - shown when online but no active order */}
-        {isOnline && !currentOrder && (
+        {/* Active Orders */}
+        {activeOrders.length > 0 && (
+          <section>
+            <h2 className="text-lg font-bold text-foreground mb-4">Active Deliveries</h2>
+            <div className="space-y-3">
+              {activeOrders.map((order: any) => (
+                <Link 
+                  key={order.id}
+                  to={`/customer/track/${order.order_number}`}
+                  className="block bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      📦
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">{order.order_number}</p>
+                      <p className="text-sm text-muted-foreground capitalize">
+                        {order.status.replace(/_/g, ' ')}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="truncate">{order.delivery_address}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Available Orders Section */}
+        {isOnline && !selectedOrder && pendingOrders.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-foreground">Available Orders</h2>
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                Looking for orders...
+                {pendingOrders.length} available
               </div>
             </div>
             
             <div className="space-y-3">
-              {availableOrders.map((order) => (
-                <div 
+              {pendingOrders.map((order: any) => (
+                <button 
                   key={order.id}
-                  className="bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors"
+                  onClick={() => handleSelectOrder(order)}
+                  className="w-full text-left bg-card rounded-xl border border-border p-4 hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="text-2xl">{order.icon}</div>
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                      {order.stores?.logo_url ? (
+                        <img src={order.stores.logo_url} alt="" className="w-8 h-8 object-contain" />
+                      ) : (
+                        <span className="text-xl">📦</span>
+                      )}
+                    </div>
                     <div className="flex-1">
-                      <p className="font-medium text-foreground">{order.storeName}</p>
-                      <p className="text-sm text-muted-foreground">{order.distance} km • {order.estimatedTime}</p>
+                      <p className="font-medium text-foreground">{order.stores?.name || 'Pickup'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {order.order_items?.length || 0} items
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-success">GH₵ {order.estimatedEarning}</p>
+                      <p className="font-bold text-success">{formatCurrency(Number(order.delivery_fee) * 1.5)}</p>
                       <p className="text-xs text-muted-foreground">Est. earning</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{order.pickupAddress}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                    <span>{order.dropoffAddress}</span>
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">{order.pickup_address || order.stores?.address}</span>
+                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">{order.delivery_address}</span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </section>
@@ -264,25 +383,16 @@ const RiderDashboard: React.FC = () => {
           </section>
         )}
 
-        {/* Recent Deliveries */}
-        <section>
-          <h2 className="text-lg font-bold text-foreground mb-4">Recent Deliveries</h2>
-          <div className="space-y-3">
-            {(orders.length > 0 ? orders : [
-              { id: 'DEL-001', icon: '📦', storeName: 'Osu', dropoffAddress: 'Cantonments', estimatedEarning: 15, estimatedTime: '30 mins ago' },
-              { id: 'DEL-002', icon: '🍔', storeName: 'Airport', dropoffAddress: 'Dzorwulu', estimatedEarning: 22, estimatedTime: '1 hour ago' },
-            ]).map((delivery) => (
-              <div key={delivery.id} className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
-                <div className="text-2xl">{delivery.icon}</div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{delivery.storeName} → {delivery.dropoffAddress}</p>
-                  <p className="text-sm text-muted-foreground">{delivery.estimatedTime}</p>
-                </div>
-                <span className="font-bold text-success">+GH₵ {delivery.estimatedEarning}</span>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* No Orders Available */}
+        {isOnline && !selectedOrder && pendingOrders.length === 0 && activeOrders.length === 0 && (
+          <section className="text-center py-8">
+            <div className="w-20 h-20 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
+              <Clock className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No orders available</h3>
+            <p className="text-muted-foreground">We'll notify you when new orders come in</p>
+          </section>
+        )}
       </main>
 
       {/* Bottom Nav */}
