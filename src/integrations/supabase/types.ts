@@ -106,7 +106,7 @@ export type Database = {
           estimated_delivery: string | null
           id: string
           notes: string | null
-          order_number: string
+          order_number: string | null
           pickup_address: string | null
           pickup_lat: number | null
           pickup_lng: number | null
@@ -128,7 +128,7 @@ export type Database = {
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
-          order_number: string
+          order_number?: string | null
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
@@ -150,7 +150,7 @@ export type Database = {
           estimated_delivery?: string | null
           id?: string
           notes?: string | null
-          order_number?: string
+          order_number?: string | null
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null

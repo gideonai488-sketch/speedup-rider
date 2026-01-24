@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import StoreLogo from '@/components/ui/store-logo';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut
 } from 'lucide-react';
-import { serviceCategories, popularStores } from '@/data/deliveryData';
+import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
+import { useStores } from '@/hooks/useStores';
+import { useOrders } from '@/hooks/useOrders';
+import { useWallet } from '@/hooks/useWallet';
+import { useAuth } from '@/context/AuthContext';
+import { Database } from '@/integrations/supabase/types';
+
+type StoreCategory = Database['public']['Enums']['store_category'];
 
 const serviceIcons: Record<string, React.ReactNode> = {
   food: <UtensilsCrossed className="w-6 h-6" />,
@@ -33,7 +41,51 @@ const serviceColors: Record<string, string> = {
 
 const CustomerHome: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+  
+  const { user, profile, signOut, loading: authLoading } = useAuth();
+  const { data: stores, isLoading: storesLoading } = useStores();
+  const { data: orders, isLoading: ordersLoading } = useOrders();
+  const { data: wallet } = useWallet();
+
+  // Redirect to auth if not logged in
+  React.useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
+  const featuredStores = stores?.filter(s => s.is_featured) || [];
+  const recentOrders = orders?.slice(0, 2) || [];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `GH₵ ${amount.toFixed(0)}`;
+  };
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return 'bg-green-500/10 text-green-600';
+      case 'cancelled':
+        return 'bg-red-500/10 text-red-600';
+      default:
+        return 'bg-primary/10 text-primary';
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -44,23 +96,7 @@ const CustomerHome: React.FC = () => {
             <div className="flex items-center gap-3">
               {/* SpeedRush Owl Logo */}
               <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
-                <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-                  <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
-                  <circle cx="20" cy="14" r="10" fill="white" />
-                  <path d="M11 7 L14 14 L8 12 Z" fill="white" />
-                  <path d="M29 7 L26 14 L32 12 Z" fill="white" />
-                  <circle cx="16" cy="14" r="4" fill="#1e293b" />
-                  <circle cx="24" cy="14" r="4" fill="#1e293b" />
-                  <circle cx="17" cy="13" r="2" fill="white" />
-                  <circle cx="25" cy="13" r="2" fill="white" />
-                  <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
-                </svg>
-                {/* Speed indicator */}
-                <div className="absolute -right-0.5 top-1/2 -translate-y-1/2 flex gap-0.5">
-                  {[...Array(2)].map((_, i) => (
-                    <div key={i} className="w-0.5 bg-white/60 rounded-full" style={{ height: `${4 + i * 3}px` }} />
-                  ))}
-                </div>
+                <span className="text-2xl">🦉</span>
               </div>
               <div>
                 <h1 className="text-lg font-bold text-foreground">
@@ -68,7 +104,7 @@ const CustomerHome: React.FC = () => {
                 </h1>
                 <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
                   <MapPin className="w-3 h-3 text-primary" />
-                  Osu, Accra
+                  {profile?.address || 'Set location'}
                   <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
@@ -76,20 +112,27 @@ const CustomerHome: React.FC = () => {
             <div className="flex items-center gap-2">
               <Link to="/customer/wallet">
                 <Button variant="ghost" size="sm" className="text-primary font-semibold">
-                  GH₵ 245
+                  {formatCurrency(wallet?.balance || 0)}
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                {orders && orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                )}
               </Button>
-              <Link to="/profile">
-                <Button variant="ghost" size="icon">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
+              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                <LogOut className="w-5 h-5" />
+              </Button>
             </div>
           </div>
+          
+          {/* Welcome message */}
+          {profile && (
+            <p className="text-sm text-muted-foreground mb-3">
+              Welcome back, <span className="font-medium text-foreground">{profile.full_name}</span>!
+            </p>
+          )}
           
           {/* Search Bar */}
           <div className="relative">
@@ -156,32 +199,42 @@ const CustomerHome: React.FC = () => {
           
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex gap-4 pb-4">
-              {popularStores.filter(s => s.featured).map((store) => (
-              <Link
-                  key={store.id}
-                  to={`/customer/store/${store.id}`}
-                  className="group flex-shrink-0 w-40"
-                >
-                  <div className={`h-24 rounded-xl ${store.coverColor} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
-                    <StoreLogo 
-                      src={store.logo} 
-                      name={store.name}
-                      className="max-h-16 max-w-28"
-                      textClassName="text-2xl"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              {storesLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 w-40">
+                    <Skeleton className="h-24 rounded-xl mb-3" />
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
-                  <h3 className="font-semibold text-foreground text-sm truncate">{store.name}</h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-0.5">
-                      <Star className="w-3 h-3 text-warning fill-warning" />
-                      {store.rating}
+                ))
+              ) : (
+                featuredStores.map((store) => (
+                  <Link
+                    key={store.id}
+                    to={`/customer/store/${store.id}`}
+                    className="group flex-shrink-0 w-40"
+                  >
+                    <div className={`h-24 rounded-xl ${store.cover_color || 'bg-primary'} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
+                      <StoreLogo 
+                        src={store.logo_url || ''} 
+                        name={store.name}
+                        className="max-h-16 max-w-28"
+                        textClassName="text-2xl"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                     </div>
-                    <span>•</span>
-                    <span>{store.deliveryTime}</span>
-                  </div>
-                </Link>
-              ))}
+                    <h3 className="font-semibold text-foreground text-sm truncate">{store.name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-0.5">
+                        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                        {store.rating?.toFixed(1) || '0.0'}
+                      </div>
+                      <span>•</span>
+                      <span>{store.delivery_time}</span>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -195,38 +248,50 @@ const CustomerHome: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            {popularStores.map((store) => (
-              <Link
-                key={store.id}
-                to={`/customer/store/${store.id}`}
-                className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
-              >
-                <div className={`h-20 ${store.coverColor} flex items-center justify-center p-3 relative`}>
-                  <StoreLogo 
-                    src={store.logo} 
-                    name={store.name}
-                    className="max-h-12 max-w-20"
-                    textClassName="text-xl"
-                  />
-                  <div className="absolute top-2 right-2 bg-black/30 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ExternalLink className="w-3 h-3 text-white" />
+            {storesLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
+                  <Skeleton className="h-20" />
+                  <div className="p-3">
+                    <Skeleton className="h-4 w-20 mb-2" />
+                    <Skeleton className="h-3 w-24" />
                   </div>
                 </div>
-                <div className="p-3">
-                  <h3 className="font-semibold text-foreground text-sm">{store.name}</h3>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <Star className="w-3 h-3 text-warning fill-warning" />
-                    <span>{store.rating}</span>
-                    <span className="mx-1">•</span>
-                    <Clock className="w-3 h-3" />
-                    <span>{store.deliveryTime}</span>
+              ))
+            ) : (
+              stores?.map((store) => (
+                <Link
+                  key={store.id}
+                  to={`/customer/store/${store.id}`}
+                  className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
+                >
+                  <div className={`h-20 ${store.cover_color || 'bg-primary'} flex items-center justify-center p-3 relative`}>
+                    <StoreLogo 
+                      src={store.logo_url || ''} 
+                      name={store.name}
+                      className="max-h-12 max-w-20"
+                      textClassName="text-xl"
+                    />
+                    <div className="absolute top-2 right-2 bg-black/30 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ExternalLink className="w-3 h-3 text-white" />
+                    </div>
                   </div>
-                  <div className="text-xs text-primary mt-1.5 font-medium">
-                    GH₵{store.deliveryFee} delivery
+                  <div className="p-3">
+                    <h3 className="font-semibold text-foreground text-sm">{store.name}</h3>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                      <span>{store.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="mx-1">•</span>
+                      <Clock className="w-3 h-3" />
+                      <span>{store.delivery_time}</span>
+                    </div>
+                    <div className="text-xs text-primary mt-1.5 font-medium">
+                      GH₵{store.delivery_fee?.toFixed(0)} delivery
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            )}
           </div>
         </section>
 
@@ -238,29 +303,47 @@ const CustomerHome: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            {[
-              { id: 'ORD-001', service: '🍔 Food', from: 'KFC Osu', status: 'Delivered', time: '2 hours ago' },
-              { id: 'ORD-002', service: '📦 Package', from: 'East Legon', status: 'In Transit', time: '5 hours ago' },
-            ].map((order) => (
-              <Link
-                key={order.id}
-                to={`/customer/track/${order.id}`}
-                className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors"
-              >
-                <div className="text-2xl">{order.service.split(' ')[0]}</div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{order.from}</p>
-                  <p className="text-sm text-muted-foreground">{order.time}</p>
+            {ordersLoading ? (
+              Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <Skeleton className="h-6 w-16 rounded-full" />
                 </div>
-                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                  order.status === 'Delivered' 
-                    ? 'bg-success/10 text-success'
-                    : 'bg-primary/10 text-primary'
-                }`}>
-                  {order.status}
-                </div>
-              </Link>
-            ))}
+              ))
+            ) : recentOrders.length > 0 ? (
+              recentOrders.map((order) => (
+                <Link
+                  key={order.id}
+                  to={`/customer/track/${order.id}`}
+                  className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors"
+                >
+                  <div className="text-2xl">
+                    {order.stores?.category === 'food' ? '🍔' : 
+                     order.stores?.category === 'groceries' ? '🛒' : 
+                     order.stores?.category === 'pharmacy' ? '💊' : '📦'}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{order.stores?.name || 'Order'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${getOrderStatusColor(order.status)}`}>
+                    {order.status.replace('_', ' ')}
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No orders yet</p>
+                <Link to="/customer/book" className="text-primary text-sm">Place your first order</Link>
+              </div>
+            )}
           </div>
         </section>
 
@@ -269,8 +352,8 @@ const CustomerHome: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-foreground">Riders Near You</h2>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              12 online
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Online
             </div>
           </div>
           
@@ -280,7 +363,6 @@ const CustomerHome: React.FC = () => {
                 <div
                   key={i}
                   className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold border-2 border-background"
-                  style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   {letter}
                 </div>

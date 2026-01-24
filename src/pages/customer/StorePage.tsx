@@ -4,12 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   ArrowLeft, Star, Clock, MapPin, Search, Plus, Minus, 
-  ShoppingBag, Heart, Share2, Info, ChevronRight, X
+  ShoppingBag, Heart, Share2, Info, ChevronRight
 } from 'lucide-react';
-import { storeDetails, Product } from '@/data/storeProducts';
+import { useStore } from '@/hooks/useStores';
+import { useProducts } from '@/hooks/useProducts';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
+
+type Product = Database['public']['Tables']['products']['Row'];
 
 interface CartItem extends Product {
   quantity: number;
@@ -18,12 +24,38 @@ interface CartItem extends Product {
 const StorePage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [showCart, setShowCart] = useState(false);
 
-  const store = storeId ? storeDetails[storeId] : null;
+  const { data: store, isLoading: storeLoading } = useStore(storeId || '');
+  const { data: products, isLoading: productsLoading } = useProducts(storeId || '');
+
+  // Redirect to auth if not logged in
+  React.useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
+
+  if (storeLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Skeleton className="h-56 w-full" />
+        <div className="px-4 py-4">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64 mb-4" />
+          <Skeleton className="h-10 w-full mb-4" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!store) {
     return (
@@ -38,14 +70,16 @@ const StorePage: React.FC = () => {
     );
   }
 
-  const categories = ['All', ...Array.from(new Set(store.products.map(p => p.category)))];
+  const categories = ['All', ...Array.from(new Set(products?.map(p => p.category_id || 'Uncategorized') || []))];
   
-  const filteredProducts = store.products.filter(product => {
+  const filteredProducts = products?.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+                         (product.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+    const matchesCategory = selectedCategory === 'All' || product.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
-  });
+  }) || [];
+
+  const popularProducts = products?.filter(p => p.is_popular) || [];
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -76,30 +110,41 @@ const StorePage: React.FC = () => {
     return cart.find(item => item.id === productId)?.quantity || 0;
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const cartTotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = () => {
-    if (cartTotal < store.minOrder) {
-      toast.error(`Minimum order is GH₵${store.minOrder}`);
+    const minOrder = store.min_order || 0;
+    if (cartTotal < minOrder) {
+      toast.error(`Minimum order is GH₵${minOrder}`);
       return;
     }
-    navigate(`/customer/book?service=${store.category}&store=${store.id}&items=${encodeURIComponent(JSON.stringify(cart))}`);
+    
+    const cartData = cart.map(item => ({
+      product_id: item.id,
+      product_name: item.name,
+      quantity: item.quantity,
+      unit_price: Number(item.price),
+    }));
+    
+    navigate(`/customer/book?service=${store.category}&store=${store.id}&items=${encodeURIComponent(JSON.stringify(cartData))}`);
   };
 
   return (
     <div className="min-h-screen bg-background pb-32">
       {/* Header Image */}
       <div className="relative h-56">
-        <div className={`absolute inset-0 ${store.coverColor}`}>
-          <img 
-            src={store.coverImage} 
-            alt={store.name}
-            className="w-full h-full object-cover opacity-60"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+        <div className={`absolute inset-0 ${store.cover_color || 'bg-primary'}`}>
+          {store.cover_image_url && (
+            <img 
+              src={store.cover_image_url} 
+              alt={store.name}
+              className="w-full h-full object-cover opacity-60"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         
@@ -126,14 +171,18 @@ const StorePage: React.FC = () => {
         {/* Store Logo */}
         <div className="absolute bottom-4 left-4 flex items-end gap-4">
           <div className="w-20 h-20 rounded-2xl bg-white p-2 shadow-lg flex items-center justify-center">
-            <img 
-              src={store.logo} 
-              alt={store.name}
-              className="max-w-full max-h-full object-contain"
-              onError={(e) => {
-                e.currentTarget.parentElement!.innerHTML = `<span class="text-2xl font-bold text-gray-800">${store.name.charAt(0)}</span>`;
-              }}
-            />
+            {store.logo_url ? (
+              <img 
+                src={store.logo_url} 
+                alt={store.name}
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.parentElement!.innerHTML = `<span class="text-2xl font-bold text-gray-800">${store.name.charAt(0)}</span>`;
+                }}
+              />
+            ) : (
+              <span className="text-2xl font-bold text-gray-800">{store.name.charAt(0)}</span>
+            )}
           </div>
         </div>
       </div>
@@ -152,13 +201,13 @@ const StorePage: React.FC = () => {
         
         <div className="flex items-center gap-4 mt-3 text-sm">
           <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 text-warning fill-warning" />
-            <span className="font-medium">{store.rating}</span>
-            <span className="text-muted-foreground">({store.reviews})</span>
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span className="font-medium">{store.rating?.toFixed(1) || '0.0'}</span>
+            <span className="text-muted-foreground">({store.reviews_count || 0})</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <Clock className="w-4 h-4" />
-            <span>{store.deliveryTime}</span>
+            <span>{store.delivery_time}</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <MapPin className="w-4 h-4" />
@@ -168,10 +217,10 @@ const StorePage: React.FC = () => {
 
         <div className="flex items-center gap-3 mt-4">
           <Badge variant="secondary" className="gap-1">
-            <span>GH₵{store.deliveryFee} delivery</span>
+            <span>GH₵{store.delivery_fee?.toFixed(0)} delivery</span>
           </Badge>
           <Badge variant="outline" className="gap-1">
-            <span>Min. GH₵{store.minOrder}</span>
+            <span>Min. GH₵{store.min_order?.toFixed(0)}</span>
           </Badge>
         </div>
       </div>
@@ -189,42 +238,22 @@ const StorePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="px-4 py-3 border-b border-border">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                className={selectedCategory === category ? "gradient-hero text-white" : ""}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-
       {/* Products */}
       <div className="px-4 py-4">
         {/* Popular Items */}
-        {selectedCategory === 'All' && (
+        {popularProducts.length > 0 && (
           <section className="mb-6">
             <h2 className="text-lg font-bold text-foreground mb-3">🔥 Popular Items</h2>
             <ScrollArea className="w-full whitespace-nowrap">
               <div className="flex gap-3 pb-2">
-                {store.products.filter(p => p.popular).map((product) => (
+                {popularProducts.map((product) => (
                   <div 
                     key={product.id}
                     className="flex-shrink-0 w-40 bg-card rounded-xl border border-border overflow-hidden"
                   >
                     <div className="relative h-28">
                       <img 
-                        src={product.image} 
+                        src={product.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'} 
                         alt={product.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -240,7 +269,7 @@ const StorePage: React.FC = () => {
                     <div className="p-3">
                       <h3 className="font-medium text-foreground text-sm truncate">{product.name}</h3>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="font-bold text-primary">GH₵{product.price}</span>
+                        <span className="font-bold text-primary">GH₵{Number(product.price).toFixed(0)}</span>
                         <Button 
                           size="icon" 
                           className="w-7 h-7 rounded-full gradient-hero"
@@ -260,74 +289,85 @@ const StorePage: React.FC = () => {
 
         {/* All Products Grid */}
         <section>
-          <h2 className="text-lg font-bold text-foreground mb-3">
-            {selectedCategory === 'All' ? 'All Items' : selectedCategory}
-          </h2>
-          <div className="space-y-3">
-            {filteredProducts.map((product) => {
-              const quantity = getCartQuantity(product.id);
-              return (
-                <div 
-                  key={product.id}
-                  className="flex gap-4 p-3 bg-card rounded-xl border border-border"
-                >
-                  <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
-                      }}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{product.description}</p>
-                    {product.rating && (
-                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                        <Star className="w-3 h-3 text-warning fill-warning" />
-                        <span>{product.rating}</span>
-                        <span>({product.reviews})</span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="font-bold text-primary text-lg">GH₵{product.price}</span>
-                      {quantity > 0 ? (
-                        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground mb-3">All Items</h2>
+          
+          {productsLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No products found</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredProducts.map((product) => {
+                const quantity = getCartQuantity(product.id);
+                return (
+                  <div 
+                    key={product.id}
+                    className="flex gap-4 p-3 bg-card rounded-xl border border-border"
+                  >
+                    <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                      <img 
+                        src={product.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{product.description}</p>
+                      {product.rating && (
+                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                          <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                          <span>{product.rating}</span>
+                          <span>({product.reviews_count})</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="font-bold text-primary text-lg">GH₵{Number(product.price).toFixed(0)}</span>
+                        {quantity > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              size="icon" 
+                              variant="outline"
+                              className="w-8 h-8 rounded-full"
+                              onClick={() => removeFromCart(product.id)}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </Button>
+                            <span className="w-6 text-center font-bold">{quantity}</span>
+                            <Button 
+                              size="icon" 
+                              className="w-8 h-8 rounded-full gradient-hero"
+                              onClick={() => addToCart(product)}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
                           <Button 
-                            size="icon" 
-                            variant="outline"
-                            className="w-8 h-8 rounded-full"
-                            onClick={() => removeFromCart(product.id)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                          <span className="w-6 text-center font-bold">{quantity}</span>
-                          <Button 
-                            size="icon" 
-                            className="w-8 h-8 rounded-full gradient-hero"
+                            size="sm"
+                            className="gradient-hero text-white"
                             onClick={() => addToCart(product)}
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-4 h-4 mr-1" />
+                            Add
                           </Button>
-                        </div>
-                      ) : (
-                        <Button 
-                          size="sm"
-                          className="gradient-hero text-white"
-                          onClick={() => addToCart(product)}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Add
-                        </Button>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
 
@@ -343,13 +383,13 @@ const StorePage: React.FC = () => {
               <span>{cartCount} items</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>GH₵{cartTotal + store.deliveryFee}</span>
+              <span>GH₵{(cartTotal + Number(store.delivery_fee || 0)).toFixed(0)}</span>
               <ChevronRight className="w-5 h-5" />
             </div>
           </Button>
-          {cartTotal < store.minOrder && (
+          {cartTotal < Number(store.min_order || 0) && (
             <p className="text-center text-sm text-muted-foreground mt-2">
-              Add GH₵{store.minOrder - cartTotal} more to reach minimum order
+              Add GH₵{(Number(store.min_order || 0) - cartTotal).toFixed(0)} more to reach minimum order
             </p>
           )}
         </div>
