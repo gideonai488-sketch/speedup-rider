@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, Phone, Navigation, MapPin,
-  CheckCircle2, Package, Truck, User, ChevronDown, ChevronUp, Clock
+  CheckCircle2, Package, Truck, User, ChevronDown, ChevronUp, Clock,
+  Locate, AlertTriangle
 } from 'lucide-react';
 import { useOrder, useUpdateOrderStatus } from '@/hooks/useOrders';
 import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
@@ -31,6 +32,8 @@ const RiderDelivery: React.FC = () => {
   const [distance, setDistance] = useState<number | null>(null);
   const [currentStreet, setCurrentStreet] = useState<string>('Calculating route...');
   const [isCompletingDelivery, setIsCompletingDelivery] = useState(false);
+  const [isAcquiringGPS, setIsAcquiringGPS] = useState(true);
+  const [gpsError, setGpsError] = useState<string | null>(null);
 
   const currentStatus = (order?.status as DeliveryStatus) || 'picked_up';
 
@@ -47,7 +50,11 @@ const RiderDelivery: React.FC = () => {
 
   // Track rider's real-time location and update server
   useEffect(() => {
-    if (!navigator.geolocation || !profile) return;
+    if (!navigator.geolocation || !profile) {
+      setGpsError('GPS not available on this device');
+      setIsAcquiringGPS(false);
+      return;
+    }
 
     const updatePos = (position: GeolocationPosition) => {
       const newLoc = {
@@ -55,6 +62,8 @@ const RiderDelivery: React.FC = () => {
         lng: position.coords.longitude,
       };
       setRiderLocation(newLoc);
+      setIsAcquiringGPS(false);
+      setGpsError(null);
 
       // Update rider location in database for customer tracking
       updateLocation.mutate({
@@ -66,9 +75,31 @@ const RiderDelivery: React.FC = () => {
       });
     };
 
-    navigator.geolocation.getCurrentPosition(updatePos, console.error, { enableHighAccuracy: true });
+    const handleError = (error: GeolocationPositionError) => {
+      console.error('GPS Error:', error);
+      setIsAcquiringGPS(false);
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          setGpsError('Location permission denied. Please enable GPS.');
+          break;
+        case error.POSITION_UNAVAILABLE:
+          setGpsError('Location unavailable. Please check GPS settings.');
+          break;
+        case error.TIMEOUT:
+          setGpsError('Location request timed out. Retrying...');
+          break;
+        default:
+          setGpsError('Unable to get your location.');
+      }
+    };
 
-    const watchId = navigator.geolocation.watchPosition(updatePos, console.error, { 
+    navigator.geolocation.getCurrentPosition(updatePos, handleError, { 
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    });
+
+    const watchId = navigator.geolocation.watchPosition(updatePos, handleError, { 
       enableHighAccuracy: true, 
       maximumAge: 3000 
     });
@@ -222,6 +253,62 @@ const RiderDelivery: React.FC = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Full-screen Map */}
       <div className="relative flex-1" style={{ minHeight: '50vh', height: '55vh' }}>
+        {/* GPS Acquiring Overlay */}
+        {isAcquiringGPS && (
+          <div className="absolute inset-0 z-30 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center animate-fade-in">
+            <div className="relative mb-6">
+              {/* Pulsing radar effect */}
+              <div className="absolute inset-0 w-24 h-24 rounded-full bg-primary/20 animate-ping" />
+              <div className="absolute inset-2 w-20 h-20 rounded-full bg-primary/30 animate-ping" style={{ animationDelay: '0.3s' }} />
+              <div className="relative w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                <Locate className="w-10 h-10 text-primary animate-pulse" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Acquiring GPS Signal</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-xs">
+              Please wait while we pinpoint your location for accurate navigation...
+            </p>
+            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span>High accuracy mode enabled</span>
+            </div>
+          </div>
+        )}
+
+        {/* GPS Error Overlay */}
+        {gpsError && !isAcquiringGPS && (
+          <div className="absolute inset-0 z-30 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center animate-fade-in">
+            <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-10 h-10 text-destructive" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Location Error</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-xs mb-4">
+              {gpsError}
+            </p>
+            <Button
+              onClick={() => {
+                setIsAcquiringGPS(true);
+                setGpsError(null);
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => {
+                    setRiderLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                    setIsAcquiringGPS(false);
+                  },
+                  () => {
+                    setGpsError('Still unable to get location. Please check device settings.');
+                    setIsAcquiringGPS(false);
+                  },
+                  { enableHighAccuracy: true, timeout: 15000 }
+                );
+              }}
+              className="gap-2"
+            >
+              <Locate className="w-4 h-4" />
+              Retry GPS
+            </Button>
+          </div>
+        )}
+
         <UberStyleMap
           riderLocation={riderLocation || undefined}
           destinationLocation={destination}
