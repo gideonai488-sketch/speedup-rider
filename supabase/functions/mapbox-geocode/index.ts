@@ -34,17 +34,28 @@ serve(async (req) => {
       );
     }
 
+    // Detect if this is a reverse geocoding request (coordinates)
+    const coordPattern = /^-?\d+\.?\d*,-?\d+\.?\d*$/;
+    const isReverseGeocode = coordPattern.test(query.trim());
+
     // Build Mapbox Geocoding API URL
     const params = new URLSearchParams({
       access_token: mapboxToken,
-      autocomplete: 'true',
       country: 'GH', // Ghana
-      limit: '5',
-      types: types || 'address,poi,place,locality,neighborhood',
     });
 
-    if (proximity) {
-      params.append('proximity', proximity);
+    if (isReverseGeocode) {
+      // For reverse geocoding, use single type and no limit to avoid Mapbox error
+      params.append('types', 'address');
+    } else {
+      // For forward geocoding, use multiple types with limit
+      params.append('autocomplete', 'true');
+      params.append('limit', '5');
+      params.append('types', types || 'address,poi,place,locality,neighborhood');
+      
+      if (proximity) {
+        params.append('proximity', proximity);
+      }
     }
 
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?${params}`;
