@@ -68,24 +68,25 @@ const TrackDelivery: React.FC = () => {
     setIsProcessingPayment(true);
 
     try {
-      // Update payment status
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          payment_status: 'paid',
-          payment_method: method,
-          paid_at: new Date().toISOString(),
-        })
-        .eq('id', order.id);
+      // Use the edge function to process payment properly
+      const { data, error } = await supabase.functions.invoke('process-payment', {
+        body: {
+          orderId: order.id,
+          paymentMethod: method,
+          customerId: order.customer_id,
+        },
+      });
 
       if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Payment failed');
 
       toast.success('Payment successful!');
       setShowPayment(false);
       refetch();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Payment failed:', err);
-      toast.error('Payment failed. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Payment failed';
+      toast.error(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }

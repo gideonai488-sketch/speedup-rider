@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, Phone, Navigation, MapPin,
-  CheckCircle2, Package, Truck, User, ChevronDown, ChevronUp
+  CheckCircle2, Package, Truck, User, ChevronDown, ChevronUp, Clock
 } from 'lucide-react';
 import { useOrder, useUpdateOrderStatus } from '@/hooks/useOrders';
+import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
+import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import UberStyleMap from '@/components/tracking/UberStyleMap';
+import { supabase } from '@/integrations/supabase/client';
 
 type DeliveryStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
@@ -18,43 +21,101 @@ const statusFlow: DeliveryStatus[] = ['picked_up', 'out_for_delivery', 'delivere
 const RiderDelivery: React.FC = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
+  const { profile } = useAuth();
   const { data: order, isLoading, refetch } = useOrder(orderId || '');
   const updateStatus = useUpdateOrderStatus();
+  const updateLocation = useUpdateRiderLocation();
   const [showDetails, setShowDetails] = useState(false);
   const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [eta, setEta] = useState<number>(10);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [currentStreet, setCurrentStreet] = useState<string>('Calculating route...');
+  const [isCompletingDelivery, setIsCompletingDelivery] = useState(false);
 
   const currentStatus = (order?.status as DeliveryStatus) || 'picked_up';
 
-  // Track rider's real-time location
+  // Determine destination based on current status
+  const getDestination = useCallback(() => {
+    if (currentStatus === 'picked_up' && order?.pickup_lat) {
+      return { lat: Number(order.pickup_lat), lng: Number(order.pickup_lng) };
+    }
+    if (order?.delivery_lat) {
+      return { lat: Number(order.delivery_lat), lng: Number(order.delivery_lng) };
+    }
+    return { lat: 5.6037, lng: -0.1870 };
+  }, [currentStatus, order]);
+
+  // Track rider's real-time location and update server
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation || !profile) return;
 
-    // Get initial position
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setRiderLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (error) => console.error('Geolocation error:', error),
-      { enableHighAccuracy: true }
-    );
+    const updatePos = (position: GeolocationPosition) => {
+      const newLoc = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      setRiderLocation(newLoc);
 
-    // Watch position updates
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setRiderLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (error) => console.error('Geolocation error:', error),
-      { enableHighAccuracy: true, maximumAge: 5000 }
-    );
+      // Update rider location in database for customer tracking
+      updateLocation.mutate({
+        latitude: newLoc.lat,
+        longitude: newLoc.lng,
+        heading: position.coords.heading || undefined,
+        speed: position.coords.speed || undefined,
+        is_online: true,
+      });
+    };
+
+    navigator.geolocation.getCurrentPosition(updatePos, console.error, { enableHighAccuracy: true });
+
+    const watchId = navigator.geolocation.watchPosition(updatePos, console.error, { 
+      enableHighAccuracy: true, 
+      maximumAge: 3000 
+    });
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+  }, [profile]);
+
+  // Calculate live ETA using Mapbox Directions API
+  useEffect(() => {
+    const calculateETA = async () => {
+      if (!riderLocation) return;
+
+      const destination = getDestination();
+      
+      try {
+        const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+        if (!tokenData?.token) return;
+
+        const response = await fetch(
+          `https://api.mapbox.com/directions/v5/mapbox/driving/${riderLocation.lng},${riderLocation.lat};${destination.lng},${destination.lat}?access_token=${tokenData.token}`
+        );
+        const data = await response.json();
+
+        if (data.routes?.[0]) {
+          const durationMinutes = Math.ceil(data.routes[0].duration / 60);
+          const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
+          setEta(durationMinutes);
+          setDistance(parseFloat(distanceKm));
+        }
+
+        // Also get current street name
+        const geoResponse = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${riderLocation.lng},${riderLocation.lat}.json?access_token=${tokenData.token}&types=address,street`
+        );
+        const geoData = await geoResponse.json();
+        if (geoData.features?.[0]?.text) {
+          setCurrentStreet(geoData.features[0].text);
+        }
+      } catch (error) {
+        console.error('Failed to calculate ETA:', error);
+      }
+    };
+
+    calculateETA();
+    const interval = setInterval(calculateETA, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, [riderLocation, getDestination]);
   
   const getNextStatus = (): DeliveryStatus | null => {
     const currentIndex = statusFlow.indexOf(currentStatus);
@@ -64,19 +125,54 @@ const RiderDelivery: React.FC = () => {
 
   const handleUpdateStatus = async () => {
     const nextStatus = getNextStatus();
-    if (!nextStatus || !order) return;
+    if (!nextStatus || !order || !profile) return;
 
     try {
+      setIsCompletingDelivery(nextStatus === 'delivered');
+      
       await updateStatus.mutateAsync({ orderId: order.id, status: nextStatus });
-      toast.success(`Status updated to ${nextStatus.replace(/_/g, ' ')}`);
-      refetch();
       
       if (nextStatus === 'delivered') {
-        toast.success('Delivery completed! GH₵ 15 earned.');
-        setTimeout(() => navigate('/rider/dashboard'), 2000);
+        // Calculate rider earning (full delivery fee)
+        const riderEarning = Number(order.delivery_fee) || 15;
+        
+        // Credit rider's wallet with full delivery fee
+        const { data: riderWallet } = await supabase
+          .from('wallets')
+          .select('id, balance')
+          .eq('user_id', profile.id)
+          .single();
+
+        if (riderWallet) {
+          // Add earnings to rider wallet
+          await supabase
+            .from('wallets')
+            .update({ balance: (riderWallet.balance || 0) + riderEarning })
+            .eq('id', riderWallet.id);
+
+          // Record transaction
+          await supabase.from('transactions').insert({
+            wallet_id: riderWallet.id,
+            amount: riderEarning,
+            type: 'rider_earning',
+            description: `Delivery earning for order ${order.order_number}`,
+            order_id: order.id,
+          });
+        }
+
+        toast.success(`Delivery completed! You earned GH₵ ${riderEarning.toFixed(2)}`);
+        toast.info('Customer will now be prompted to pay');
+        
+        setTimeout(() => navigate('/rider'), 2000);
+      } else {
+        toast.success(`Status updated to ${nextStatus.replace(/_/g, ' ')}`);
       }
+      
+      refetch();
     } catch (error) {
       toast.error('Failed to update status');
+    } finally {
+      setIsCompletingDelivery(false);
     }
   };
 
@@ -95,22 +191,7 @@ const RiderDelivery: React.FC = () => {
 
   const formatCurrency = (value: number) => `GH₵ ${value?.toFixed(2) || '0.00'}`;
 
-  // Get customer info from order
   const customer = (order as any)?.customer as { full_name?: string; phone?: string } | undefined;
-
-  // Determine destination based on current status
-  const getDestination = () => {
-    if (currentStatus === 'picked_up' && order?.pickup_lat) {
-      // Show pickup location when heading to pick up
-      return { lat: Number(order.pickup_lat), lng: Number(order.pickup_lng) };
-    }
-    // Show delivery location when delivering
-    if (order?.delivery_lat) {
-      return { lat: Number(order.delivery_lat), lng: Number(order.delivery_lng) };
-    }
-    // Fallback to Accra
-    return { lat: 5.6037, lng: -0.1870 };
-  };
 
   if (isLoading) {
     return (
@@ -128,13 +209,14 @@ const RiderDelivery: React.FC = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Order not found</p>
-          <Button onClick={() => navigate('/rider/dashboard')}>Back to Dashboard</Button>
+          <Button onClick={() => navigate('/rider')}>Back to Dashboard</Button>
         </div>
       </div>
     );
   }
 
   const destination = getDestination();
+  const riderEarning = Number(order.delivery_fee) || 15;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -143,14 +225,14 @@ const RiderDelivery: React.FC = () => {
         <UberStyleMap
           riderLocation={riderLocation || undefined}
           destinationLocation={destination}
-          eta={currentStatus === 'picked_up' ? 8 : 5}
-          currentStreet={currentStatus === 'picked_up' ? 'Heading to pickup' : 'Delivering to customer'}
+          eta={eta}
+          currentStreet={currentStreet}
           isMoving={currentStatus !== 'delivered'}
         />
 
         {/* Back button overlay */}
         <button 
-          onClick={() => navigate('/rider/dashboard')}
+          onClick={() => navigate('/rider')}
           className="absolute top-4 left-4 z-10 w-10 h-10 bg-card rounded-full shadow-lg flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -161,6 +243,15 @@ const RiderDelivery: React.FC = () => {
           <p className="text-xs text-muted-foreground">Order</p>
           <p className="font-semibold text-foreground text-sm">{order.order_number}</p>
         </div>
+
+        {/* Live ETA Badge */}
+        {riderLocation && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-primary text-primary-foreground rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            <span className="font-bold">{eta} min</span>
+            {distance && <span className="text-sm opacity-80">• {distance} km</span>}
+          </div>
+        )}
 
         {/* Status Badge Overlay */}
         <div className="absolute bottom-4 left-4 right-4 z-10">
@@ -192,7 +283,7 @@ const RiderDelivery: React.FC = () => {
                 currentStatus === 'delivered' ? "text-white/80" : "text-muted-foreground"
               )}>
                 {currentStatus === 'delivered' 
-                  ? 'Order delivered successfully' 
+                  ? 'Waiting for customer payment' 
                   : currentStatus === 'picked_up' 
                     ? 'Head to pickup location'
                     : 'Heading to customer'}
@@ -203,7 +294,7 @@ const RiderDelivery: React.FC = () => {
                 "text-2xl font-bold",
                 currentStatus === 'delivered' ? "text-white" : "text-success"
               )}>
-                {formatCurrency((Number(order.delivery_fee) || 15) - 5)}
+                {formatCurrency(riderEarning)}
               </p>
               <p className={cn(
                 "text-xs",
@@ -218,7 +309,6 @@ const RiderDelivery: React.FC = () => {
 
       {/* Bottom Sheet with Details */}
       <div className="bg-card border-t border-border rounded-t-3xl -mt-4 relative z-20">
-        {/* Drag Handle */}
         <button 
           onClick={() => setShowDetails(!showDetails)}
           className="w-full flex flex-col items-center pt-3 pb-2"
@@ -236,7 +326,6 @@ const RiderDelivery: React.FC = () => {
         )}>
           {/* Pickup & Dropoff Locations */}
           <section className="space-y-4 mb-4">
-            {/* Pickup */}
             <div className="flex items-start gap-3">
               <div className="w-3 h-3 rounded-full bg-primary mt-1.5 flex-shrink-0" />
               <div className="flex-1">
@@ -253,8 +342,7 @@ const RiderDelivery: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${order.pickup_lat},${order.pickup_lng}`;
-                    window.open(url, '_blank');
+                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.pickup_lat},${order.pickup_lng}`, '_blank');
                   }}
                 >
                   <Navigation className="w-4 h-4" />
@@ -264,7 +352,6 @@ const RiderDelivery: React.FC = () => {
 
             <div className="border-l-2 border-dashed border-border ml-1.5 h-4" />
 
-            {/* Dropoff */}
             <div className="flex items-start gap-3">
               <div className="w-3 h-3 rounded-full bg-success mt-1.5 flex-shrink-0" />
               <div className="flex-1">
@@ -276,8 +363,7 @@ const RiderDelivery: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${order.delivery_lat},${order.delivery_lng}`;
-                    window.open(url, '_blank');
+                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.delivery_lat},${order.delivery_lng}`, '_blank');
                   }}
                 >
                   <Navigation className="w-4 h-4" />
@@ -310,7 +396,6 @@ const RiderDelivery: React.FC = () => {
             </div>
           </section>
 
-          {/* Order Notes */}
           {order.notes && (
             <section className="bg-warning/10 rounded-xl p-4 mb-4">
               <p className="text-xs text-muted-foreground font-medium uppercase mb-1">Notes</p>
@@ -324,7 +409,7 @@ const RiderDelivery: React.FC = () => {
           <div className="px-4 pb-4 safe-area-pb">
             <Button
               onClick={handleUpdateStatus}
-              disabled={updateStatus.isPending || !getNextStatus()}
+              disabled={updateStatus.isPending || isCompletingDelivery || !getNextStatus()}
               className={cn(
                 "w-full h-14 text-lg font-semibold",
                 currentStatus === 'out_for_delivery' 
@@ -332,10 +417,10 @@ const RiderDelivery: React.FC = () => {
                   : "gradient-hero text-white"
               )}
             >
-              {updateStatus.isPending ? (
+              {updateStatus.isPending || isCompletingDelivery ? (
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Updating...
+                  {isCompletingDelivery ? 'Processing payment...' : 'Updating...'}
                 </div>
               ) : (
                 <>

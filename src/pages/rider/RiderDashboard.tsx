@@ -279,7 +279,7 @@ const RiderDashboard: React.FC = () => {
                   <div>
                     <p className="font-semibold text-foreground">New Delivery Request!</p>
                     <p className="text-sm text-primary font-medium">
-                      {formatCurrency(Number(selectedOrder.delivery_fee) * 1.5)}
+                      Earn {formatCurrency(Number(selectedOrder.delivery_fee) || 15)}
                     </p>
                   </div>
                 </div>

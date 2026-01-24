@@ -11,7 +11,7 @@ import { useRiderWallet } from '@/hooks/useWallet';
 import { useRiderDeliveryStats } from '@/hooks/useAdminData';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 
-const RIDER_FEE = 5; // Flat GH₵ 5 per order
+// Note: Platform fee is handled separately - rider keeps full delivery fee
 
 const RiderEarnings: React.FC = () => {
   const navigate = useNavigate();
@@ -143,17 +143,16 @@ const RiderEarnings: React.FC = () => {
           </div>
         </div>
 
-        {/* Fee Breakdown Info */}
-        <div className="bg-warning/10 rounded-xl border border-warning/20 p-4">
+        {/* Earnings Info */}
+        <div className="bg-success/10 rounded-xl border border-success/20 p-4">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center flex-shrink-0">
-              <DollarSign className="w-5 h-5 text-warning" />
+            <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="font-medium text-foreground">Platform Fee: GH₵ {RIDER_FEE} per order</p>
+              <p className="font-medium text-foreground">You keep 100% of delivery fees!</p>
               <p className="text-sm text-muted-foreground mt-1">
-                A flat fee of GH₵ {RIDER_FEE} is deducted from each completed delivery. 
-                Your earnings shown are after this deduction.
+                All delivery fees go directly to your wallet. No deductions from your earnings.
               </p>
             </div>
           </div>
@@ -239,7 +238,6 @@ const RiderEarnings: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-success">+{formatCurrency(tx.amount)}</p>
-                    <p className="text-xs text-muted-foreground">-GH₵{RIDER_FEE} fee</p>
                   </div>
                 </div>
               ))}
