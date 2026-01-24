@@ -347,18 +347,11 @@ export const useRiderActiveOrders = (riderId: string) => {
   });
 };
 
-// Rider earnings
+// Rider earnings - PRODUCTION: Calculate from actual delivered orders
 export const useRiderEarnings = (riderId: string) => {
   return useQuery({
     queryKey: ['rider-earnings', riderId],
     queryFn: async () => {
-      const { data: transactions, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('type', 'rider_earning');
-
-      if (error) throw error;
-
       // Get wallet for this rider
       const { data: wallet } = await supabase
         .from('wallets')
@@ -370,12 +363,23 @@ export const useRiderEarnings = (riderId: string) => {
       const today = new Date().toISOString().split('T')[0];
       const { data: todayOrders } = await supabase
         .from('orders')
-        .select('*')
+        .select('delivery_fee')
         .eq('rider_id', riderId)
         .eq('status', 'delivered')
         .gte('delivered_at', `${today}T00:00:00`);
 
-      const todayEarnings = (todayOrders?.length || 0) * 15; // GH₵15 per delivery
+      // Calculate today's earnings from actual delivery fees
+      const todayEarnings = todayOrders?.reduce((sum, order) => 
+        sum + (Number(order.delivery_fee) || 0), 0) || 0;
+
+      // Get transactions for history
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('wallet_id', wallet?.id || '')
+        .eq('type', 'rider_earning')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       return {
         balance: wallet?.balance || 0,
