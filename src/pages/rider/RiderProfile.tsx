@@ -13,23 +13,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-// Ghana banks list with Paystack bank codes
+// Ghana banks list with correct Paystack bank codes
 const GHANA_BANKS = [
-  { code: '050', name: 'Ecobank Ghana' },
-  { code: '130', name: 'GCB Bank' },
-  { code: '190', name: 'Stanbic Bank Ghana' },
-  { code: '030', name: 'Absa Bank Ghana' },
-  { code: '060', name: 'United Bank for Africa' },
-  { code: '120', name: 'Zenith Bank Ghana' },
-  { code: '240', name: 'Fidelity Bank Ghana' },
-  { code: '280', name: 'Consolidated Bank Ghana' },
-  { code: '080', name: 'Agricultural Development Bank' },
-  { code: '042', name: 'Access Bank Ghana' },
-  { code: '140', name: 'CalBank' },
-  { code: '230', name: 'Guaranty Trust Bank Ghana' },
-  { code: '900554', name: 'MTN Mobile Money' },
-  { code: '900553', name: 'Vodafone Cash' },
-  { code: '900556', name: 'AirtelTigo Money' },
+  { code: 'GH010100', name: 'Ecobank Ghana' },
+  { code: 'GH040100', name: 'GCB Bank' },
+  { code: 'GH190100', name: 'Stanbic Bank Ghana' },
+  { code: 'GH030100', name: 'Absa Bank Ghana' },
+  { code: 'GH060100', name: 'United Bank for Africa' },
+  { code: 'GH120100', name: 'Zenith Bank Ghana' },
+  { code: 'GH240100', name: 'Fidelity Bank Ghana' },
+  { code: 'GH280100', name: 'Consolidated Bank Ghana' },
+  { code: 'GH080100', name: 'Agricultural Development Bank' },
+  { code: 'GH050100', name: 'Access Bank Ghana' },
+  { code: 'GH140100', name: 'CalBank' },
+  { code: 'GH230100', name: 'Guaranty Trust Bank Ghana' },
+  { code: 'GH270100', name: 'Prudential Bank' },
+  { code: 'GH200100', name: 'Standard Chartered Bank Ghana' },
+  { code: 'GH210100', name: 'Republic Bank Ghana' },
+  { code: 'GH290100', name: 'FBN Bank Ghana' },
+  { code: 'MTN', name: 'MTN Mobile Money' },
+  { code: 'VOD', name: 'Vodafone Cash' },
+  { code: 'ATL', name: 'AirtelTigo Money' },
 ];
 
 const RiderProfile: React.FC = () => {
