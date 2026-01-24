@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   ArrowLeft, Phone, MessageSquare, MapPin,
-  Clock, Star, Shield, Loader2
+  Star, Navigation, CreditCard, Wallet, ChevronUp
 } from 'lucide-react';
-import LiveMap from '@/components/tracking/LiveMap';
+import UberStyleMap from '@/components/tracking/UberStyleMap';
 import { useOrder } from '@/hooks/useOrders';
 import { useRiderLocation } from '@/hooks/useRiderLocation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
-type DeliveryStatus = 'pending' | 'confirmed' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
+type DeliveryStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
 const TrackDelivery: React.FC = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
-  const { data: order, isLoading: orderLoading } = useOrder(orderId || '');
+  const { data: order, isLoading: orderLoading, refetch } = useOrder(orderId || '');
   const { data: riderLocation } = useRiderLocation(order?.rider_id || '');
-  const [showDetails, setShowDetails] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [eta, setEta] = useState(15);
+  const [currentStreet, setCurrentStreet] = useState('En route to you');
 
   // Update ETA based on status
   useEffect(() => {
     if (order?.status) {
       const etaMap: Record<string, number> = {
-        pending: 30,
-        confirmed: 25,
+        pending: 35,
+        confirmed: 30,
+        preparing: 25,
         ready_for_pickup: 20,
         picked_up: 15,
         out_for_delivery: 10,
@@ -35,36 +41,89 @@ const TrackDelivery: React.FC = () => {
     }
   }, [order?.status]);
 
-  const statusInfo: Record<DeliveryStatus, { text: string; color: string; icon: string }> = {
-    pending: { text: 'Order placed, waiting for confirmation', color: 'text-warning', icon: '📋' },
-    confirmed: { text: 'Order confirmed!', color: 'text-primary', icon: '✅' },
-    ready_for_pickup: { text: 'Ready for pickup', color: 'text-accent', icon: '📦' },
-    picked_up: { text: 'Package picked up!', color: 'text-primary', icon: '🏍️' },
-    out_for_delivery: { text: 'On the way to you', color: 'text-success', icon: '🚀' },
-    delivered: { text: 'Order delivered!', color: 'text-success', icon: '🎉' },
-    cancelled: { text: 'Order cancelled', color: 'text-destructive', icon: '❌' },
+  // Reverse geocode rider location to get street name
+  useEffect(() => {
+    const getStreetName = async () => {
+      if (!riderLocation) return;
+      try {
+        const { data } = await supabase.functions.invoke('get-mapbox-token');
+        if (!data?.token) return;
+        
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${riderLocation.longitude},${riderLocation.latitude}.json?access_token=${data.token}&types=address,street`
+        );
+        const geoData = await response.json();
+        if (geoData.features?.[0]?.text) {
+          setCurrentStreet(geoData.features[0].text);
+        }
+      } catch {
+        // Keep default
+      }
+    };
+    getStreetName();
+  }, [riderLocation]);
+
+  const handlePayment = async (method: 'wallet' | 'momo' | 'card') => {
+    if (!order) return;
+    setIsProcessingPayment(true);
+
+    try {
+      // Update payment status
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          payment_status: 'paid',
+          payment_method: method,
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', order.id);
+
+      if (error) throw error;
+
+      toast.success('Payment successful!');
+      setShowPayment(false);
+      refetch();
+    } catch (err) {
+      console.error('Payment failed:', err);
+      toast.error('Payment failed. Please try again.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const currentStatus = (order?.status as DeliveryStatus) || 'pending';
-  const statusDetails = statusInfo[currentStatus] || statusInfo.pending;
+  const paymentStatus = (order as any)?.payment_status || 'pending';
+  const isDelivered = currentStatus === 'delivered';
+  const needsPayment = isDelivered && paymentStatus === 'pending';
 
   // Parse coordinates
-  const pickupLocation = {
-    lat: Number(order?.pickup_lat) || 5.6037,
-    lng: Number(order?.pickup_lng) || -0.1870,
-  };
-  
+  const pickupLocation = order?.pickup_lat ? {
+    lat: Number(order.pickup_lat),
+    lng: Number(order.pickup_lng),
+  } : undefined;
+
   const dropoffLocation = {
     lat: Number(order?.delivery_lat) || 5.6145,
     lng: Number(order?.delivery_lng) || -0.2050,
   };
 
-  const rider = order?.rider as { full_name?: string; phone?: string } | undefined;
+  const riderPos = riderLocation ? {
+    lat: Number(riderLocation.latitude),
+    lng: Number(riderLocation.longitude),
+    heading: Number(riderLocation.heading) || 0,
+  } : undefined;
+
+  const rider = order?.rider as { full_name?: string; phone?: string; avatar_url?: string } | undefined;
+
+  const formatCurrency = (value: number) => `GH₵ ${value?.toFixed(2) || '0.00'}`;
 
   if (orderLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -82,184 +141,231 @@ const TrackDelivery: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Map Area */}
-      <div className="h-[55vh] relative">
+      {/* Full Screen Map */}
+      <div className="h-[60vh] relative">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between">
-          <button 
+        <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between safe-area-inset">
+          <button
             onClick={() => navigate('/orders')}
-            className="w-10 h-10 rounded-full bg-background shadow-lg flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-card shadow-lg flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="bg-background rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+          <div className="bg-card rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">
-              {order.order_number || `Order #${orderId?.slice(0, 8)}`}
+              {order.order_number || `#${orderId?.slice(0, 8)}`}
             </span>
-            <div className={`w-2 h-2 rounded-full ${currentStatus === 'delivered' ? 'bg-success' : 'bg-primary animate-pulse'}`} />
+            <div className={cn(
+              "w-2 h-2 rounded-full",
+              isDelivered ? "bg-success" : "bg-primary animate-pulse"
+            )} />
           </div>
         </div>
 
-        {/* Live Map Component */}
-        <LiveMap
+        {/* Map */}
+        <UberStyleMap
+          riderLocation={riderPos}
+          destinationLocation={dropoffLocation}
           pickupLocation={pickupLocation}
-          dropoffLocation={dropoffLocation}
-          status={currentStatus}
-          riderLocation={riderLocation ? { lat: Number(riderLocation.latitude), lng: Number(riderLocation.longitude) } : undefined}
+          eta={eta}
+          currentStreet={currentStreet}
+          isMoving={currentStatus === 'out_for_delivery' || currentStatus === 'picked_up'}
         />
+
+        {/* Get Directions Button */}
+        {riderPos && (
+          <div className="absolute bottom-4 left-4 right-4 z-10">
+            <Button
+              variant="default"
+              className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-xl py-6"
+              onClick={() => {
+                const url = `https://www.google.com/maps/dir/?api=1&destination=${dropoffLocation.lat},${dropoffLocation.lng}`;
+                window.open(url, '_blank');
+              }}
+            >
+              <Navigation className="w-5 h-5 mr-2" />
+              GET DIRECTIONS
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Bottom Sheet */}
-      <div 
-        className={`absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-lg transition-all duration-300 ${
-          showDetails ? 'h-[70vh]' : 'h-auto'
-        }`}
-      >
-        <button 
-          onClick={() => setShowDetails(!showDetails)}
+      <div className={cn(
+        "absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl shadow-2xl transition-all duration-300 z-30",
+        showPayment ? "h-[70vh]" : "h-auto"
+      )}>
+        {/* Handle */}
+        <button
+          onClick={() => setShowPayment(!showPayment)}
           className="w-full flex justify-center py-3"
         >
-          <div className="w-12 h-1 bg-border rounded-full" />
+          <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
         </button>
 
         <div className="px-6 pb-8">
-          {/* Status Banner */}
-          <div className="flex items-center gap-4 p-4 bg-secondary/50 rounded-2xl mb-6">
-            <div className="text-3xl">{statusDetails.icon}</div>
-            <div className="flex-1">
-              <p className={`font-semibold ${statusDetails.color}`}>
-                {statusDetails.text}
-              </p>
-              {currentStatus !== 'delivered' && currentStatus !== 'cancelled' && (
-                <p className="text-sm text-muted-foreground">
-                  Estimated arrival: {eta} mins
-                </p>
-              )}
-            </div>
-            {currentStatus !== 'pending' && currentStatus !== 'delivered' && currentStatus !== 'cancelled' && (
-              <div className="text-right">
-                <p className="text-2xl font-bold text-primary">{eta}</p>
-                <p className="text-xs text-muted-foreground">min</p>
-              </div>
-            )}
-          </div>
-
-          {/* Progress Steps */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between relative">
-              {(['confirmed', 'picked_up', 'out_for_delivery', 'delivered'] as const).map((step) => {
-                const statusOrder = ['pending', 'confirmed', 'ready_for_pickup', 'picked_up', 'out_for_delivery', 'delivered'];
-                const currentIndex = statusOrder.indexOf(currentStatus);
-                const stepIndex = statusOrder.indexOf(step);
-                const isCompleted = currentIndex > stepIndex;
-                const isCurrent = currentStatus === step || (step === 'confirmed' && (currentStatus === 'confirmed' || currentStatus === 'ready_for_pickup'));
-                
-                return (
-                  <div key={step} className="flex flex-col items-center z-10">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                      isCompleted || isCurrent
-                        ? 'bg-primary text-white'
-                        : 'bg-secondary text-muted-foreground'
-                    }`}>
-                      {step === 'confirmed' && '✓'}
-                      {step === 'picked_up' && '📦'}
-                      {step === 'out_for_delivery' && '🚀'}
-                      {step === 'delivered' && '🎉'}
-                    </div>
-                    <p className={`text-xs mt-2 ${isCompleted || isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                      {step === 'confirmed' && 'Confirmed'}
-                      {step === 'picked_up' && 'Picked up'}
-                      {step === 'out_for_delivery' && 'Delivering'}
-                      {step === 'delivered' && 'Delivered'}
-                    </p>
-                  </div>
-                );
-              })}
-              
-              {/* Progress line */}
-              <div className="absolute top-5 left-5 right-5 h-0.5 bg-secondary -z-0">
-                <div 
-                  className="h-full bg-primary transition-all duration-500"
-                  style={{ 
-                    width: currentStatus === 'delivered' ? '100%' 
-                      : currentStatus === 'out_for_delivery' ? '75%'
-                      : currentStatus === 'picked_up' ? '50%'
-                      : currentStatus === 'ready_for_pickup' || currentStatus === 'confirmed' ? '25%'
-                      : '0%'
-                  }}
-                />
-              </div>
-            </div>
+          {/* Dropoff Address */}
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">DROPOFF</p>
+            <p className="text-lg font-semibold text-foreground">{order.delivery_address}</p>
           </div>
 
           {/* Rider Info */}
           {rider && (
-            <div className="bg-card rounded-2xl border border-border p-4 mb-6 animate-fade-in">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center text-white font-bold text-xl">
-                  {rider.full_name?.charAt(0) || 'R'}
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground">{rider.full_name || 'Rider'}</p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                    <span>4.9</span>
-                    {riderLocation?.vehicle_plate && (
-                      <>
-                        <span>•</span>
-                        <span>{riderLocation.vehicle_plate}</span>
-                      </>
-                    )}
+            <div className="flex items-center gap-4 py-4 border-t border-border">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-bold text-lg">
+                {rider.full_name?.charAt(0) || 'R'}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">{rider.full_name || 'Your Rider'}</p>
+                <div className="flex items-center gap-1 text-sm">
+                  <span className="font-medium">4.8</span>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          "w-3 h-3",
+                          i < 4 ? "text-warning fill-warning" : "text-muted-foreground"
+                        )}
+                      />
+                    ))}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="icon" className="rounded-full">
-                    <MessageSquare className="w-4 h-4" />
-                  </Button>
-                  {rider.phone && (
-                    <a href={`tel:${rider.phone}`}>
-                      <Button size="icon" className="rounded-full gradient-hero text-white">
-                        <Phone className="w-4 h-4" />
-                      </Button>
-                    </a>
-                  )}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full h-11 w-11"
+                  onClick={() => toast.info('Messaging rider...')}
+                >
+                  <MessageSquare className="w-5 h-5" />
+                </Button>
+                {rider.phone && (
+                  <a href={`tel:${rider.phone}`}>
+                    <Button
+                      size="icon"
+                      className="rounded-full h-11 w-11 bg-primary hover:bg-primary/90"
+                    >
+                      <Phone className="w-5 h-5" />
+                    </Button>
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Payment Section - Shows after delivery */}
+          {needsPayment && (
+            <div className="pt-4 border-t border-border animate-fade-in">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="font-semibold text-foreground">Payment Due</p>
+                  <p className="text-sm text-muted-foreground">Your order has been delivered</p>
+                </div>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(Number(order.total))}</p>
+              </div>
+
+              {/* Fee Breakdown */}
+              <div className="bg-muted/50 rounded-xl p-4 mb-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>{formatCurrency(Number(order.subtotal))}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span>{formatCurrency(Number(order.delivery_fee))}</span>
+                </div>
+                {(order as any)?.surge_multiplier > 1 && (
+                  <div className="flex justify-between text-sm text-warning">
+                    <span>Surge ({((order as any).surge_multiplier - 1) * 100}%)</span>
+                    <span>Included</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-semibold pt-2 border-t border-border">
+                  <span>Total</span>
+                  <span className="text-primary">{formatCurrency(Number(order.total))}</span>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="space-y-2">
+                <Button
+                  variant="hero"
+                  className="w-full py-6"
+                  onClick={() => handlePayment('wallet')}
+                  disabled={isProcessingPayment}
+                >
+                  <Wallet className="w-5 h-5 mr-2" />
+                  Pay with Wallet
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full py-6"
+                  onClick={() => handlePayment('momo')}
+                  disabled={isProcessingPayment}
+                >
+                  <Phone className="w-5 h-5 mr-2" />
+                  Pay with Mobile Money
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full py-6"
+                  onClick={() => handlePayment('card')}
+                  disabled={isProcessingPayment}
+                >
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Pay with Card
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Payment Complete */}
+          {paymentStatus === 'paid' && (
+            <div className="pt-4 border-t border-border">
+              <div className="bg-success/10 rounded-xl p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-success" />
+                </div>
+                <div>
+                  <p className="font-semibold text-success">Payment Complete</p>
+                  <p className="text-sm text-muted-foreground">
+                    Paid {formatCurrency(Number(order.total))} via {(order as any).payment_method}
+                  </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Order Details */}
-          {showDetails && (
-            <div className="space-y-4 animate-fade-in">
-              <h3 className="font-semibold text-foreground">Delivery Details</h3>
-              
+          {/* Order Details Toggle */}
+          {showPayment && (
+            <div className="pt-4 mt-4 border-t border-border space-y-4 animate-fade-in">
+              <h3 className="font-semibold text-foreground">Order Details</h3>
+
+              {/* Locations */}
               <div className="space-y-3">
+                {pickupLocation && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase">PICKUP</p>
+                      <p className="text-sm font-medium">{order.pickup_address || 'Store location'}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-primary" />
+                  <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 text-success" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">PICKUP</p>
-                    <p className="text-sm font-medium">{order.pickup_address || 'Store location'}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">DROPOFF</p>
+                    <p className="text-xs text-muted-foreground uppercase">DROPOFF</p>
                     <p className="text-sm font-medium">{order.delivery_address}</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-success" />
-                  <span className="text-sm text-foreground">{order.order_number || `Order #${orderId?.slice(0, 8)}`}</span>
-                </div>
-                <span className="font-bold text-primary">GH₵ {Number(order.total).toFixed(2)}</span>
               </div>
 
               {/* Order Items */}
@@ -269,12 +375,23 @@ const TrackDelivery: React.FC = () => {
                   {order.order_items.map((item: any) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.product_name} x{item.quantity}</span>
-                      <span className="font-medium">GH₵ {Number(item.total_price).toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(Number(item.total_price))}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
+          )}
+
+          {/* Expand button */}
+          {!showPayment && !needsPayment && (
+            <button
+              onClick={() => setShowPayment(true)}
+              className="w-full flex items-center justify-center gap-2 pt-4 text-muted-foreground"
+            >
+              <span className="text-sm">View details</span>
+              <ChevronUp className="w-4 h-4" />
+            </button>
           )}
         </div>
       </div>
