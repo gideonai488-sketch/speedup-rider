@@ -7,11 +7,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SplashScreen from "@/components/SplashScreen";
 import { AdminProvider } from "@/context/AdminContext";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 // SpeedRush Pages
 import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import AuthPage from "./pages/AuthPage";
 import CustomerHome from "./pages/customer/CustomerHome";
 import BookDelivery from "./pages/customer/BookDelivery";
 import TrackDelivery from "./pages/customer/TrackDelivery";
@@ -58,65 +58,68 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CartProvider>
-          <AdminProvider>
-            <Toaster />
-            <Sonner position="top-center" />
-            
-            {showSplash && isFirstVisit && (
-              <SplashScreen onComplete={handleSplashComplete} duration={3000} />
-            )}
-            
-            <BrowserRouter>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                
-                {/* Customer Routes */}
-                <Route path="/customer" element={<CustomerHome />} />
-                <Route path="/customer/home" element={<CustomerHome />} />
-                <Route path="/customer/dashboard" element={<CustomerHome />} />
-                <Route path="/customer/store/:storeId" element={<StorePage />} />
-                <Route path="/customer/book" element={<BookDelivery />} />
-                <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
-                <Route path="/customer/wallet" element={<Wallet />} />
-                <Route path="/customer/referral" element={<Referral />} />
-                <Route path="/customer/orders" element={<Orders />} />
-                <Route path="/customer/profile" element={<Profile />} />
-                <Route path="/customer/notifications" element={<Orders />} />
-                
-                {/* Shared Routes (Bottom Nav) */}
-                <Route path="/search" element={<Search />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/profile" element={<Profile />} />
-                
-                {/* Rider Routes */}
-                <Route path="/rider" element={<RiderDashboard />} />
-                <Route path="/rider/dashboard" element={<RiderDashboard />} />
-                <Route path="/rider/profile" element={<Profile />} />
-                <Route path="/rider/earnings" element={<Wallet />} />
-                <Route path="/rider/deliveries" element={<Orders />} />
-                
-                {/* Admin Routes - Access via /admin */}
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/orders" element={<AdminOrders />} />
-                <Route path="/admin/stores" element={<AdminStores />} />
-                <Route path="/admin/riders" element={<AdminRiders />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/pricing" element={<AdminPricing />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                
-                {/* Fallback */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </AdminProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <AdminProvider>
+              <Toaster />
+              <Sonner position="top-center" />
+              
+              {showSplash && isFirstVisit && (
+                <SplashScreen onComplete={handleSplashComplete} duration={3000} />
+              )}
+              
+              <BrowserRouter>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/signup" element={<AuthPage />} />
+                  
+                  {/* Customer Routes */}
+                  <Route path="/customer" element={<CustomerHome />} />
+                  <Route path="/customer/home" element={<CustomerHome />} />
+                  <Route path="/customer/dashboard" element={<CustomerHome />} />
+                  <Route path="/customer/store/:storeId" element={<StorePage />} />
+                  <Route path="/customer/book" element={<BookDelivery />} />
+                  <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
+                  <Route path="/customer/wallet" element={<Wallet />} />
+                  <Route path="/customer/referral" element={<Referral />} />
+                  <Route path="/customer/orders" element={<Orders />} />
+                  <Route path="/customer/profile" element={<Profile />} />
+                  <Route path="/customer/notifications" element={<Orders />} />
+                  
+                  {/* Shared Routes (Bottom Nav) */}
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/profile" element={<Profile />} />
+                  
+                  {/* Rider Routes */}
+                  <Route path="/rider" element={<RiderDashboard />} />
+                  <Route path="/rider/dashboard" element={<RiderDashboard />} />
+                  <Route path="/rider/profile" element={<Profile />} />
+                  <Route path="/rider/earnings" element={<Wallet />} />
+                  <Route path="/rider/deliveries" element={<Orders />} />
+                  
+                  {/* Admin Routes - Access via /admin */}
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/orders" element={<AdminOrders />} />
+                  <Route path="/admin/stores" element={<AdminStores />} />
+                  <Route path="/admin/riders" element={<AdminRiders />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/pricing" element={<AdminPricing />} />
+                  <Route path="/admin/settings" element={<AdminSettings />} />
+                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                  
+                  {/* Fallback */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </AdminProvider>
+          </CartProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
