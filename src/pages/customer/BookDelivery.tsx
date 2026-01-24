@@ -47,6 +47,7 @@ const BookDelivery: React.FC = () => {
     fee: 0,
     baseFee: 5,
     distanceFee: 0,
+    serviceFee: 2,
     surgeMultiplier: 1,
   });
 
@@ -93,6 +94,7 @@ const BookDelivery: React.FC = () => {
         fee: breakdown.totalFee,
         baseFee: breakdown.baseFee,
         distanceFee: breakdown.distanceFee,
+        serviceFee: breakdown.serviceFee,
         surgeMultiplier: breakdown.surgeMultiplier,
       });
       setStep(3);
@@ -104,13 +106,14 @@ const BookDelivery: React.FC = () => {
         formData.dropoffCoords.lat,
         formData.dropoffCoords.lng
       );
-      const fee = 5 + (distance * 2);
+      const fee = 5 + (distance * 2) + 2; // base + distance + service fee
       setEstimate({
         distance: Math.round(distance * 10) / 10,
         duration: `${Math.round(distance * 3)}-${Math.round(distance * 4)} mins`,
         fee: Math.round(fee),
         baseFee: 5,
         distanceFee: Math.round(distance * 2 * 100) / 100,
+        serviceFee: 2,
         surgeMultiplier: 1,
       });
       setStep(3);
@@ -148,6 +151,8 @@ const BookDelivery: React.FC = () => {
         distance_km: estimate.distance,
         base_fee: estimate.baseFee,
         per_km_fee: 2,
+        service_fee: estimate.serviceFee,
+        rider_fee: 5, // Flat fee taken from rider
         surge_multiplier: estimate.surgeMultiplier,
         payment_status: 'pending', // Pay after delivery
       };
@@ -391,10 +396,14 @@ const BookDelivery: React.FC = () => {
                 <span className="text-muted-foreground">Distance ({estimate.distance} km × GH₵ 2/km)</span>
                 <span className="text-foreground">GH₵ {estimate.distanceFee.toFixed(2)}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Service fee</span>
+                <span className="text-foreground">GH₵ {estimate.serviceFee.toFixed(2)}</span>
+              </div>
               {estimate.surgeMultiplier > 1 && (
                 <div className="flex justify-between text-sm text-warning">
                   <span>Surge ({estimate.surgeMultiplier.toFixed(1)}×)</span>
-                  <span>+GH₵ {((estimate.baseFee + estimate.distanceFee) * (estimate.surgeMultiplier - 1)).toFixed(2)}</span>
+                  <span>+GH₵ {((estimate.baseFee + estimate.distanceFee + estimate.serviceFee) * (estimate.surgeMultiplier - 1)).toFixed(2)}</span>
                 </div>
               )}
               <div className="border-t border-border pt-3 flex justify-between">
