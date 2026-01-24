@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, User, Phone, MapPin, CreditCard, Building2, 
-  ChevronRight, LogOut, Shield, Star, Truck, Edit2, Save, Loader2
+  ChevronRight, LogOut, Shield, Star, Truck, Edit2, Save, Loader2,
+  CheckCircle2, XCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +49,9 @@ const RiderProfile: React.FC = () => {
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
 
   // Fetch extended profile with bank details
   useEffect(() => {
@@ -56,7 +60,7 @@ const RiderProfile: React.FC = () => {
       
       const { data } = await supabase
         .from('profiles')
-        .select('bank_name, bank_code, account_number, account_name')
+        .select('bank_name, bank_code, account_number, account_name, subaccount_code')
         .eq('id', profile.id)
         .single();
       
@@ -65,14 +69,63 @@ const RiderProfile: React.FC = () => {
         setBankCode(data.bank_code || '');
         setAccountNumber(data.account_number || '');
         setAccountName(data.account_name || '');
+        // If already has subaccount, mark as verified
+        if (data.subaccount_code && data.account_name) {
+          setIsVerified(true);
+        }
       }
     };
     
     fetchBankDetails();
   }, [profile]);
 
+  // Verify bank account with Paystack
+  const handleVerifyAccount = async () => {
+    if (!bankCode || !accountNumber) {
+      toast.error('Please select a bank and enter account number');
+      return;
+    }
+
+    setIsVerifying(true);
+    setVerificationError('');
+    setIsVerified(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-bank-account', {
+        body: {
+          bank_code: bankCode,
+          account_number: accountNumber,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setAccountName(data.account_name);
+        setIsVerified(true);
+        toast.success(`Account verified: ${data.account_name}`);
+      } else {
+        throw new Error(data?.error || 'Verification failed');
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      const message = error instanceof Error ? error.message : 'Could not verify account';
+      setVerificationError(message);
+      setAccountName('');
+      toast.error(message);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!profile) return;
+
+    // Require verification before saving bank details
+    if (bankCode && accountNumber && !isVerified) {
+      toast.error('Please verify your bank account first');
+      return;
+    }
     
     setIsSaving(true);
     try {
@@ -93,8 +146,8 @@ const RiderProfile: React.FC = () => {
 
       if (error) throw error;
 
-      // If bank details are provided, create/update Paystack subaccount
-      if (bankCode && accountNumber && accountName) {
+      // If bank details are verified, create/update Paystack subaccount
+      if (bankCode && accountNumber && accountName && isVerified) {
         toast.loading('Setting up payment account...');
         
         const { data, error: subaccountError } = await supabase.functions.invoke('create-subaccount', {
@@ -124,6 +177,23 @@ const RiderProfile: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Reset verification when account details change
+  const handleAccountNumberChange = (value: string) => {
+    setAccountNumber(value);
+    setIsVerified(false);
+    setAccountName('');
+    setVerificationError('');
+  };
+
+  const handleBankChange = (code: string) => {
+    setBankCode(code);
+    const bank = GHANA_BANKS.find(b => b.code === code);
+    setBankName(bank?.name || '');
+    setIsVerified(false);
+    setAccountName('');
+    setVerificationError('');
   };
 
   const handleLogout = async () => {
@@ -282,11 +352,7 @@ const RiderProfile: React.FC = () => {
               <Label className="text-muted-foreground">Bank/MoMo Provider</Label>
               <select
                 value={bankCode}
-                onChange={(e) => {
-                  setBankCode(e.target.value);
-                  const bank = GHANA_BANKS.find(b => b.code === e.target.value);
-                  setBankName(bank?.name || '');
-                }}
+                onChange={(e) => handleBankChange(e.target.value)}
                 disabled={!isEditing}
                 className="w-full mt-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50"
               >
@@ -300,23 +366,61 @@ const RiderProfile: React.FC = () => {
             </div>
             <div>
               <Label className="text-muted-foreground">Account/Phone Number</Label>
-              <Input
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter account or phone number"
-                className="mt-1"
-              />
+              <div className="flex gap-2 mt-1">
+                <Input
+                  value={accountNumber}
+                  onChange={(e) => handleAccountNumberChange(e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="Enter account or phone number"
+                  className="flex-1"
+                />
+                {isEditing && bankCode && accountNumber && !isVerified && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleVerifyAccount}
+                    disabled={isVerifying}
+                    className="shrink-0"
+                  >
+                    {isVerifying ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      'Verify'
+                    )}
+                  </Button>
+                )}
+                {isVerified && (
+                  <div className="flex items-center text-success">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+              {verificationError && (
+                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  {verificationError}
+                </p>
+              )}
             </div>
             <div>
               <Label className="text-muted-foreground">Account Name</Label>
               <Input
                 value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                disabled={!isEditing}
-                placeholder="Name on the account"
-                className="mt-1"
+                readOnly
+                disabled
+                placeholder="Will be auto-filled after verification"
+                className={cn(
+                  "mt-1",
+                  isVerified && "border-success/50 bg-success/5"
+                )}
               />
+              {isVerified && (
+                <p className="text-xs text-success mt-1 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Account verified via Paystack
+                </p>
+              )}
             </div>
           </div>
           
