@@ -94,6 +94,7 @@ const App = () => {
                   <Route path="/customer/store/:storeId" element={<StorePage />} />
                   <Route path="/customer/book" element={<BookDelivery />} />
                   <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
+                  <Route path="/track/:orderId" element={<TrackDelivery />} />
                   <Route path="/customer/wallet" element={<Wallet />} />
                   <Route path="/customer/referral" element={<Referral />} />
                   <Route path="/customer/orders" element={<Orders />} />

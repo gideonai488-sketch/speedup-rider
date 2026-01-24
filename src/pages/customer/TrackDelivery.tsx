@@ -96,6 +96,8 @@ const TrackDelivery: React.FC = () => {
   const paymentStatus = (order as any)?.payment_status || 'pending';
   const isDelivered = currentStatus === 'delivered';
   const needsPayment = isDelivered && paymentStatus === 'pending';
+  const hasRider = !!order?.rider_id;
+  const isFindingRider = !hasRider && ['pending'].includes(currentStatus);
 
   // Parse coordinates - Map shows RIDER and CUSTOMER locations, not pickup/dropoff
   // Customer location (delivery address) - where the order is going
@@ -132,6 +134,68 @@ const TrackDelivery: React.FC = () => {
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Order not found</p>
           <Button onClick={() => navigate('/orders')}>Go to Orders</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Finding rider screen - show before map/locations appear
+  if (isFindingRider) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-40 gradient-glass border-b border-border/50 safe-area-inset">
+          <div className="flex items-center gap-3 px-4 h-16 max-w-lg mx-auto">
+            <button onClick={() => navigate('/orders')}>
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-lg font-bold">Finding Rider</h1>
+              <p className="text-xs text-muted-foreground">{order.order_number || `#${orderId?.slice(0, 8)}`}</p>
+            </div>
+          </div>
+        </header>
+
+        {/* Finding Rider Animation */}
+        <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+          {/* Animated radar */}
+          <div className="relative w-48 h-48 mb-8">
+            <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute inset-4 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }} />
+            <div className="absolute inset-8 rounded-full bg-primary/30 animate-ping" style={{ animationDuration: '2s', animationDelay: '1s' }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full gradient-hero flex items-center justify-center shadow-glow">
+                <span className="text-4xl">🏍️</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 className="text-xl font-bold text-foreground mb-2">Looking for nearby riders...</h2>
+          <p className="text-muted-foreground mb-8">
+            We're finding the best rider for your delivery. This usually takes less than a minute.
+          </p>
+
+          {/* Order Summary */}
+          <div className="w-full max-w-sm bg-card rounded-2xl border border-border/50 p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-3 h-3 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-xs text-muted-foreground">PICKUP</p>
+                <p className="text-sm font-medium">{order.pickup_address || 'Store pickup'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-3 h-3 rounded-full bg-success mt-1.5 flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-xs text-muted-foreground">DROPOFF</p>
+                <p className="text-sm font-medium">{order.delivery_address}</p>
+              </div>
+            </div>
+            <div className="pt-3 border-t border-border flex justify-between">
+              <span className="text-muted-foreground">Estimated Total</span>
+              <span className="font-bold text-primary">{formatCurrency(Number(order.total))}</span>
+            </div>
+          </div>
         </div>
       </div>
     );
