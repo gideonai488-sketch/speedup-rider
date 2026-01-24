@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge';
-import { mockOrders, mockRiders } from '@/data/adminMockData';
-import { AdminOrder, AdminOrderStatus } from '@/types/admin';
+import { useAdminOrders, useAdminRiders, useUpdateOrderStatus } from '@/hooks/useAdminData';
+import { Database } from '@/integrations/supabase/types';
 import { 
   Search, 
   Filter, 
@@ -10,7 +10,8 @@ import {
   MapPin,
   Phone,
   User,
-  Package
+  Package,
+  Loader2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,55 +29,71 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
-const statusOptions: AdminOrderStatus[] = [
-  'pending', 'confirmed', 'picked_up', 'processing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'
+type OrderStatus = Database['public']['Enums']['order_status'];
+
+const statusOptions: OrderStatus[] = [
+  'pending', 'confirmed', 'picked_up', 'out_for_delivery', 'delivered', 'cancelled'
 ];
 
 const AdminOrders: React.FC = () => {
-  const [orders, setOrders] = useState<AdminOrder[]>(mockOrders);
+  const { data: orders = [], isLoading: ordersLoading } = useAdminOrders();
+  const { data: riders = [] } = useAdminRiders();
+  const updateOrderStatus = useUpdateOrderStatus();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const customerName = (order as any).profiles?.full_name || '';
+    const matchesSearch = customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          order.order_number?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const formatCurrency = (value: number) => `GH₵ ${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `GH₵ ${value?.toLocaleString() || 0}`;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GH', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return format(new Date(dateString), 'MMM d, h:mm a');
   };
 
-  const handleStatusUpdate = (orderId: string, newStatus: AdminOrderStatus) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-    if (selectedOrder?.id === orderId) {
-      setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
+  const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus, riderId?: string) => {
+    try {
+      await updateOrderStatus.mutateAsync({ orderId, status: newStatus, riderId });
+      toast.success(`Order updated to ${newStatus.replace('_', ' ')}`);
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder((prev: any) => prev ? { ...prev, status: newStatus } : null);
+      }
+    } catch (error) {
+      toast.error('Failed to update order');
     }
-    toast.success(`Order ${orderId} updated to ${newStatus.replace('_', ' ')}`);
   };
 
-  const handleAssignRider = (orderId: string, riderId: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, assignedRider: riderId } : order
-    ));
-    if (selectedOrder?.id === orderId) {
-      setSelectedOrder(prev => prev ? { ...prev, assignedRider: riderId } : null);
+  const handleAssignRider = async (orderId: string, riderId: string) => {
+    try {
+      await updateOrderStatus.mutateAsync({ orderId, status: 'confirmed', riderId });
+      const rider = riders.find((r: any) => r.id === riderId);
+      toast.success(`${rider?.full_name} assigned to order`);
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder((prev: any) => prev ? { ...prev, rider_id: riderId } : null);
+      }
+    } catch (error) {
+      toast.error('Failed to assign rider');
     }
-    const rider = mockRiders.find(r => r.id === riderId);
-    toast.success(`${rider?.name} assigned to order ${orderId}`);
   };
+
+  if (ordersLoading) {
+    return (
+      <AdminLayout title="Orders">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title="Orders">
@@ -115,35 +132,40 @@ const AdminOrders: React.FC = () => {
 
         {/* Orders List */}
         <div className="space-y-3">
-          {filteredOrders.map((order) => (
-            <button
-              key={order.id}
-              onClick={() => setSelectedOrder(order)}
-              className="w-full text-left bg-card rounded-2xl border border-border/50 p-4 shadow-card hover:shadow-lg transition-all"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-primary">{order.id}</span>
-                    <OrderStatusBadge status={order.status} size="sm" />
+          {filteredOrders.map((order) => {
+            const customerName = (order as any).profiles?.full_name || 'Unknown Customer';
+            const orderItems = (order as any).order_items || [];
+            
+            return (
+              <button
+                key={order.id}
+                onClick={() => setSelectedOrder(order)}
+                className="w-full text-left bg-card rounded-2xl border border-border/50 p-4 shadow-card hover:shadow-lg transition-all"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-primary">{order.order_number}</span>
+                      <OrderStatusBadge status={order.status as any} size="sm" />
+                    </div>
+                    <p className="text-base font-semibold text-foreground mt-1">
+                      {customerName}
+                    </p>
                   </div>
-                  <p className="text-base font-semibold text-foreground mt-1">
-                    {order.customerName}
-                  </p>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
-                  {order.items.length} item{order.items.length > 1 ? 's' : ''} • {formatDate(order.createdAt)}
-                </span>
-                <span className="font-bold text-foreground">
-                  {formatCurrency(order.total)}
-                </span>
-              </div>
-            </button>
-          ))}
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {orderItems.length} item{orderItems.length !== 1 ? 's' : ''} • {formatDate(order.created_at)}
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {formatCurrency(order.total)}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {filteredOrders.length === 0 && (
@@ -161,7 +183,7 @@ const AdminOrders: React.FC = () => {
             <>
               <SheetHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <SheetTitle className="text-lg">Order {selectedOrder.id}</SheetTitle>
+                  <SheetTitle className="text-lg">Order {selectedOrder.order_number}</SheetTitle>
                   <OrderStatusBadge status={selectedOrder.status} />
                 </div>
               </SheetHeader>
@@ -173,12 +195,12 @@ const AdminOrders: React.FC = () => {
                     <User className="w-4 h-4" /> Customer Details
                   </h4>
                   <div className="space-y-2">
-                    <p className="text-sm text-foreground">{selectedOrder.customerName}</p>
+                    <p className="text-sm text-foreground">{selectedOrder.profiles?.full_name}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5" /> {selectedOrder.customerPhone}
+                      <Phone className="w-3.5 h-3.5" /> {selectedOrder.profiles?.phone || 'No phone'}
                     </p>
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5" /> {selectedOrder.pickupAddress}
+                      <MapPin className="w-3.5 h-3.5" /> {selectedOrder.delivery_address}
                     </p>
                   </div>
                 </div>
@@ -186,17 +208,37 @@ const AdminOrders: React.FC = () => {
                 {/* Order Items */}
                 <div className="bg-secondary/30 rounded-xl p-4 space-y-3">
                   <h4 className="font-semibold text-foreground">Order Items</h4>
-                  {selectedOrder.items.map((item, idx) => (
+                  {selectedOrder.order_items?.map((item: any, idx: number) => (
                     <div key={idx} className="flex justify-between text-sm">
                       <span className="text-foreground">
-                        {item.serviceName} × {item.quantity}
+                        {item.product_name} × {item.quantity}
                       </span>
-                      <span className="font-medium">{formatCurrency(item.price)}</span>
+                      <span className="font-medium">{formatCurrency(item.total_price)}</span>
                     </div>
                   ))}
-                  <div className="border-t border-border pt-2 flex justify-between">
-                    <span className="font-semibold">Total</span>
-                    <span className="font-bold text-primary">{formatCurrency(selectedOrder.total)}</span>
+                  <div className="border-t border-border pt-2 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>{formatCurrency(selectedOrder.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Delivery Fee</span>
+                      <span>{formatCurrency(selectedOrder.delivery_fee)}</span>
+                    </div>
+                    <div className="flex justify-between font-semibold">
+                      <span>Total</span>
+                      <span className="text-primary">{formatCurrency(selectedOrder.total)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Status */}
+                <div className="bg-secondary/30 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Payment Status</span>
+                    <span className={`text-sm font-medium ${selectedOrder.payment_status === 'paid' ? 'text-success' : 'text-warning'}`}>
+                      {selectedOrder.payment_status?.toUpperCase()}
+                    </span>
                   </div>
                 </div>
 
@@ -205,7 +247,7 @@ const AdminOrders: React.FC = () => {
                   <h4 className="font-semibold text-foreground">Update Status</h4>
                   <Select 
                     value={selectedOrder.status} 
-                    onValueChange={(value: AdminOrderStatus) => handleStatusUpdate(selectedOrder.id, value)}
+                    onValueChange={(value: OrderStatus) => handleStatusUpdate(selectedOrder.id, value)}
                   >
                     <SelectTrigger className="bg-card">
                       <SelectValue />
@@ -224,41 +266,35 @@ const AdminOrders: React.FC = () => {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-foreground">Assign Rider</h4>
                   <Select 
-                    value={selectedOrder.assignedRider || ''} 
+                    value={selectedOrder.rider_id || ''} 
                     onValueChange={(value) => handleAssignRider(selectedOrder.id, value)}
                   >
                     <SelectTrigger className="bg-card">
                       <SelectValue placeholder="Select a rider" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockRiders.filter(r => r.status !== 'offline').map(rider => (
+                      {riders.filter((r: any) => r.is_online).map((rider: any) => (
                         <SelectItem key={rider.id} value={rider.id}>
-                          {rider.name} ({rider.status})
+                          {rider.full_name} (Online)
+                        </SelectItem>
+                      ))}
+                      {riders.filter((r: any) => !r.is_online).map((rider: any) => (
+                        <SelectItem key={rider.id} value={rider.id}>
+                          {rider.full_name} (Offline)
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => setSelectedOrder(null)}
-                  >
-                    Close
-                  </Button>
-                  <Button 
-                    className="flex-1 gradient-hero text-primary-foreground"
-                    onClick={() => {
-                      toast.success('Order updated successfully');
-                      setSelectedOrder(null);
-                    }}
-                  >
-                    Save Changes
-                  </Button>
-                </div>
+                {/* Close Button */}
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setSelectedOrder(null)}
+                >
+                  Close
+                </Button>
               </div>
             </>
           )}
