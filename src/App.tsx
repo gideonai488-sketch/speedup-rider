@@ -19,7 +19,10 @@ import TrackDelivery from "./pages/customer/TrackDelivery";
 import StorePage from "./pages/customer/StorePage";
 import Wallet from "./pages/customer/Wallet";
 import Referral from "./pages/customer/Referral";
+import Notifications from "./pages/customer/Notifications";
 import RiderDashboard from "./pages/rider/RiderDashboard";
+import RiderProfile from "./pages/rider/RiderProfile";
+import RiderHistory from "./pages/rider/RiderHistory";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Cart from "./pages/Cart";
@@ -99,7 +102,7 @@ const App = () => {
                   <Route path="/customer/referral" element={<Referral />} />
                   <Route path="/customer/orders" element={<Orders />} />
                   <Route path="/customer/profile" element={<Profile />} />
-                  <Route path="/customer/notifications" element={<Orders />} />
+                  <Route path="/customer/notifications" element={<Notifications />} />
                   
                   {/* Shared Routes (Bottom Nav) */}
                   <Route path="/search" element={<Search />} />
@@ -111,8 +114,9 @@ const App = () => {
                   <Route path="/rider" element={<RiderDashboard />} />
                   <Route path="/rider/dashboard" element={<RiderDashboard />} />
                   <Route path="/rider/earnings" element={<RiderEarnings />} />
-                  <Route path="/rider/profile" element={<Profile />} />
-                  <Route path="/rider/deliveries" element={<Orders />} />
+                  <Route path="/rider/profile" element={<RiderProfile />} />
+                  <Route path="/rider/history" element={<RiderHistory />} />
+                  <Route path="/rider/deliveries" element={<RiderHistory />} />
                   <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                   
                   {/* Admin Routes - Access via /admin */}
