@@ -28,8 +28,10 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const riderMarker = useRef<mapboxgl.Marker | null>(null);
+  const destMarker = useRef<mapboxgl.Marker | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
   const [routeDistance, setRouteDistance] = useState<number | null>(null);
 
   const recenterToRider = useCallback(() => {
@@ -79,19 +81,62 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
       bearing: 0,
     });
 
-    // Add destination marker (customer location) - Green pin
-    const destEl = document.createElement('div');
-    destEl.innerHTML = `
-      <div style="width: 32px; height: 32px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(16,185,129,0.4);">
-        <div style="width: 12px; height: 12px; background: white; border-radius: 50%;"></div>
-      </div>
-    `;
-    new mapboxgl.Marker({ element: destEl })
-      .setLngLat([destinationLocation.lng, destinationLocation.lat])
-      .addTo(map.current);
+    // Wait for map style to fully load before doing anything
+    map.current.on('load', () => {
+      if (!map.current) return;
+      setIsMapReady(true);
+    });
 
-    // Add rider marker - Animated motorcycle rider
-    if (riderLocation) {
+    return () => {
+      if (map.current) {
+        setIsMapReady(false);
+        map.current.remove();
+        map.current = null;
+        riderMarker.current = null;
+        destMarker.current = null;
+      }
+    };
+  }, [mapboxToken]);
+
+  // Add markers and route AFTER map is ready
+  useEffect(() => {
+    if (!map.current || !isMapReady) return;
+
+    // Add destination marker (customer location) - Green pin
+    if (!destMarker.current) {
+      const destEl = document.createElement('div');
+      destEl.innerHTML = `
+        <div style="width: 32px; height: 32px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(16,185,129,0.4);">
+          <div style="width: 12px; height: 12px; background: white; border-radius: 50%;"></div>
+        </div>
+      `;
+      destMarker.current = new mapboxgl.Marker({ element: destEl })
+        .setLngLat([destinationLocation.lng, destinationLocation.lat])
+        .addTo(map.current);
+    } else {
+      destMarker.current.setLngLat([destinationLocation.lng, destinationLocation.lat]);
+    }
+
+    // Fit bounds
+    const bounds = new mapboxgl.LngLatBounds();
+    if (riderLocation) bounds.extend([riderLocation.lng, riderLocation.lat]);
+    bounds.extend([destinationLocation.lng, destinationLocation.lat]);
+
+    try {
+      map.current.fitBounds(bounds, {
+        padding: { top: 80, bottom: 120, left: 40, right: 40 },
+        maxZoom: 16,
+      });
+    } catch (e) {
+      console.warn('Could not fit bounds');
+    }
+  }, [isMapReady, destinationLocation]);
+
+  // Manage rider marker separately
+  useEffect(() => {
+    if (!map.current || !isMapReady || !riderLocation) return;
+
+    if (!riderMarker.current) {
       const riderEl = document.createElement('div');
       riderEl.className = 'rider-marker-uber';
       riderEl.innerHTML = `
@@ -113,134 +158,101 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
         </style>
         <div class="rider-marker-container" style="width: 52px; height: 52px; background: linear-gradient(135deg, #f97316, #ea580c); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white;">
           <div class="rider-icon" style="display: flex; flex-direction: column; align-items: center;">
-            <!-- Rider on motorcycle -->
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Motorcycle wheels -->
               <circle cx="5" cy="18" r="3" fill="none"/>
               <circle cx="19" cy="18" r="3" fill="none"/>
-              <!-- Motorcycle body -->
               <path d="M5 18h2l1-3h8l1 3h2"/>
               <path d="M8 15l2-4h4l1 2"/>
-              <!-- Rider body -->
               <circle cx="12" cy="6" r="2" fill="white"/>
               <path d="M12 8v3"/>
               <path d="M10 10l2 1 2-1"/>
-              <!-- Helmet -->
               <path d="M10 5.5c0-1.5 1-2.5 2-2.5s2 1 2 2.5" fill="white"/>
             </svg>
           </div>
         </div>
-        <!-- Direction indicator -->
         <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #ea580c;"></div>
       `;
       riderMarker.current = new mapboxgl.Marker({ element: riderEl, rotationAlignment: 'map' })
         .setLngLat([riderLocation.lng, riderLocation.lat])
         .addTo(map.current);
+    } else {
+      riderMarker.current.setLngLat([riderLocation.lng, riderLocation.lat]);
     }
 
-    // Fetch and display route
-    map.current.on('load', async () => {
-      if (!map.current) return;
-
-      const bounds = new mapboxgl.LngLatBounds();
-      if (riderLocation) bounds.extend([riderLocation.lng, riderLocation.lat]);
-      bounds.extend([destinationLocation.lng, destinationLocation.lat]);
-
-      try {
-        map.current.fitBounds(bounds, {
-          padding: { top: 60, bottom: 100, left: 30, right: 30 },
-          maxZoom: 16,
-        });
-      } catch (e) {
-        // Fallback if bounds fitting fails
-        console.warn('Could not fit bounds, centering on destination');
-        map.current.setCenter([destinationLocation.lng, destinationLocation.lat]);
-        map.current.setZoom(14);
+    // Update rider heading
+    if (riderLocation.heading) {
+      const el = riderMarker.current.getElement();
+      if (el) {
+        const innerDiv = el.querySelector('.rider-marker-container') as HTMLElement;
+        if (innerDiv) {
+          innerDiv.style.transform = `rotate(${riderLocation.heading}deg)`;
+        }
       }
+    }
+  }, [isMapReady, riderLocation]);
 
-      // Fetch route between rider and customer
-      if (riderLocation) {
-        try {
-          const waypoints = `${riderLocation.lng},${riderLocation.lat};${destinationLocation.lng},${destinationLocation.lat}`;
+  // Fetch and display route - only when map is ready and we have both locations
+  useEffect(() => {
+    if (!map.current || !isMapReady || !riderLocation || !mapboxToken) return;
 
-          const response = await fetch(
-            `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${mapboxToken}`
-          );
-          const data = await response.json();
+    const fetchRoute = async () => {
+      try {
+        const waypoints = `${riderLocation.lng},${riderLocation.lat};${destinationLocation.lng},${destinationLocation.lat}`;
 
-          if (data.routes && data.routes[0] && map.current) {
-            // Store distance for display
-            setRouteDistance(data.routes[0].distance / 1000);
+        const response = await fetch(
+          `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${mapboxToken}`
+        );
+        const data = await response.json();
 
-            // Remove existing route if present
+        if (data.routes && data.routes[0] && map.current && map.current.isStyleLoaded()) {
+          setRouteDistance(data.routes[0].distance / 1000);
+
+          // Safely remove existing route
+          try {
+            if (map.current.getLayer('route')) {
+              map.current.removeLayer('route');
+            }
             if (map.current.getSource('route')) {
-              if (map.current.getLayer('route')) {
-                map.current.removeLayer('route');
-              }
               map.current.removeSource('route');
             }
-
-            map.current.addSource('route', {
-              type: 'geojson',
-              data: {
-                type: 'Feature',
-                properties: {},
-                geometry: data.routes[0].geometry,
-              },
-            });
-
-            // Route line - dark like Uber
-            map.current.addLayer({
-              id: 'route',
-              type: 'line',
-              source: 'route',
-              layout: {
-                'line-join': 'round',
-                'line-cap': 'round',
-              },
-              paint: {
-                'line-color': '#1a1a1a',
-                'line-width': 5,
-                'line-opacity': 0.9,
-              },
-            });
+          } catch (e) {
+            // Ignore removal errors
           }
-        } catch (err) {
-          console.error('Failed to fetch route:', err);
-        }
-      }
-    });
 
-    return () => {
-      if (map.current) {
-        // Clean up layers and sources before removing map
-        if (map.current.getLayer('route')) {
-          map.current.removeLayer('route');
+          // Add new route
+          map.current.addSource('route', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: data.routes[0].geometry,
+            },
+          });
+
+          map.current.addLayer({
+            id: 'route',
+            type: 'line',
+            source: 'route',
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round',
+            },
+            paint: {
+              'line-color': '#1a1a1a',
+              'line-width': 5,
+              'line-opacity': 0.9,
+            },
+          });
         }
-        if (map.current.getSource('route')) {
-          map.current.removeSource('route');
-        }
-        map.current.remove();
-        map.current = null;
+      } catch (err) {
+        console.error('Failed to fetch route:', err);
       }
     };
-  }, [mapboxToken, destinationLocation]);
 
-  // Update rider position smoothly
-  useEffect(() => {
-    if (riderMarker.current && riderLocation && map.current) {
-      riderMarker.current.setLngLat([riderLocation.lng, riderLocation.lat]);
-
-      // Update rider heading
-      const el = riderMarker.current.getElement();
-      if (el && riderLocation.heading) {
-        const innerDiv = el.querySelector('div');
-        if (innerDiv) {
-          (innerDiv as HTMLElement).style.transform = `rotate(${riderLocation.heading}deg)`;
-        }
-      }
-    }
-  }, [riderLocation]);
+    // Small delay to ensure map is fully ready
+    const timer = setTimeout(fetchRoute, 500);
+    return () => clearTimeout(timer);
+  }, [isMapReady, riderLocation, destinationLocation, mapboxToken]);
 
   if (error) {
     return (
@@ -262,10 +274,11 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
   }
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative" style={{ minHeight: '300px' }}>
       <div 
         ref={mapContainer} 
-        className="w-full h-full"
+        className="absolute inset-0"
+        style={{ width: '100%', height: '100%' }}
       />
 
       {/* Recenter Button */}
@@ -280,12 +293,12 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
       )}
 
       {/* ETA Bubble - Uber style */}
-      {riderLocation && (
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-full z-10">
+      {riderLocation && isMapReady && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10">
           <div className="bg-card rounded-lg shadow-lg px-4 py-2 flex items-center gap-2">
             <div>
               <p className="text-lg font-bold text-foreground">{eta} mins</p>
-              <p className="text-xs text-muted-foreground">{currentStreet}</p>
+              <p className="text-xs text-muted-foreground truncate max-w-[150px]">{currentStreet}</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
@@ -295,12 +308,12 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
       )}
 
       {/* Current status overlay */}
-      {isMoving && riderLocation && (
+      {isMoving && riderLocation && isMapReady && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
           <div className="bg-card rounded-full shadow-lg px-4 py-2 flex items-center gap-2">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">DRIVING</p>
-            <p className="text-sm font-semibold text-foreground">{currentStreet}</p>
+            <p className="text-sm font-semibold text-foreground truncate max-w-[120px]">{currentStreet}</p>
           </div>
         </div>
       )}
