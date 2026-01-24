@@ -283,9 +283,12 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          rider_status: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
+          vehicle_plate: string | null
+          vehicle_type: string | null
         }
         Insert: {
           address?: string | null
@@ -294,9 +297,12 @@ export type Database = {
           full_name: string
           id?: string
           phone?: string | null
+          rider_status?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
+          vehicle_plate?: string | null
+          vehicle_type?: string | null
         }
         Update: {
           address?: string | null
@@ -305,9 +311,12 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          rider_status?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
+          vehicle_plate?: string | null
+          vehicle_type?: string | null
         }
         Relationships: []
       }
