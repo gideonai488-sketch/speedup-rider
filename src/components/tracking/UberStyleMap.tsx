@@ -148,9 +148,17 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
           );
           const data = await response.json();
 
-          if (data.routes && data.routes[0]) {
+          if (data.routes && data.routes[0] && map.current) {
             // Store distance for display
             setRouteDistance(data.routes[0].distance / 1000);
+
+            // Remove existing route if present
+            if (map.current.getSource('route')) {
+              if (map.current.getLayer('route')) {
+                map.current.removeLayer('route');
+              }
+              map.current.removeSource('route');
+            }
 
             map.current.addSource('route', {
               type: 'geojson',
@@ -184,7 +192,17 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
     });
 
     return () => {
-      map.current?.remove();
+      if (map.current) {
+        // Clean up layers and sources before removing map
+        if (map.current.getLayer('route')) {
+          map.current.removeLayer('route');
+        }
+        if (map.current.getSource('route')) {
+          map.current.removeSource('route');
+        }
+        map.current.remove();
+        map.current = null;
+      }
     };
   }, [mapboxToken, destinationLocation]);
 
