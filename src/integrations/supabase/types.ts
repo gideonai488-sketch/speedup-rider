@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -42,6 +74,47 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -277,8 +350,12 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_name: string | null
+          account_number: string | null
           address: string | null
           avatar_url: string | null
+          bank_code: string | null
+          bank_name: string | null
           created_at: string
           full_name: string
           id: string
@@ -291,8 +368,12 @@ export type Database = {
           vehicle_type: string | null
         }
         Insert: {
+          account_name?: string | null
+          account_number?: string | null
           address?: string | null
           avatar_url?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
           created_at?: string
           full_name: string
           id?: string
@@ -305,8 +386,12 @@ export type Database = {
           vehicle_type?: string | null
         }
         Update: {
+          account_name?: string | null
+          account_number?: string | null
           address?: string | null
           avatar_url?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
           created_at?: string
           full_name?: string
           id?: string
@@ -319,6 +404,71 @@ export type Database = {
           vehicle_type?: string | null
         }
         Relationships: []
+      }
+      ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          order_id: string
+          rider_id: string | null
+          rider_rating: number | null
+          store_id: string | null
+          store_rating: number | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          order_id: string
+          rider_id?: string | null
+          rider_rating?: number | null
+          store_id?: string | null
+          store_rating?: number | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          order_id?: string
+          rider_id?: string | null
+          rider_rating?: number | null
+          store_id?: string | null
+          store_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referrals: {
         Row: {
@@ -587,6 +737,62 @@ export type Database = {
             foreignKeyName: "wallets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      withdrawal_requests: {
+        Row: {
+          account_name: string
+          account_number: string
+          amount: number
+          bank_code: string
+          bank_name: string
+          created_at: string
+          failure_reason: string | null
+          id: string
+          paystack_reference: string | null
+          paystack_transfer_code: string | null
+          processed_at: string | null
+          rider_id: string
+          status: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          amount: number
+          bank_code: string
+          bank_name: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          paystack_reference?: string | null
+          paystack_transfer_code?: string | null
+          processed_at?: string | null
+          rider_id: string
+          status?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          amount?: number
+          bank_code?: string
+          bank_name?: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          paystack_reference?: string | null
+          paystack_transfer_code?: string | null
+          processed_at?: string | null
+          rider_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

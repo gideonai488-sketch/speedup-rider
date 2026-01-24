@@ -6,6 +6,7 @@ import {
   Star, Navigation, CreditCard, Wallet, ChevronUp
 } from 'lucide-react';
 import UberStyleMap from '@/components/tracking/UberStyleMap';
+import RatingModal from '@/components/rating/RatingModal';
 import { useOrder } from '@/hooks/useOrders';
 import { useRiderLocation } from '@/hooks/useRiderLocation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +22,7 @@ const TrackDelivery: React.FC = () => {
   const { data: order, isLoading: orderLoading, refetch } = useOrder(orderId || '');
   const { data: riderLocation } = useRiderLocation(order?.rider_id || '');
   const [showPayment, setShowPayment] = useState(false);
+  const [showRating, setShowRating] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [eta, setEta] = useState(15);
   const [currentStreet, setCurrentStreet] = useState('En route to you');
@@ -83,6 +85,9 @@ const TrackDelivery: React.FC = () => {
       toast.success('Payment successful!');
       setShowPayment(false);
       refetch();
+      
+      // Show rating modal after successful payment
+      setTimeout(() => setShowRating(true), 500);
     } catch (err: unknown) {
       console.error('Payment failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Payment failed';
@@ -400,16 +405,25 @@ const TrackDelivery: React.FC = () => {
           {/* Payment Complete */}
           {paymentStatus === 'paid' && (
             <div className="pt-4 border-t border-border">
-              <div className="bg-success/10 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-success" />
+              <div className="bg-success/10 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                    <Star className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-success">Payment Complete</p>
+                    <p className="text-sm text-muted-foreground">
+                      Paid {formatCurrency(Number(order.total))} via {(order as any).payment_method}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-success">Payment Complete</p>
-                  <p className="text-sm text-muted-foreground">
-                    Paid {formatCurrency(Number(order.total))} via {(order as any).payment_method}
-                  </p>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowRating(true)}
+                >
+                  Rate
+                </Button>
               </div>
             </div>
           )}
@@ -470,6 +484,17 @@ const TrackDelivery: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={showRating}
+        onClose={() => setShowRating(false)}
+        orderId={order.id}
+        riderId={order.rider_id || undefined}
+        storeId={(order as any).store_id || undefined}
+        riderName={rider?.full_name}
+        storeName={(order as any).stores?.name}
+      />
     </div>
   );
 };

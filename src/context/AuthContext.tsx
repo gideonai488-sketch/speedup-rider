@@ -13,6 +13,9 @@ interface Profile {
   phone: string | null;
   avatar_url: string | null;
   address: string | null;
+  rider_status: string | null;
+  vehicle_type: string | null;
+  vehicle_plate: string | null;
 }
 
 interface AuthContextType {
