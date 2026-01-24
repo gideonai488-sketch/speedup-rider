@@ -96,17 +96,14 @@ const TrackDelivery: React.FC = () => {
   const isDelivered = currentStatus === 'delivered';
   const needsPayment = isDelivered && paymentStatus === 'pending';
 
-  // Parse coordinates
-  const pickupLocation = order?.pickup_lat ? {
-    lat: Number(order.pickup_lat),
-    lng: Number(order.pickup_lng),
-  } : undefined;
-
-  const dropoffLocation = {
+  // Parse coordinates - Map shows RIDER and CUSTOMER locations, not pickup/dropoff
+  // Customer location (delivery address) - where the order is going
+  const customerLocation = {
     lat: Number(order?.delivery_lat) || 5.6145,
     lng: Number(order?.delivery_lng) || -0.2050,
   };
 
+  // Rider location from real-time tracking
   const riderPos = riderLocation ? {
     lat: Number(riderLocation.latitude),
     lng: Number(riderLocation.longitude),
@@ -162,11 +159,10 @@ const TrackDelivery: React.FC = () => {
           </div>
         </div>
 
-        {/* Map */}
+        {/* Map - Shows rider and customer locations only */}
         <UberStyleMap
           riderLocation={riderPos}
-          destinationLocation={dropoffLocation}
-          pickupLocation={pickupLocation}
+          destinationLocation={customerLocation}
           eta={eta}
           currentStreet={currentStreet}
           isMoving={currentStatus === 'out_for_delivery' || currentStatus === 'picked_up'}
@@ -179,7 +175,7 @@ const TrackDelivery: React.FC = () => {
               variant="default"
               className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-xl py-6"
               onClick={() => {
-                const url = `https://www.google.com/maps/dir/?api=1&destination=${dropoffLocation.lat},${dropoffLocation.lng}`;
+                const url = `https://www.google.com/maps/dir/?api=1&destination=${customerLocation.lat},${customerLocation.lng}`;
                 window.open(url, '_blank');
               }}
             >
@@ -204,10 +200,24 @@ const TrackDelivery: React.FC = () => {
         </button>
 
         <div className="px-6 pb-8">
-          {/* Dropoff Address */}
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">DROPOFF</p>
-            <p className="text-lg font-semibold text-foreground">{order.delivery_address}</p>
+          {/* Pickup & Dropoff Addresses as Text */}
+          <div className="space-y-3 mb-4">
+            {order.pickup_address && (
+              <div className="flex items-start gap-3">
+                <div className="w-3 h-3 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">PICKUP</p>
+                  <p className="text-sm font-medium text-foreground">{order.pickup_address}</p>
+                </div>
+              </div>
+            )}
+            <div className="flex items-start gap-3">
+              <div className="w-3 h-3 rounded-full bg-success mt-1.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">DROPOFF</p>
+                <p className="text-sm font-medium text-foreground">{order.delivery_address}</p>
+              </div>
+            </div>
           </div>
 
           {/* Rider Info */}
@@ -346,14 +356,14 @@ const TrackDelivery: React.FC = () => {
 
               {/* Locations */}
               <div className="space-y-3">
-                {pickupLocation && (
+                {order.pickup_address && (
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <MapPin className="w-4 h-4 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase">PICKUP</p>
-                      <p className="text-sm font-medium">{order.pickup_address || 'Store location'}</p>
+                      <p className="text-sm font-medium">{order.pickup_address}</p>
                     </div>
                   </div>
                 )}

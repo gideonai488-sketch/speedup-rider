@@ -49,13 +49,14 @@ export const useOrder = (orderId: string) => {
           *,
           stores(*),
           order_items(*),
-          rider:profiles!orders_rider_id_fkey(*)
+          rider:profiles!orders_rider_id_fkey(*),
+          customer:profiles!orders_customer_id_fkey(*)
         `)
         .eq('id', orderId)
         .single();
 
       if (error) throw error;
-      return data as OrderWithDetails;
+      return data as OrderWithDetails & { customer?: { full_name?: string; phone?: string } };
     },
     enabled: !!orderId,
   });

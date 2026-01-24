@@ -39,6 +39,7 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
+import RiderDelivery from "./pages/rider/RiderDelivery";
 
 const queryClient = new QueryClient();
 
@@ -111,7 +112,7 @@ const App = () => {
                   <Route path="/rider/earnings" element={<RiderEarnings />} />
                   <Route path="/rider/profile" element={<Profile />} />
                   <Route path="/rider/deliveries" element={<Orders />} />
-                  <Route path="/rider/deliveries" element={<Orders />} />
+                  <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                   
                   {/* Admin Routes - Access via /admin */}
                   <Route path="/admin" element={<AdminDashboard />} />
