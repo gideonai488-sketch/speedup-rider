@@ -126,10 +126,17 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
       if (riderLocation) bounds.extend([riderLocation.lng, riderLocation.lat]);
       bounds.extend([destinationLocation.lng, destinationLocation.lat]);
 
-      map.current.fitBounds(bounds, {
-        padding: { top: 120, bottom: 200, left: 50, right: 50 },
-        maxZoom: 16,
-      });
+      try {
+        map.current.fitBounds(bounds, {
+          padding: { top: 60, bottom: 100, left: 30, right: 30 },
+          maxZoom: 16,
+        });
+      } catch (e) {
+        // Fallback if bounds fitting fails
+        console.warn('Could not fit bounds, centering on destination');
+        map.current.setCenter([destinationLocation.lng, destinationLocation.lat]);
+        map.current.setZoom(14);
+      }
 
       // Fetch route between rider and customer
       if (riderLocation) {
@@ -217,8 +224,12 @@ const UberStyleMap: React.FC<UberStyleMapProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={mapContainer} className="absolute inset-0" />
+    <div className="relative w-full h-full" style={{ minHeight: '300px' }}>
+      <div 
+        ref={mapContainer} 
+        className="absolute inset-0" 
+        style={{ width: '100%', height: '100%', minHeight: '300px' }}
+      />
 
       {/* ETA Bubble - Uber style */}
       {riderLocation && (
