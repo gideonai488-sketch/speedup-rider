@@ -221,7 +221,7 @@ const RiderDelivery: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Full-screen Map */}
-      <div className="relative flex-1 min-h-[50vh]">
+      <div className="relative flex-1" style={{ minHeight: '50vh', height: '55vh' }}>
         <UberStyleMap
           riderLocation={riderLocation || undefined}
           destinationLocation={destination}
