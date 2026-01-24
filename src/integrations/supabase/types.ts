@@ -116,7 +116,9 @@ export type Database = {
           pickup_address: string | null
           pickup_lat: number | null
           pickup_lng: number | null
+          rider_fee: number | null
           rider_id: string | null
+          service_fee: number | null
           status: Database["public"]["Enums"]["order_status"]
           store_id: string | null
           subtotal: number
@@ -145,7 +147,9 @@ export type Database = {
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
+          rider_fee?: number | null
           rider_id?: string | null
+          service_fee?: number | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string | null
           subtotal?: number
@@ -174,7 +178,9 @@ export type Database = {
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
+          rider_fee?: number | null
           rider_id?: string | null
+          service_fee?: number | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string | null
           subtotal?: number
@@ -582,15 +588,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_delivery_fee: {
-        Args: {
-          p_base_fee?: number
-          p_distance_km: number
-          p_per_km_fee?: number
-          p_surge_multiplier?: number
-        }
-        Returns: number
-      }
+      calculate_delivery_fee:
+        | {
+            Args: {
+              p_base_fee?: number
+              p_distance_km: number
+              p_per_km_fee?: number
+              p_surge_multiplier?: number
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              p_base_fee?: number
+              p_distance_km: number
+              p_per_km_fee?: number
+              p_service_fee?: number
+              p_surge_multiplier?: number
+            }
+            Returns: number
+          }
       get_profile_id: { Args: { check_user_id: string }; Returns: string }
       get_surge_multiplier: { Args: never; Returns: number }
       is_admin: { Args: { check_user_id: string }; Returns: boolean }

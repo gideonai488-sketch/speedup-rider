@@ -91,7 +91,7 @@ const LandingPage: React.FC = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link to="/signup?role=rider">
+              <Link to="/rider/auth">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 text-lg px-8">
                   Become a Rider
                 </Button>
@@ -293,7 +293,7 @@ const LandingPage: React.FC = () => {
               Be your own boss and start delivering today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup?role=rider">
+              <Link to="/rider/auth">
                 <Button size="lg" className="w-full sm:w-auto bg-white text-foreground hover:bg-white/90 text-lg px-8">
                   Apply to Ride
                   <ArrowRight className="w-5 h-5 ml-2" />

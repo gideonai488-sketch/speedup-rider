@@ -1,13 +1,16 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface FeeBreakdown {
   baseFee: number;
   distanceFee: number;
+  serviceFee: number;
   surgeMultiplier: number;
   totalFee: number;
   distanceKm: number;
   estimatedMinutes: number;
+  riderEarnings: number;
+  riderFee: number;
 }
 
 interface Coordinates {
@@ -22,6 +25,8 @@ export const useDeliveryFee = () => {
 
   const BASE_FEE = 5; // GH₵ 5 base fee
   const PER_KM_FEE = 2; // GH₵ 2 per km
+  const SERVICE_FEE = 2; // GH₵ 2 service fee
+  const RIDER_FEE = 5; // Flat GH₵ 5 taken from rider per order
 
   const calculateFee = useCallback(async (
     pickup: Coordinates,
@@ -62,16 +67,22 @@ export const useDeliveryFee = () => {
 
       // Calculate fees
       const distanceFee = distanceKm * PER_KM_FEE;
-      const subtotal = BASE_FEE + distanceFee;
+      const subtotal = BASE_FEE + distanceFee + SERVICE_FEE;
       const totalFee = Math.round(subtotal * surgeMultiplier * 100) / 100;
+      
+      // Rider gets total minus the flat rider fee
+      const riderEarnings = Math.max(0, totalFee - RIDER_FEE);
 
       const breakdown: FeeBreakdown = {
         baseFee: BASE_FEE,
         distanceFee: Math.round(distanceFee * 100) / 100,
+        serviceFee: SERVICE_FEE,
         surgeMultiplier,
         totalFee,
         distanceKm: Math.round(distanceKm * 10) / 10,
         estimatedMinutes,
+        riderEarnings: Math.round(riderEarnings * 100) / 100,
+        riderFee: RIDER_FEE,
       };
 
       setFeeBreakdown(breakdown);
@@ -93,6 +104,8 @@ export const useDeliveryFee = () => {
     isCalculating,
     error,
     formatFee,
+    SERVICE_FEE,
+    RIDER_FEE,
   };
 };
 

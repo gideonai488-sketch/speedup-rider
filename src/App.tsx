@@ -11,7 +11,8 @@ import { AuthProvider } from "@/context/AuthContext";
 
 // SpeedRush Pages
 import LandingPage from "./pages/LandingPage";
-import AuthPage from "./pages/AuthPage";
+import CustomerAuth from "./pages/auth/CustomerAuth";
+import RiderAuth from "./pages/auth/RiderAuth";
 import CustomerHome from "./pages/customer/CustomerHome";
 import BookDelivery from "./pages/customer/BookDelivery";
 import TrackDelivery from "./pages/customer/TrackDelivery";
@@ -72,9 +73,14 @@ const App = () => {
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<LandingPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/login" element={<AuthPage />} />
-                  <Route path="/signup" element={<AuthPage />} />
+                  <Route path="/auth" element={<CustomerAuth />} />
+                  <Route path="/login" element={<CustomerAuth />} />
+                  <Route path="/signup" element={<CustomerAuth />} />
+                  
+                  {/* Rider Auth */}
+                  <Route path="/rider/auth" element={<RiderAuth />} />
+                  <Route path="/rider/login" element={<RiderAuth />} />
+                  <Route path="/rider/signup" element={<RiderAuth />} />
                   
                   {/* Customer Routes */}
                   <Route path="/customer" element={<CustomerHome />} />
