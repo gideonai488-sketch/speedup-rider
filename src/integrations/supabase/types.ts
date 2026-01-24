@@ -362,6 +362,7 @@ export type Database = {
           phone: string | null
           rider_status: string | null
           role: Database["public"]["Enums"]["user_role"]
+          subaccount_code: string | null
           updated_at: string
           user_id: string
           vehicle_plate: string | null
@@ -380,6 +381,7 @@ export type Database = {
           phone?: string | null
           rider_status?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          subaccount_code?: string | null
           updated_at?: string
           user_id: string
           vehicle_plate?: string | null
@@ -398,6 +400,7 @@ export type Database = {
           phone?: string | null
           rider_status?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          subaccount_code?: string | null
           updated_at?: string
           user_id?: string
           vehicle_plate?: string | null
