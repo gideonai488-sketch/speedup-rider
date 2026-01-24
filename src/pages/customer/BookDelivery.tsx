@@ -1,29 +1,37 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { 
-  ArrowLeft, MapPin, Navigation, Clock, CreditCard, 
+  ArrowLeft, MapPin, Navigation, CreditCard, 
   ChevronRight, Loader2, Zap
 } from 'lucide-react';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
 import { toast } from 'sonner';
+import { useCreateOrder } from '@/hooks/useOrders';
+import { useAuth } from '@/context/AuthContext';
+import AddressAutocomplete from '@/components/location/AddressAutocomplete';
+import { supabase } from '@/integrations/supabase/client';
 
 const BookDelivery: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preselectedService = searchParams.get('service') as ServiceType | null;
+  const { profile } = useAuth();
+  const createOrder = useCreateOrder();
   
   const [step, setStep] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [formData, setFormData] = useState({
     serviceType: preselectedService || '' as ServiceType,
     pickupAddress: '',
+    pickupCoords: null as { lat: number; lng: number } | null,
     pickupLandmark: '',
     dropoffAddress: '',
+    dropoffCoords: null as { lat: number; lng: number } | null,
     dropoffLandmark: '',
     description: '',
     contactName: '',
@@ -31,9 +39,9 @@ const BookDelivery: React.FC = () => {
   });
   
   const [estimate, setEstimate] = useState({
-    distance: 5.2,
-    duration: '15-20 mins',
-    fee: 25,
+    distance: 0,
+    duration: '',
+    fee: 0,
   });
 
   const selectedService = serviceCategories.find(s => s.id === formData.serviceType);
@@ -43,15 +51,42 @@ const BookDelivery: React.FC = () => {
     setStep(2);
   };
 
-  const handleLocationSubmit = () => {
+  const calculateDistance = (
+    lat1: number, lng1: number, 
+    lat2: number, lng2: number
+  ): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const handleLocationSubmit = async () => {
     if (!formData.pickupAddress || !formData.dropoffAddress) {
       toast.error('Please enter both pickup and dropoff locations');
       return;
     }
-    // Calculate estimate based on inputs
+
     const basePrice = selectedService?.basePrice || 5;
     const pricePerKm = selectedService?.pricePerKm || 1.5;
-    const distance = Math.random() * 10 + 2; // Mock distance
+    
+    let distance = 5; // Default estimate
+    
+    // Calculate real distance if we have coordinates
+    if (formData.pickupCoords && formData.dropoffCoords) {
+      distance = calculateDistance(
+        formData.pickupCoords.lat,
+        formData.pickupCoords.lng,
+        formData.dropoffCoords.lat,
+        formData.dropoffCoords.lng
+      );
+    }
+    
     const fee = basePrice + (distance * pricePerKm);
     
     setEstimate({
@@ -63,13 +98,46 @@ const BookDelivery: React.FC = () => {
   };
 
   const handleFindRider = async () => {
+    if (!profile) {
+      toast.error('Please log in to book a delivery');
+      navigate('/auth');
+      return;
+    }
+
     setIsSearching(true);
     
-    // Simulate rider search
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    toast.success('Rider found! Kofi is on the way.');
-    navigate('/customer/track/DEMO-001');
+    try {
+      // Create the order in the database
+      const orderData = {
+        store_id: null as any, // Delivery orders don't have a store
+        items: [{
+          product_id: null as any,
+          product_name: `${selectedService?.name} Delivery`,
+          quantity: 1,
+          unit_price: estimate.fee,
+        }],
+        delivery_address: formData.dropoffAddress,
+        delivery_lat: formData.dropoffCoords?.lat,
+        delivery_lng: formData.dropoffCoords?.lng,
+        pickup_address: formData.pickupAddress,
+        pickup_lat: formData.pickupCoords?.lat,
+        pickup_lng: formData.pickupCoords?.lng,
+        notes: formData.description || `${selectedService?.name} delivery. Contact: ${formData.contactName} ${formData.contactPhone}`.trim(),
+        delivery_fee: estimate.fee,
+      };
+
+      const order = await createOrder.mutateAsync(orderData);
+      
+      // Simulate finding a rider (in production, this would be handled by a realtime system)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.success('Rider found! Your delivery is on the way.');
+      navigate(`/customer/track/${order.id}`);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast.error('Failed to create order. Please try again.');
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -143,42 +211,52 @@ const BookDelivery: React.FC = () => {
 
             <div className="space-y-4">
               <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 flex flex-col items-center py-4">
+                <div className="absolute left-4 top-0 bottom-0 flex flex-col items-center py-4 z-10">
                   <div className="w-3 h-3 rounded-full bg-primary" />
                   <div className="flex-1 w-0.5 bg-border my-1" />
-                  <div className="w-3 h-3 rounded-full bg-rush" />
+                  <div className="w-3 h-3 rounded-full bg-coral" />
                 </div>
                 
                 <div className="space-y-3 pl-10">
                   <div className="bg-card rounded-xl border border-border p-4">
-                    <Label className="text-xs text-muted-foreground">PICKUP LOCATION</Label>
-                    <Input
-                      placeholder="Enter pickup address"
+                    <Label className="text-xs text-muted-foreground mb-2 block">PICKUP LOCATION</Label>
+                    <AddressAutocomplete
                       value={formData.pickupAddress}
-                      onChange={(e) => setFormData({ ...formData, pickupAddress: e.target.value })}
-                      className="border-0 p-0 h-auto text-foreground font-medium focus-visible:ring-0 mt-1"
+                      onChange={(address, coords) => setFormData({ 
+                        ...formData, 
+                        pickupAddress: address,
+                        pickupCoords: coords || null
+                      })}
+                      placeholder="Enter pickup address"
+                      icon="pickup"
+                      className="border-0 shadow-none"
                     />
                     <Input
                       placeholder="Landmark (optional)"
                       value={formData.pickupLandmark}
                       onChange={(e) => setFormData({ ...formData, pickupLandmark: e.target.value })}
-                      className="border-0 p-0 h-auto text-sm text-muted-foreground focus-visible:ring-0 mt-1"
+                      className="border-0 p-0 h-auto text-sm text-muted-foreground focus-visible:ring-0 mt-2"
                     />
                   </div>
                   
                   <div className="bg-card rounded-xl border border-border p-4">
-                    <Label className="text-xs text-muted-foreground">DROPOFF LOCATION</Label>
-                    <Input
-                      placeholder="Enter dropoff address"
+                    <Label className="text-xs text-muted-foreground mb-2 block">DROPOFF LOCATION</Label>
+                    <AddressAutocomplete
                       value={formData.dropoffAddress}
-                      onChange={(e) => setFormData({ ...formData, dropoffAddress: e.target.value })}
-                      className="border-0 p-0 h-auto text-foreground font-medium focus-visible:ring-0 mt-1"
+                      onChange={(address, coords) => setFormData({ 
+                        ...formData, 
+                        dropoffAddress: address,
+                        dropoffCoords: coords || null
+                      })}
+                      placeholder="Enter dropoff address"
+                      icon="dropoff"
+                      className="border-0 shadow-none"
                     />
                     <Input
                       placeholder="Landmark (optional)"
                       value={formData.dropoffLandmark}
                       onChange={(e) => setFormData({ ...formData, dropoffLandmark: e.target.value })}
-                      className="border-0 p-0 h-auto text-sm text-muted-foreground focus-visible:ring-0 mt-1"
+                      className="border-0 p-0 h-auto text-sm text-muted-foreground focus-visible:ring-0 mt-2"
                     />
                   </div>
                 </div>
@@ -230,7 +308,7 @@ const BookDelivery: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-rush mt-0.5" />
+                  <MapPin className="w-4 h-4 text-coral mt-0.5" />
                   <div>
                     <p className="text-xs text-muted-foreground">DROPOFF</p>
                     <p className="text-sm font-medium text-foreground">{formData.dropoffAddress}</p>

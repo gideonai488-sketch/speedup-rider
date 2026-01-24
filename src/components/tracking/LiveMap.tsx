@@ -11,7 +11,7 @@ interface LiveMapProps {
   pickupLocation: Location;
   dropoffLocation: Location;
   riderLocation?: Location;
-  status: 'searching' | 'accepted' | 'arriving' | 'picked_up' | 'delivering' | 'delivered';
+  status: string;
 }
 
 const LiveMap: React.FC<LiveMapProps> = ({ 

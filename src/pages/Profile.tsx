@@ -9,41 +9,62 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
 import { useNavigate } from 'react-router-dom';
-
-const menuSections = [
-  {
-    title: 'My Account',
-    items: [
-      { icon: Package, label: 'My Orders', badge: '3', path: '/orders' },
-      { icon: MapPin, label: 'Saved Addresses', badge: '2' },
-      { icon: CreditCard, label: 'Payment Methods' },
-      { icon: Heart, label: 'Favorites' },
-      { icon: Wallet, label: 'SpeedRush Wallet', value: 'GH₵ 125.00' },
-    ]
-  },
-  {
-    title: 'Rewards & Referrals',
-    items: [
-      { icon: Gift, label: 'Refer & Earn', highlight: true, subtitle: 'Get GH₵ 20 per referral' },
-      { icon: Star, label: 'Loyalty Points', value: '1,250 pts' },
-      { icon: Clock, label: 'Order History' },
-    ]
-  },
-  {
-    title: 'Support & Settings',
-    items: [
-      { icon: MessageCircle, label: 'Chat Support', online: true },
-      { icon: HelpCircle, label: 'Help Center' },
-      { icon: FileText, label: 'Terms & Privacy' },
-      { icon: Bell, label: 'Notifications' },
-      { icon: Settings, label: 'App Settings' },
-    ]
-  }
-];
+import { useAuth } from '@/context/AuthContext';
+import { useUserStats } from '@/hooks/useUserStats';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Profile: React.FC = () => {
   const { toggleAdminMode } = useAdmin();
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
+  const { data: stats, isLoading: statsLoading } = useUserStats();
+
+  const menuSections = [
+    {
+      title: 'My Account',
+      items: [
+        { icon: Package, label: 'My Orders', badge: stats?.pendingOrders ? String(stats.pendingOrders) : undefined, path: '/orders' },
+        { icon: MapPin, label: 'Saved Addresses' },
+        { icon: CreditCard, label: 'Payment Methods' },
+        { icon: Heart, label: 'Favorites' },
+        { icon: Wallet, label: 'SpeedRush Wallet', value: `GH₵ ${stats?.walletBalance?.toFixed(2) || '0.00'}`, path: '/customer/wallet' },
+      ]
+    },
+    {
+      title: 'Rewards & Referrals',
+      items: [
+        { icon: Gift, label: 'Refer & Earn', highlight: true, subtitle: 'Get GH₵ 20 per referral', path: '/customer/referral' },
+        { icon: Star, label: 'Loyalty Points', value: `${stats?.loyaltyPoints?.toLocaleString() || 0} pts` },
+        { icon: Clock, label: 'Order History', path: '/orders' },
+      ]
+    },
+    {
+      title: 'Support & Settings',
+      items: [
+        { icon: MessageCircle, label: 'Chat Support', online: true },
+        { icon: HelpCircle, label: 'Help Center' },
+        { icon: FileText, label: 'Terms & Privacy' },
+        { icon: Bell, label: 'Notifications' },
+        { icon: Settings, label: 'App Settings' },
+      ]
+    }
+  ];
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  // Calculate membership tier based on total spent
+  const getMembershipTier = () => {
+    const spent = stats?.totalSpent || 0;
+    if (spent >= 5000) return { name: 'Platinum', emoji: '💎' };
+    if (spent >= 2000) return { name: 'Gold', emoji: '⚡' };
+    if (spent >= 500) return { name: 'Silver', emoji: '🥈' };
+    return { name: 'Bronze', emoji: '🥉' };
+  };
+
+  const tier = getMembershipTier();
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -59,8 +80,12 @@ const Profile: React.FC = () => {
           <div className="flex items-center gap-4">
             {/* Avatar with status */}
             <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-xl">
-                <User className="w-10 h-10 text-primary-foreground" />
+              <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-xl overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-10 h-10 text-primary-foreground" />
+                )}
               </div>
               {/* Online indicator */}
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full border-3 border-white flex items-center justify-center">
@@ -69,11 +94,17 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-primary-foreground">Kwame Asante</h1>
-              <p className="text-sm text-primary-foreground/70">+233 20 123 4567</p>
+              <h1 className="text-xl font-bold text-primary-foreground">
+                {profile?.full_name || 'Guest User'}
+              </h1>
+              <p className="text-sm text-primary-foreground/70">
+                {profile?.phone || 'No phone added'}
+              </p>
               <div className="flex items-center gap-2 mt-2">
                 <div className="px-3 py-1 rounded-full bg-accent/80 backdrop-blur-sm">
-                  <span className="text-xs font-bold text-accent-foreground">⚡ Gold Member</span>
+                  <span className="text-xs font-bold text-accent-foreground">
+                    {tier.emoji} {tier.name} Member
+                  </span>
                 </div>
                 <div className="flex items-center gap-1 text-primary-foreground/80">
                   <Star className="w-3 h-3 fill-current" />
@@ -96,20 +127,28 @@ const Profile: React.FC = () => {
       {/* Stats Cards */}
       <div className="max-w-lg mx-auto px-4 -mt-4">
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Total Orders', value: '124', icon: '📦' },
-            { label: 'Points Earned', value: '1,250', icon: '⭐' },
-            { label: 'Money Saved', value: 'GH₵ 380', icon: '💰' },
-          ].map(({ label, value, icon }) => (
-            <div
-              key={label}
-              className="rounded-2xl bg-card border border-border/50 p-4 text-center shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="text-2xl mb-1">{icon}</div>
-              <p className="text-lg font-bold text-foreground">{value}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-            </div>
-          ))}
+          {statsLoading ? (
+            <>
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 rounded-2xl" />
+              ))}
+            </>
+          ) : (
+            [
+              { label: 'Total Orders', value: stats?.totalOrders?.toString() || '0', icon: '📦' },
+              { label: 'Points Earned', value: stats?.loyaltyPoints?.toLocaleString() || '0', icon: '⭐' },
+              { label: 'Money Saved', value: `GH₵ ${Math.floor((stats?.totalSpent || 0) * 0.05)}`, icon: '💰' },
+            ].map(({ label, value, icon }) => (
+              <div
+                key={label}
+                className="rounded-2xl bg-card border border-border/50 p-4 text-center shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="text-2xl mb-1">{icon}</div>
+                <p className="text-lg font-bold text-foreground">{value}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -173,36 +212,45 @@ const Profile: React.FC = () => {
         ))}
 
         {/* Admin & Rider Mode */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-            Switch Mode
-          </h3>
-          
-          <button 
-            onClick={toggleAdminMode}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-all group"
-          >
-            <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ShieldCheck className="w-5 h-5 text-primary" />
-            </div>
-            <span className="flex-1 text-left font-medium text-primary">Admin Dashboard</span>
-            <ChevronRight className="w-5 h-5 text-primary" />
-          </button>
+        {profile?.role === 'admin' || profile?.role === 'rider' ? (
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+              Switch Mode
+            </h3>
+            
+            {profile?.role === 'admin' && (
+              <button 
+                onClick={toggleAdminMode}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-all group"
+              >
+                <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                </div>
+                <span className="flex-1 text-left font-medium text-primary">Admin Dashboard</span>
+                <ChevronRight className="w-5 h-5 text-primary" />
+              </button>
+            )}
 
-          <button 
-            onClick={() => navigate('/rider')}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 hover:border-accent/40 transition-all group"
-          >
-            <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-xl">🏍️</span>
-            </div>
-            <span className="flex-1 text-left font-medium text-accent-foreground">Rider Mode</span>
-            <ChevronRight className="w-5 h-5 text-accent" />
-          </button>
-        </div>
+            {profile?.role === 'rider' && (
+              <button 
+                onClick={() => navigate('/rider')}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 hover:border-accent/40 transition-all group"
+              >
+                <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-xl">🏍️</span>
+                </div>
+                <span className="flex-1 text-left font-medium text-accent-foreground">Rider Mode</span>
+                <ChevronRight className="w-5 h-5 text-accent" />
+              </button>
+            )}
+          </div>
+        ) : null}
 
         {/* Logout */}
-        <button className="w-full flex items-center gap-4 p-4 rounded-2xl bg-destructive/5 border border-destructive/20 hover:bg-destructive/10 transition-all mt-4 group">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-4 p-4 rounded-2xl bg-destructive/5 border border-destructive/20 hover:bg-destructive/10 transition-all mt-4 group"
+        >
           <div className="w-11 h-11 rounded-xl bg-destructive/10 flex items-center justify-center group-hover:scale-110 transition-transform">
             <LogOut className="w-5 h-5 text-destructive" />
           </div>
