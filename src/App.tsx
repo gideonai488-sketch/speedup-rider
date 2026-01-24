@@ -31,10 +31,14 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminStores from "./pages/admin/AdminStores";
 import AdminRiders from "./pages/admin/AdminRiders";
+import AdminRiderApprovals from "./pages/admin/AdminRiderApprovals";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminPricing from "./pages/admin/AdminPricing";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+
+// Rider Pages
+import RiderEarnings from "./pages/rider/RiderEarnings";
 
 const queryClient = new QueryClient();
 
@@ -104,8 +108,9 @@ const App = () => {
                   {/* Rider Routes */}
                   <Route path="/rider" element={<RiderDashboard />} />
                   <Route path="/rider/dashboard" element={<RiderDashboard />} />
+                  <Route path="/rider/earnings" element={<RiderEarnings />} />
                   <Route path="/rider/profile" element={<Profile />} />
-                  <Route path="/rider/earnings" element={<Wallet />} />
+                  <Route path="/rider/deliveries" element={<Orders />} />
                   <Route path="/rider/deliveries" element={<Orders />} />
                   
                   {/* Admin Routes - Access via /admin */}
@@ -114,8 +119,11 @@ const App = () => {
                   <Route path="/admin/orders" element={<AdminOrders />} />
                   <Route path="/admin/stores" element={<AdminStores />} />
                   <Route path="/admin/riders" element={<AdminRiders />} />
+                  <Route path="/admin/rider-approvals" element={<AdminRiderApprovals />} />
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/pricing" element={<AdminPricing />} />
+                  <Route path="/admin/settings" element={<AdminSettings />} />
+                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
                   <Route path="/admin/settings" element={<AdminSettings />} />
                   <Route path="/admin/analytics" element={<AdminAnalytics />} />
                   

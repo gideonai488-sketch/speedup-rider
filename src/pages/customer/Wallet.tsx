@@ -4,41 +4,74 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   ArrowLeft, Wallet as WalletIcon, Plus, ArrowUpRight, ArrowDownLeft,
-  CreditCard, Smartphone, Building2, Gift, Sparkles, ChevronRight
+  CreditCard, Smartphone, Building2, Gift, Sparkles, ChevronRight, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface Transaction {
-  id: string;
-  type: 'credit' | 'debit';
-  amount: number;
-  description: string;
-  date: string;
-  icon: string;
-}
-
-const transactions: Transaction[] = [
-  { id: '1', type: 'debit', amount: 25, description: 'KFC Osu Order', date: '2 hours ago', icon: '🍔' },
-  { id: '2', type: 'credit', amount: 20, description: 'Referral Bonus', date: 'Yesterday', icon: '🎁' },
-  { id: '3', type: 'debit', amount: 15, description: 'Shoprite Delivery', date: 'Yesterday', icon: '🛒' },
-  { id: '4', type: 'credit', amount: 100, description: 'Wallet Top-up', date: '2 days ago', icon: '💳' },
-  { id: '5', type: 'debit', amount: 45, description: 'Pharmacy Order', date: '3 days ago', icon: '💊' },
-];
+import { useWallet, useTransactions, useTopUpWallet } from '@/hooks/useWallet';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import BottomNav from '@/components/layout/BottomNav';
 
 const topUpOptions = [50, 100, 200, 500];
+
+const getTransactionIcon = (type: string): string => {
+  switch (type) {
+    case 'deposit': return '💳';
+    case 'withdrawal': return '💸';
+    case 'order_payment': return '🛒';
+    case 'order_refund': return '↩️';
+    case 'rider_earning': return '🏍️';
+    case 'referral_bonus': return '🎁';
+    default: return '💰';
+  }
+};
+
+const getTransactionLabel = (type: string): string => {
+  switch (type) {
+    case 'deposit': return 'Wallet Top-up';
+    case 'withdrawal': return 'Withdrawal';
+    case 'order_payment': return 'Order Payment';
+    case 'order_refund': return 'Order Refund';
+    case 'rider_earning': return 'Delivery Earning';
+    case 'referral_bonus': return 'Referral Bonus';
+    default: return 'Transaction';
+  }
+};
 
 const Wallet: React.FC = () => {
   const navigate = useNavigate();
   const [showTopUp, setShowTopUp] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
-  const [balance] = useState(245.50);
+  
+  const { data: wallet, isLoading: walletLoading } = useWallet();
+  const { data: transactions = [], isLoading: txLoading } = useTransactions();
+  const topUpMutation = useTopUpWallet();
 
   const handleTopUp = (amount: number) => {
     setTopUpAmount(amount.toString());
   };
 
+  const handleConfirmTopUp = async () => {
+    const amount = parseFloat(topUpAmount);
+    if (!amount || amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    try {
+      await topUpMutation.mutateAsync(amount);
+      toast.success(`GH₵ ${amount} added to your wallet!`);
+      setShowTopUp(false);
+      setTopUpAmount('');
+    } catch (error) {
+      toast.error('Failed to top up wallet');
+    }
+  };
+
+  const balance = wallet?.balance || 0;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-gradient-to-br from-primary via-primary/90 to-accent pt-12 pb-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -65,7 +98,11 @@ const Wallet: React.FC = () => {
               </div>
               <div>
                 <p className="text-white/70 text-sm">Available Balance</p>
-                <p className="text-3xl font-bold text-white">GH₵ {balance.toFixed(2)}</p>
+                {walletLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-white" />
+                ) : (
+                  <p className="text-3xl font-bold text-white">GH₵ {balance.toFixed(2)}</p>
+                )}
               </div>
             </div>
             
@@ -129,33 +166,52 @@ const Wallet: React.FC = () => {
         {/* Transaction History */}
         <div>
           <h2 className="text-lg font-bold text-foreground mb-4">Recent Transactions</h2>
-          <div className="space-y-3">
-            {transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border"
-              >
-                <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-2xl">
-                  {tx.icon}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{tx.description}</p>
-                  <p className="text-sm text-muted-foreground">{tx.date}</p>
-                </div>
-                <div className={cn(
-                  'flex items-center gap-1 font-bold',
-                  tx.type === 'credit' ? 'text-success' : 'text-foreground'
-                )}>
-                  {tx.type === 'credit' ? (
-                    <ArrowDownLeft className="w-4 h-4" />
-                  ) : (
-                    <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
-                  )}
-                  <span>{tx.type === 'credit' ? '+' : '-'}GH₵{tx.amount}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {txLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <WalletIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No transactions yet</p>
+              <p className="text-sm">Your transaction history will appear here</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {transactions.map((tx) => {
+                const isCredit = ['deposit', 'order_refund', 'referral_bonus', 'rider_earning'].includes(tx.type);
+                return (
+                  <div
+                    key={tx.id}
+                    className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-2xl">
+                      {getTransactionIcon(tx.type)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">
+                        {tx.description || getTransactionLabel(tx.type)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(tx.created_at), 'MMM d, yyyy • h:mm a')}
+                      </p>
+                    </div>
+                    <div className={cn(
+                      'flex items-center gap-1 font-bold',
+                      isCredit ? 'text-success' : 'text-foreground'
+                    )}>
+                      {isCredit ? (
+                        <ArrowDownLeft className="w-4 h-4" />
+                      ) : (
+                        <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span>{isCredit ? '+' : '-'}GH₵{Math.abs(tx.amount).toFixed(2)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -206,13 +262,23 @@ const Wallet: React.FC = () => {
 
             <Button 
               className="w-full gradient-hero text-white"
-              disabled={!topUpAmount}
+              disabled={!topUpAmount || topUpMutation.isPending}
+              onClick={handleConfirmTopUp}
             >
-              Add GH₵{topUpAmount || '0'}
+              {topUpMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Add GH₵${topUpAmount || '0'}`
+              )}
             </Button>
           </div>
         </div>
       )}
+
+      <BottomNav />
     </div>
   );
 };

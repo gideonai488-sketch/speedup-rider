@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  title: string;
+  title?: string;
 }
 
 const adminNavItems = [
@@ -40,6 +40,7 @@ const adminNavItems = [
   { path: '/admin/orders', icon: ClipboardList, label: 'Orders' },
   { path: '/admin/stores', icon: Store, label: 'Stores' },
   { path: '/admin/riders', icon: Bike, label: 'Riders' },
+  { path: '/admin/rider-approvals', icon: Users, label: 'Approvals' },
   { path: '/admin/users', icon: Users, label: 'Users' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
@@ -128,7 +129,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                  <h1 className="text-lg font-bold text-foreground">{title}</h1>
+                  <h1 className="text-lg font-bold text-foreground">{title || 'Admin'}</h1>
                   <p className="text-xs text-muted-foreground hidden sm:block">Admin Dashboard</p>
                 </div>
               </div>

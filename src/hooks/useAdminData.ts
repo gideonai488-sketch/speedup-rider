@@ -385,3 +385,93 @@ export const useRiderEarnings = (riderId: string) => {
     enabled: !!riderId,
   });
 };
+
+// Pending riders (for approval)
+export const usePendingRiders = (status?: string) => {
+  return useQuery({
+    queryKey: ['pending-riders', status],
+    queryFn: async () => {
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'rider')
+        .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('rider_status', status);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+// Update rider status
+export const useUpdateRiderStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ riderId, status }: { riderId: string; status: string }) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ rider_status: status })
+        .eq('id', riderId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending-riders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-riders'] });
+    },
+  });
+};
+
+// Rider delivery stats
+export const useRiderDeliveryStats = (riderId: string) => {
+  return useQuery({
+    queryKey: ['rider-delivery-stats', riderId],
+    queryFn: async () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString();
+
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      const weekStr = weekStart.toISOString();
+
+      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      const monthStr = monthStart.toISOString();
+
+      // Get all delivered orders for this rider
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('rider_id', riderId)
+        .eq('status', 'delivered');
+
+      if (error) throw error;
+
+      const todayDeliveries = orders?.filter(o => 
+        new Date(o.delivered_at || o.updated_at) >= today
+      ).length || 0;
+
+      const weekDeliveries = orders?.filter(o => 
+        new Date(o.delivered_at || o.updated_at) >= weekStart
+      ).length || 0;
+
+      const totalDeliveries = orders?.length || 0;
+
+      return {
+        todayDeliveries,
+        weekDeliveries,
+        totalDeliveries,
+      };
+    },
+    enabled: !!riderId,
+  });
+};
