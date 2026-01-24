@@ -158,43 +158,26 @@ const RiderDelivery: React.FC = () => {
     const nextStatus = getNextStatus();
     if (!nextStatus || !order || !profile) return;
 
+    // Block completing delivery until customer has paid
+    if (nextStatus === 'delivered' && (order as any).payment_status !== 'paid') {
+      toast.error('Customer must pay before you can complete delivery');
+      toast.info('Please wait for customer to complete payment');
+      return;
+    }
+
     try {
       setIsCompletingDelivery(nextStatus === 'delivered');
       
       await updateStatus.mutateAsync({ orderId: order.id, status: nextStatus });
       
       if (nextStatus === 'delivered') {
-        // Calculate rider earning (full delivery fee)
+        // Rider just reports delivery - earnings were already credited via payment
         const riderEarning = Number(order.delivery_fee) || 15;
-        
-        // Credit rider's wallet with full delivery fee
-        const { data: riderWallet } = await supabase
-          .from('wallets')
-          .select('id, balance')
-          .eq('user_id', profile.id)
-          .single();
-
-        if (riderWallet) {
-          // Add earnings to rider wallet
-          await supabase
-            .from('wallets')
-            .update({ balance: (riderWallet.balance || 0) + riderEarning })
-            .eq('id', riderWallet.id);
-
-          // Record transaction
-          await supabase.from('transactions').insert({
-            wallet_id: riderWallet.id,
-            amount: riderEarning,
-            type: 'rider_earning',
-            description: `Delivery earning for order ${order.order_number}`,
-            order_id: order.id,
-          });
-        }
-
         toast.success(`Delivery completed! You earned GH₵ ${riderEarning.toFixed(2)}`);
-        toast.info('Customer will now be prompted to pay');
-        
         setTimeout(() => navigate('/rider'), 2000);
+      } else if (nextStatus === 'out_for_delivery') {
+        toast.success('Status updated - customer will be prompted to pay');
+        toast.info('Wait for payment before completing delivery');
       } else {
         toast.success(`Status updated to ${nextStatus.replace(/_/g, ' ')}`);
       }
@@ -208,16 +191,25 @@ const RiderDelivery: React.FC = () => {
   };
 
   const getStatusButtonText = () => {
+    const paymentStatus = (order as any)?.payment_status || 'pending';
     switch (currentStatus) {
       case 'picked_up':
         return 'Start Delivery';
       case 'out_for_delivery':
-        return 'Complete Delivery';
+        return paymentStatus === 'paid' ? 'Complete Delivery' : 'Waiting for Payment...';
       case 'delivered':
         return 'Delivered ✓';
       default:
         return 'Update Status';
     }
+  };
+
+  const canComplete = () => {
+    const paymentStatus = (order as any)?.payment_status || 'pending';
+    if (currentStatus === 'out_for_delivery') {
+      return paymentStatus === 'paid';
+    }
+    return true;
   };
 
   const formatCurrency = (value: number) => `GH₵ ${value?.toFixed(2) || '0.00'}`;
@@ -370,10 +362,12 @@ const RiderDelivery: React.FC = () => {
                 currentStatus === 'delivered' ? "text-white/80" : "text-muted-foreground"
               )}>
                 {currentStatus === 'delivered' 
-                  ? 'Waiting for customer payment' 
+                  ? 'Delivery complete!' 
                   : currentStatus === 'picked_up' 
                     ? 'Head to pickup location'
-                    : 'Heading to customer'}
+                    : (order as any)?.payment_status === 'paid'
+                      ? 'Payment received - complete delivery'
+                      : 'At customer - waiting for payment'}
               </p>
             </div>
             <div className="text-right">
@@ -494,24 +488,47 @@ const RiderDelivery: React.FC = () => {
         {/* Action Button */}
         {currentStatus !== 'delivered' && (
           <div className="px-4 pb-4 safe-area-pb">
+            {/* Payment waiting indicator */}
+            {currentStatus === 'out_for_delivery' && !canComplete() && (
+              <div className="mb-3 p-3 bg-warning/10 border border-warning/30 rounded-xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-warning" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-warning">Waiting for Payment</p>
+                  <p className="text-xs text-muted-foreground">Customer must pay before you can complete</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => refetch()}
+                  className="text-xs"
+                >
+                  Refresh
+                </Button>
+              </div>
+            )}
+            
             <Button
               onClick={handleUpdateStatus}
-              disabled={updateStatus.isPending || isCompletingDelivery || !getNextStatus()}
+              disabled={updateStatus.isPending || isCompletingDelivery || !getNextStatus() || !canComplete()}
               className={cn(
                 "w-full h-14 text-lg font-semibold",
-                currentStatus === 'out_for_delivery' 
+                currentStatus === 'out_for_delivery' && canComplete()
                   ? "bg-success hover:bg-success/90 text-white" 
-                  : "gradient-hero text-white"
+                  : currentStatus === 'out_for_delivery' && !canComplete()
+                    ? "bg-muted text-muted-foreground"
+                    : "gradient-hero text-white"
               )}
             >
               {updateStatus.isPending || isCompletingDelivery ? (
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {isCompletingDelivery ? 'Processing payment...' : 'Updating...'}
+                  {isCompletingDelivery ? 'Completing...' : 'Updating...'}
                 </div>
               ) : (
                 <>
-                  {currentStatus === 'out_for_delivery' && <CheckCircle2 className="w-5 h-5 mr-2" />}
+                  {currentStatus === 'out_for_delivery' && canComplete() && <CheckCircle2 className="w-5 h-5 mr-2" />}
                   {currentStatus === 'picked_up' && <Truck className="w-5 h-5 mr-2" />}
                   {getStatusButtonText()}
                 </>

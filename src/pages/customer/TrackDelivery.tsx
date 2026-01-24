@@ -115,7 +115,9 @@ const TrackDelivery: React.FC = () => {
   const currentStatus = (order?.status as DeliveryStatus) || 'pending';
   const paymentStatus = (order as any)?.payment_status || 'pending';
   const isDelivered = currentStatus === 'delivered';
-  const needsPayment = isDelivered && paymentStatus === 'pending';
+  const isOutForDelivery = currentStatus === 'out_for_delivery';
+  // Customer pays when rider is out for delivery (before delivery is marked complete)
+  const needsPayment = (isOutForDelivery || isDelivered) && paymentStatus === 'pending';
   const hasRider = !!order?.rider_id;
   const isFindingRider = !hasRider && ['pending'].includes(currentStatus);
 
@@ -305,13 +307,15 @@ const TrackDelivery: React.FC = () => {
             </div>
           )}
 
-          {/* Payment Section - Shows after delivery */}
+          {/* Payment Section - Shows when rider is out for delivery or after */}
           {needsPayment && (
             <div className="pt-4 border-t border-border animate-fade-in">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="font-semibold text-foreground">Payment Due</p>
-                  <p className="text-sm text-muted-foreground">Your order has been delivered</p>
+                  <p className="font-semibold text-foreground">Payment Required</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isOutForDelivery ? 'Pay now to complete your delivery' : 'Please complete payment'}
+                  </p>
                 </div>
                 <p className="text-2xl font-bold text-primary">{formatCurrency(Number(order.total))}</p>
               </div>
