@@ -111,14 +111,19 @@ const FindingRider: React.FC<FindingRiderProps> = ({
     setSearchComplete(false);
   };
 
-  const handleCancelOrder = async () => {
+  const handleCancelOrder = async (e?: React.MouseEvent) => {
+    // Prevent default AlertDialogAction behavior
+    e?.preventDefault();
     if (!onCancel) return;
     setIsCancelling(true);
     try {
       await onCancel();
+      setShowCancelDialog(false);
+    } catch (err) {
+      console.error('Cancel error:', err);
+      // Don't close dialog on error - let user retry
     } finally {
       setIsCancelling(false);
-      setShowCancelDialog(false);
     }
   };
 
@@ -313,7 +318,10 @@ const FindingRider: React.FC<FindingRiderProps> = ({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isCancelling}>Keep Searching</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleCancelOrder}
+              onClick={(e) => {
+                e.preventDefault();
+                handleCancelOrder(e);
+              }}
               disabled={isCancelling}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
