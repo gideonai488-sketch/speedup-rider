@@ -198,13 +198,19 @@ export const useUpdateOrderStatus = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update order status error:', error);
+        throw new Error(`Failed to update order: ${error.message}`);
+      }
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] });
       queryClient.invalidateQueries({ queryKey: ['rider-orders'] });
       queryClient.invalidateQueries({ queryKey: ['available-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['rider-pending-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['rider-active-orders'] });
     },
   });
 };
@@ -217,6 +223,18 @@ export const useAcceptOrder = () => {
     mutationFn: async (orderId: string) => {
       if (!profile) throw new Error('Not authenticated');
 
+      // First check if order is still available
+      const { data: existingOrder, error: checkError } = await supabase
+        .from('orders')
+        .select('id, rider_id, status')
+        .eq('id', orderId)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+      if (!existingOrder) throw new Error('Order not found');
+      if (existingOrder.rider_id) throw new Error('Order already accepted by another rider');
+
+      // Atomically update only if rider_id is still null
       const { data, error } = await supabase
         .from('orders')
         .update({
@@ -228,13 +246,20 @@ export const useAcceptOrder = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('Order already accepted by another rider');
+        }
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['rider-orders'] });
       queryClient.invalidateQueries({ queryKey: ['available-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['rider-pending-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['rider-active-orders'] });
     },
   });
 };
