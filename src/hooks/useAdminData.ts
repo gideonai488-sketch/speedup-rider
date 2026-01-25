@@ -297,29 +297,58 @@ export const useRiderPendingOrders = () => {
   });
 };
 
-// Accept order as rider
+// Accept order as rider - with race condition protection
 export const useAcceptOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ orderId, riderId }: { orderId: string; riderId: string }) => {
+      // First check if order is still available (race condition protection)
+      const { data: existingOrder, error: checkError } = await supabase
+        .from('orders')
+        .select('id, rider_id, status')
+        .eq('id', orderId)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+      
+      // If order doesn't exist or already has a rider, throw error
+      if (!existingOrder) {
+        throw new Error('Order not found');
+      }
+      
+      if (existingOrder.rider_id) {
+        throw new Error('Order already accepted by another rider');
+      }
+
+      // Atomically update only if rider_id is still null
       const { data, error } = await supabase
         .from('orders')
         .update({ 
           rider_id: riderId, 
-          status: 'picked_up',
+          status: 'confirmed', // Set to confirmed, not picked_up
           updated_at: new Date().toISOString()
         })
         .eq('id', orderId)
+        .is('rider_id', null) // Critical: Only update if no rider assigned yet
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If no rows updated, it means another rider got it first
+        if (error.code === 'PGRST116') {
+          throw new Error('Order already accepted by another rider');
+        }
+        throw error;
+      }
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rider-pending-orders'] });
       queryClient.invalidateQueries({ queryKey: ['rider-active-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['available-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 };
