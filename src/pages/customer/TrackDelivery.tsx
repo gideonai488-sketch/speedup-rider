@@ -29,6 +29,38 @@ const TrackDelivery: React.FC = () => {
   const [eta, setEta] = useState(15);
   const [currentStreet, setCurrentStreet] = useState('En route to you');
 
+  // Subscribe to real-time order updates (for rider acceptance, status changes)
+  useEffect(() => {
+    if (!orderId) return;
+
+    const channel = supabase
+      .channel(`order-tracking-${orderId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${orderId}`,
+        },
+        (payload) => {
+          console.log('Order updated:', payload);
+          // Refetch to get full data with relations
+          refetch();
+          
+          // Show toast for rider assignment
+          if (payload.new.rider_id && !payload.old?.rider_id) {
+            toast.success('A rider has accepted your order!');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [orderId, refetch]);
+
   // Update ETA based on status
   useEffect(() => {
     if (order?.status) {
