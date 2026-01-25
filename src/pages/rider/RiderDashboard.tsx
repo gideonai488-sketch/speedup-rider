@@ -175,8 +175,18 @@ const RiderDashboard: React.FC = () => {
       });
       toast.success(`Order accepted! Navigate to ${selectedOrder.stores?.name || 'pickup'}`);
       setSelectedOrder(null);
-    } catch (error) {
-      toast.error('Failed to accept order');
+      refetchPending(); // Immediately refresh pending orders
+    } catch (error: any) {
+      // Show specific error message for race conditions
+      if (error?.message?.includes('already accepted')) {
+        toast.error('Order was already accepted by another rider');
+      } else if (error?.message?.includes('not found')) {
+        toast.error('Order no longer available');
+      } else {
+        toast.error('Failed to accept order. Please try again.');
+      }
+      setSelectedOrder(null);
+      refetchPending(); // Refresh to remove unavailable orders
     }
   };
 
