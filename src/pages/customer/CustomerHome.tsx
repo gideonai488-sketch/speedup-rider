@@ -9,14 +9,15 @@ import StoreLogo from '@/components/ui/store-logo';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw
 } from 'lucide-react';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
-import { useStores } from '@/hooks/useStores';
+import { useStoresByCity } from '@/hooks/useStores';
 import { useOrders } from '@/hooks/useOrders';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/context/AuthContext';
+import { useUserLocation } from '@/hooks/useUserLocation';
 import { Database } from '@/integrations/supabase/types';
 
 type StoreCategory = Database['public']['Enums']['store_category'];
@@ -45,9 +46,15 @@ const CustomerHome: React.FC = () => {
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
   
   const { user, profile, signOut, loading: authLoading } = useAuth();
-  const { data: stores, isLoading: storesLoading } = useStores();
+  const { city, isLoading: locationLoading, refetch: refetchLocation } = useUserLocation();
+  const { data: storeData, isLoading: storesLoading } = useStoresByCity(city);
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const { data: wallet } = useWallet();
+
+  // Extract stores from the hook data
+  const stores = storeData?.stores || [];
+  const isFilteredByCity = storeData?.isFiltered || false;
+  const currentCity = storeData?.city || city;
 
   // Redirect to auth if not logged in
   React.useEffect(() => {
@@ -56,7 +63,7 @@ const CustomerHome: React.FC = () => {
     }
   }, [user, authLoading, navigate]);
 
-  const featuredStores = stores?.filter(s => s.is_featured) || [];
+  const featuredStores = stores.filter(s => s.is_featured) || [];
   const recentOrders = orders?.slice(0, 2) || [];
 
   const handleSignOut = async () => {
@@ -102,10 +109,22 @@ const CustomerHome: React.FC = () => {
                 <h1 className="text-lg font-bold text-foreground">
                   Speed<span className="text-primary">Rush</span>
                 </h1>
-                <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <button 
+                  onClick={refetchLocation}
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
                   <MapPin className="w-3 h-3 text-primary" />
-                  {profile?.address || 'Set location'}
-                  <ChevronRight className="w-3 h-3" />
+                  {locationLoading ? (
+                    <span className="flex items-center gap-1">
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Detecting...
+                    </span>
+                  ) : (
+                    <>
+                      {currentCity || profile?.address || 'Set location'}
+                      <ChevronRight className="w-3 h-3" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -193,7 +212,14 @@ const CustomerHome: React.FC = () => {
         {/* Featured Stores - Netflix Style */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Featured Stores</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground">Featured Stores</h2>
+              {isFilteredByCity && currentCity && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  in {currentCity}
+                </span>
+              )}
+            </div>
             <button className="text-sm text-primary font-medium">See all</button>
           </div>
           
@@ -243,7 +269,14 @@ const CustomerHome: React.FC = () => {
         {/* Popular Stores Grid */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Popular Near You</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-foreground">Popular Near You</h2>
+              {isFilteredByCity && currentCity && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  {currentCity}
+                </span>
+              )}
+            </div>
             <button className="text-sm text-primary font-medium">See all</button>
           </div>
           
