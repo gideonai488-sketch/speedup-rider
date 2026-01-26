@@ -1,0 +1,198 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface UserLocation {
+  city: string | null;
+  region: string | null;
+  coordinates: {
+    lat: number;
+    lng: number;
+  } | null;
+  isLoading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+// Map of Ghana regions/cities for better matching
+const GHANA_CITIES = [
+  'Accra', 'Tema', 'Kumasi', 'Tamale', 'Takoradi', 'Sekondi',
+  'Cape Coast', 'Koforidua', 'Sunyani', 'Ho', 'Bolgatanga',
+  'Wa', 'Techiman', 'Obuasi', 'Teshie', 'Madina', 'Ashaiman',
+  'Nungua', 'Kasoa', 'Aflao', 'Hohoe', 'Keta', 'Kpando',
+  'Winneba', 'Nsawam', 'Swedru', 'Agona', 'Axim', 'Elmina',
+  'Prestea', 'Tarkwa', 'Dunkwa', 'Nkawkaw', 'Mpraeso', 'Akim Oda',
+  'Suhum', 'Kibi', 'Akwatia', 'Asamankese', 'Berekum', 'Dormaa',
+  'Wenchi', 'Goaso', 'Mampong', 'Ejura', 'Konongo', 'Agogo',
+  'Bekwai', 'Juaben', 'Bawku', 'Navrongo', 'Zebilla', 'Damongo',
+  'Yendi', 'Salaga', 'Bimbilla', 'Kintampo', 'Atebubu', 'Yeji'
+];
+
+const extractCityFromContext = (context: any[] | undefined, placeName: string): string | null => {
+  if (!context) return null;
+
+  // First try to find place type in context
+  for (const ctx of context) {
+    if (ctx.id?.startsWith('place.') || ctx.id?.startsWith('locality.')) {
+      // Check if it matches a known Ghana city
+      const cityName = ctx.text;
+      const matchedCity = GHANA_CITIES.find(
+        c => cityName?.toLowerCase().includes(c.toLowerCase()) ||
+             c.toLowerCase().includes(cityName?.toLowerCase())
+      );
+      if (matchedCity) return matchedCity;
+      return cityName;
+    }
+  }
+
+  // Try to extract from place_name
+  for (const city of GHANA_CITIES) {
+    if (placeName?.toLowerCase().includes(city.toLowerCase())) {
+      return city;
+    }
+  }
+
+  // Check region context
+  for (const ctx of context) {
+    if (ctx.id?.startsWith('region.')) {
+      // Map region to main city
+      const region = ctx.text?.toLowerCase();
+      if (region?.includes('greater accra')) return 'Accra';
+      if (region?.includes('ashanti')) return 'Kumasi';
+      if (region?.includes('western')) return 'Takoradi';
+      if (region?.includes('central')) return 'Cape Coast';
+      if (region?.includes('eastern')) return 'Koforidua';
+      if (region?.includes('volta') || region?.includes('oti')) return 'Ho';
+      if (region?.includes('northern')) return 'Tamale';
+      if (region?.includes('upper east')) return 'Bolgatanga';
+      if (region?.includes('upper west')) return 'Wa';
+      if (region?.includes('bono') || region?.includes('ahafo')) return 'Sunyani';
+      if (region?.includes('savannah')) return 'Damongo';
+      if (region?.includes('north east')) return 'Nalerigu';
+    }
+  }
+
+  return null;
+};
+
+export const useUserLocation = (): UserLocation => {
+  const [city, setCity] = useState<string | null>(null);
+  const [region, setRegion] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const detectLocation = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    // Check if we have cached location in sessionStorage
+    const cachedLocation = sessionStorage.getItem('user_location');
+    if (cachedLocation) {
+      try {
+        const parsed = JSON.parse(cachedLocation);
+        // Check if cache is less than 30 minutes old
+        if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+          setCity(parsed.city);
+          setRegion(parsed.region);
+          setCoordinates(parsed.coordinates);
+          setIsLoading(false);
+          return;
+        }
+      } catch (e) {
+        sessionStorage.removeItem('user_location');
+      }
+    }
+
+    if (!navigator.geolocation) {
+      setError('Geolocation not supported');
+      setCity('Accra'); // Default fallback
+      setIsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setCoordinates(coords);
+
+          // Reverse geocode to get city
+          const { data, error: geocodeError } = await supabase.functions.invoke('mapbox-geocode', {
+            body: {
+              query: `${coords.lng},${coords.lat}`,
+              types: 'place,locality,region',
+            },
+          });
+
+          if (geocodeError) {
+            console.error('Geocode error:', geocodeError);
+            throw geocodeError;
+          }
+
+          if (data?.features?.[0]) {
+            const feature = data.features[0];
+            const detectedCity = extractCityFromContext(feature.context, feature.place_name);
+            
+            // Extract region from context
+            let detectedRegion: string | null = null;
+            if (feature.context) {
+              for (const ctx of feature.context) {
+                if (ctx.id?.startsWith('region.')) {
+                  detectedRegion = ctx.text;
+                  break;
+                }
+              }
+            }
+
+            setCity(detectedCity || 'Accra');
+            setRegion(detectedRegion);
+
+            // Cache the location
+            sessionStorage.setItem('user_location', JSON.stringify({
+              city: detectedCity || 'Accra',
+              region: detectedRegion,
+              coordinates: coords,
+              timestamp: Date.now(),
+            }));
+          } else {
+            setCity('Accra');
+          }
+        } catch (err) {
+          console.error('Location detection error:', err);
+          setCity('Accra');
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      (geoError) => {
+        console.error('Geolocation error:', geoError);
+        setError(geoError.message);
+        setCity('Accra'); // Default fallback
+        setIsLoading(false);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000, // 5 minutes
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    detectLocation();
+  }, [detectLocation]);
+
+  return {
+    city,
+    region,
+    coordinates,
+    isLoading,
+    error,
+    refetch: detectLocation,
+  };
+};
+
+export default useUserLocation;
