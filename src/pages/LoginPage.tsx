@@ -1,34 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Zap, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Zap, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
+import { z } from 'zod';
+
+// Validation schema
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { signIn, user, profile, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user && profile) {
+      const redirectPath = profile.role === 'rider' 
+        ? '/rider/dashboard' 
+        : profile.role === 'admin' 
+          ? '/admin/dashboard' 
+          : '/customer/home';
+      navigate(redirectPath, { replace: true });
+    }
+  }, [user, profile, loading, navigate]);
+
+  const validateForm = () => {
+    try {
+      loginSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: { email?: string; password?: string } = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0] as 'email' | 'password';
+          fieldErrors[field] = err.message;
+        });
+        setErrors(fieldErrors);
+      }
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setIsLoading(true);
     
-    // Simulate login
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Demo: check email for role (in real app, this comes from backend)
-    const isRider = formData.email.includes('rider');
-    
-    toast.success('Welcome back!');
-    navigate(isRider ? '/rider/dashboard' : '/customer/home');
-    setIsLoading(false);
+    try {
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please try again.');
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error('Please verify your email before logging in.');
+        } else {
+          toast.error(error.message || 'Failed to log in. Please try again.');
+        }
+        setIsLoading(false);
+        return;
+      }
+      
+      toast.success('Welcome back!');
+      // Navigation will be handled by the useEffect when profile loads
+    } catch (err) {
+      toast.error('An unexpected error occurred. Please try again.');
+      setIsLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -79,8 +143,12 @@ const LoginPage: React.FC = () => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="mt-1.5"
+                className={`mt-1.5 ${errors.email ? 'border-destructive' : ''}`}
+                disabled={isLoading}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive mt-1">{errors.email}</p>
+              )}
             </div>
             
             <div>
@@ -98,16 +166,21 @@ const LoginPage: React.FC = () => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
-                  className="pr-10"
+                  className={`pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-sm text-destructive mt-1">{errors.password}</p>
+              )}
             </div>
             
             <Button 
@@ -115,7 +188,14 @@ const LoginPage: React.FC = () => {
               className="w-full gradient-hero text-white shadow-glow"
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Log in'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                'Log in'
+              )}
             </Button>
           </form>
           
@@ -125,12 +205,6 @@ const LoginPage: React.FC = () => {
               Sign up
             </Link>
           </p>
-          
-          <div className="mt-8 p-4 bg-secondary/50 rounded-xl">
-            <p className="text-sm text-muted-foreground text-center">
-              <strong>Demo:</strong> Use any email to login. Include "rider" in email for rider dashboard.
-            </p>
-          </div>
         </div>
       </div>
     </div>

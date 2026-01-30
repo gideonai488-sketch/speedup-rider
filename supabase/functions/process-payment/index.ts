@@ -17,17 +17,68 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
     const paystackPublicKey = Deno.env.get("PAYSTACK_PUBLIC_KEY");
+    
+    // ========================================
+    // AUTHENTICATION CHECK - CRITICAL SECURITY
+    // ========================================
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.error("Missing or invalid authorization header");
+      return new Response(
+        JSON.stringify({ success: false, error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create client with user's auth token to validate
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Validate the JWT and get claims
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getUser(token);
+    
+    if (claimsError || !claimsData?.user) {
+      console.error("Authentication failed:", claimsError?.message);
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid authentication token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authenticatedUserId = claimsData.user.id;
+    console.log(`Authenticated user: ${authenticatedUserId}`);
+
+    // Now use service role for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { orderId, paymentMethod, customerId, callbackUrl } = await req.json();
+    const { orderId, paymentMethod, callbackUrl } = await req.json();
 
     console.log(`Processing payment for order: ${orderId}, method: ${paymentMethod}`);
     console.log(`Paystack keys configured: secret=${!!paystackSecretKey}, public=${!!paystackPublicKey}`);
 
-    if (!orderId || !paymentMethod || !customerId) {
-      throw new Error("Missing required fields: orderId, paymentMethod, or customerId");
+    if (!orderId || !paymentMethod) {
+      throw new Error("Missing required fields: orderId or paymentMethod");
+    }
+
+    // ========================================
+    // AUTHORIZATION CHECK - VERIFY ORDER OWNERSHIP
+    // ========================================
+    
+    // Get user's profile
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("user_id", authenticatedUserId)
+      .single();
+
+    if (profileError || !userProfile) {
+      console.error("User profile not found:", profileError);
+      throw new Error("User profile not found");
     }
 
     // Get the order details with rider info including subaccount
@@ -40,6 +91,15 @@ serve(async (req) => {
     if (orderError || !order) {
       console.error("Order fetch error:", orderError);
       throw new Error("Order not found");
+    }
+
+    // CRITICAL: Verify the authenticated user owns this order
+    if (order.customer_id !== userProfile.id) {
+      console.error(`Authorization failed: User ${userProfile.id} attempted to pay for order owned by ${order.customer_id}`);
+      return new Response(
+        JSON.stringify({ success: false, error: "You are not authorized to pay for this order" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Get rider's subaccount code for split payment
@@ -58,36 +118,14 @@ serve(async (req) => {
 
     console.log(`Order total: ${totalAmount}, Delivery fee: ${deliveryFee}, Rider earnings: ${riderEarnings}`);
 
-    // Get customer profile - customerId can be either profile.id or auth.user.id
-    let customerProfile = await supabase
-      .from("profiles")
-      .select("id, user_id")
-      .eq("id", customerId)
-      .maybeSingle();
-
-    // If not found by profile.id, try by user_id
-    if (!customerProfile.data) {
-      customerProfile = await supabase
-        .from("profiles")
-        .select("id, user_id")
-        .eq("user_id", customerId)
-        .single();
-    }
-
-    if (!customerProfile.data) {
-      throw new Error("Customer profile not found");
-    }
-
-    const profile = customerProfile.data;
-
     // Get customer email from auth.users via service role
-    const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
-    const customerEmail = authUser?.user?.email || `customer_${profile.id}@speedrush.app`;
+    const { data: authUser } = await supabase.auth.admin.getUserById(authenticatedUserId);
+    const customerEmail = authUser?.user?.email || `customer_${userProfile.id}@speedrush.app`;
 
     const { data: customerWallet } = await supabase
       .from("wallets")
       .select("*")
-      .eq("user_id", profile.id)
+      .eq("user_id", userProfile.id)
       .single();
 
     // Process payment based on method
@@ -135,7 +173,7 @@ serve(async (req) => {
         channels,
         metadata: {
           order_id: orderId,
-          customer_id: customerId,
+          customer_id: userProfile.id, // Use validated profile ID
           rider_id: order.rider_id,
           delivery_fee: deliveryFee,
           platform_fee: PLATFORM_FEE,
@@ -233,17 +271,11 @@ serve(async (req) => {
           });
 
           console.log(`Credited GH₵${riderEarnings} to rider ${riderProfile.full_name}`);
-          
-          // TODO: When Paystack key is added, use Paystack Transfer API to send to rider's bank
-          // const riderBankDetails = await getRiderBankDetails(riderProfile.id);
-          // if (riderBankDetails && paystackSecretKey) {
-          //   await initiatePaystackTransfer(riderEarnings, riderBankDetails);
-          // }
         }
       }
     }
 
-    // Credit admin with platform fee - will use Paystack when key is added
+    // Credit admin with platform fee
     const { data: adminProfile } = await supabase
       .from("profiles")
       .select("id")

@@ -16,7 +16,42 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    
+    // ========================================
+    // AUTHENTICATION CHECK - CRITICAL SECURITY
+    // ========================================
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.error("Missing or invalid authorization header");
+      return new Response(
+        JSON.stringify({ success: false, error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create client with user's auth token to validate
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Validate the JWT and get user
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getUser(token);
+    
+    if (claimsError || !claimsData?.user) {
+      console.error("Authentication failed:", claimsError?.message);
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid authentication token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authenticatedUserId = claimsData.user.id;
+    console.log(`Authenticated user: ${authenticatedUserId}`);
+
+    // Now use service role for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { reference, orderId } = await req.json();
@@ -29,6 +64,23 @@ serve(async (req) => {
 
     if (!paystackSecretKey) {
       throw new Error("Payment gateway not configured");
+    }
+
+    // ========================================
+    // IDEMPOTENCY CHECK - Prevent duplicate processing
+    // ========================================
+    const { data: existingPayment } = await supabase
+      .from("payment_idempotency")
+      .select("*")
+      .eq("payment_reference", reference)
+      .maybeSingle();
+
+    if (existingPayment) {
+      console.log(`Payment ${reference} already processed, returning cached result`);
+      return new Response(
+        JSON.stringify(existingPayment.result || { success: true, message: "Payment already processed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Verify transaction with Paystack
@@ -61,6 +113,18 @@ serve(async (req) => {
       throw new Error("Order ID not found in payment metadata");
     }
 
+    // Get user's profile for authorization
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("user_id", authenticatedUserId)
+      .single();
+
+    if (profileError || !userProfile) {
+      console.error("User profile not found:", profileError);
+      throw new Error("User profile not found");
+    }
+
     // Get order details
     const { data: order, error: orderError } = await supabase
       .from("orders")
@@ -73,11 +137,51 @@ serve(async (req) => {
       throw new Error("Order not found");
     }
 
-    // Already paid - return success
+    // ========================================
+    // AUTHORIZATION CHECK - Verify user is related to this order
+    // ========================================
+    const isCustomer = order.customer_id === userProfile.id;
+    const isRider = order.rider_id === userProfile.id;
+    const isAdmin = userProfile.role === 'admin';
+
+    if (!isCustomer && !isRider && !isAdmin) {
+      console.error(`Authorization failed: User ${userProfile.id} is not related to order ${actualOrderId}`);
+      return new Response(
+        JSON.stringify({ success: false, error: "Not authorized to verify this payment" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Already paid - return success (idempotent)
     if (order.payment_status === "paid") {
       console.log("Order already marked as paid");
+      
+      // Record in idempotency table (ignore if exists)
+      await supabase.from("payment_idempotency").upsert({
+        payment_reference: reference,
+        order_id: actualOrderId,
+        result: { success: true, message: "Payment already processed" }
+      }, { onConflict: 'payment_reference', ignoreDuplicates: true });
+      
       return new Response(
         JSON.stringify({ success: true, message: "Payment already processed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Record this payment to prevent duplicate processing
+    const { error: idempotencyError } = await supabase
+      .from("payment_idempotency")
+      .insert({
+        payment_reference: reference,
+        order_id: actualOrderId,
+      });
+
+    if (idempotencyError && idempotencyError.code === '23505') {
+      // Duplicate key - another request is processing this payment
+      console.log(`Payment ${reference} is being processed by another request`);
+      return new Response(
+        JSON.stringify({ success: true, message: "Payment is being processed" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -184,13 +288,21 @@ serve(async (req) => {
 
     console.log(`Payment verified and processed for order ${actualOrderId}`);
 
+    const result = {
+      success: true,
+      message: "Payment verified successfully",
+      paymentMethod: paymentChannel,
+      amount: verifyData.data.amount / 100,
+    };
+
+    // Update idempotency record with result
+    await supabase
+      .from("payment_idempotency")
+      .update({ result })
+      .eq("payment_reference", reference);
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Payment verified successfully",
-        paymentMethod: paymentChannel,
-        amount: verifyData.data.amount / 100, // Convert from pesewas to GHS
-      }),
+      JSON.stringify(result),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
