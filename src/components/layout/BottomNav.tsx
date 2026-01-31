@@ -1,15 +1,13 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Search, ClipboardList, ShoppingBag, User, Zap, Wallet, Clock } from 'lucide-react';
+import { Home, Search, ClipboardList, User, Zap, Wallet, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
 const customerNavItems = [
   { path: '/customer', icon: Home, label: 'Home' },
   { path: '/search', icon: Search, label: 'Search' },
   { path: '/orders', icon: ClipboardList, label: 'Orders' },
-  { path: '/cart', icon: ShoppingBag, label: 'Cart' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 
@@ -22,7 +20,6 @@ const riderNavItems = [
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
-  const { totalItems } = useCart();
   const { profile } = useAuth();
 
   // Determine if user is a rider based on profile role or current route
@@ -36,7 +33,6 @@ const BottomNav: React.FC = () => {
           const isActive = location.pathname === path || 
             (path === '/profile' && location.pathname === '/profile') ||
             (path === '/rider/profile' && location.pathname === '/rider/profile');
-          const isCart = path === '/cart';
 
           return (
             <NavLink
@@ -55,11 +51,6 @@ const BottomNav: React.FC = () => {
                   )}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
-                {isCart && totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 gradient-coral rounded-full text-xs font-bold text-coral-foreground flex items-center justify-center animate-scale-in">
-                    {totalItems}
-                  </span>
-                )}
               </div>
               <span
                 className={cn(
