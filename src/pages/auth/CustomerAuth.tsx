@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
-import { Loader2, Mail, Lock, User, Phone, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Loader2, Lock, User, Phone, ShoppingBag, ArrowLeft, MapPin } from 'lucide-react';
 import { z } from 'zod';
+import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 
-const emailSchema = z.string().email('Please enter a valid email address');
+const phoneSchema = z.string().min(10, 'Please enter a valid phone number');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 const CustomerAuth: React.FC = () => {
@@ -21,22 +23,23 @@ const CustomerAuth: React.FC = () => {
   const [activeTab, setActiveTab] = useState('login');
   
   // Login form
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   
   // Signup form
-  const [signupEmail, setSignupEmail] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
-  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [signupCity, setSignupCity] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+
+  const citiesByRegion = getCitiesByRegion();
 
   useEffect(() => {
     if (user && profile && !authLoading) {
       if (profile.role === 'admin') {
         navigate('/admin');
       } else if (profile.role === 'rider') {
-        // Rider trying to access customer auth - redirect to rider app
         toast.error('Please use the rider app to login');
         navigate('/rider/auth');
       } else {
@@ -49,7 +52,7 @@ const CustomerAuth: React.FC = () => {
     e.preventDefault();
     
     try {
-      emailSchema.parse(loginEmail);
+      phoneSchema.parse(loginPhone);
       passwordSchema.parse(loginPassword);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -59,12 +62,14 @@ const CustomerAuth: React.FC = () => {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(loginEmail, loginPassword);
+    // Use phone as email format for Supabase auth
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
 
     if (error) {
       if (error.message.includes('Invalid login credentials')) {
-        toast.error('Invalid email or password');
+        toast.error('Invalid phone number or password');
       } else {
         toast.error(error.message);
       }
@@ -77,7 +82,7 @@ const CustomerAuth: React.FC = () => {
     e.preventDefault();
     
     try {
-      emailSchema.parse(signupEmail);
+      phoneSchema.parse(signupPhone);
       passwordSchema.parse(signupPassword);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -96,14 +101,21 @@ const CustomerAuth: React.FC = () => {
       return;
     }
 
+    if (!signupCity) {
+      toast.error('Please select your city');
+      return;
+    }
+
     setIsLoading(true);
-    // Always sign up as customer from this page
-    const { error } = await signUp(signupEmail, signupPassword, signupName, 'customer', signupPhone);
+    // Use phone as email format for Supabase auth
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const cityLabel = ghanaianCities.find(c => c.value === signupCity)?.label || signupCity;
+    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, cityLabel);
     setIsLoading(false);
 
     if (error) {
       if (error.message.includes('already registered')) {
-        toast.error('This email is already registered. Please login instead.');
+        toast.error('This phone number is already registered. Please login instead.');
       } else {
         toast.error(error.message);
       }
@@ -147,15 +159,15 @@ const CustomerAuth: React.FC = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-phone">Phone Number</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
+                        id="login-phone"
+                        type="tel"
+                        placeholder="0XX XXX XXXX"
+                        value={loginPhone}
+                        onChange={(e) => setLoginPhone(e.target.value)}
                         className="pl-10"
                         required
                       />
@@ -207,33 +219,42 @@ const CustomerAuth: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-phone">Phone Number</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
+                        id="signup-phone"
+                        type="tel"
+                        placeholder="0XX XXX XXXX"
+                        value={signupPhone}
+                        onChange={(e) => setSignupPhone(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Phone</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-phone"
-                        type="tel"
-                        placeholder="+233 XX XXX XXXX"
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+                    <Label>City</Label>
+                    <Select value={signupCity} onValueChange={setSignupCity}>
+                      <SelectTrigger className="w-full">
+                        <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <SelectValue placeholder="Select your city" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {Object.entries(citiesByRegion).map(([region, cities]) => (
+                          <div key={region}>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted">
+                              {region} Region
+                            </div>
+                            {cities.map((city) => (
+                              <SelectItem key={city.value} value={city.value}>
+                                {city.label}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>

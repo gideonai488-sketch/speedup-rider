@@ -23,7 +23,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role?: UserRole, phone?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, role?: UserRole, phone?: string, city?: string, vehicleType?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
@@ -95,7 +95,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     password: string,
     fullName: string,
     role: UserRole = 'customer',
-    phone?: string
+    phone?: string,
+    city?: string,
+    vehicleType?: string
   ) => {
     const redirectUrl = `${window.location.origin}/`;
 
@@ -108,6 +110,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           full_name: fullName,
           role: role,
           phone: phone,
+          city: city,
+          vehicle_type: vehicleType,
         },
       },
     });

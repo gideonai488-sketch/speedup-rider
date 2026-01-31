@@ -1,28 +1,35 @@
 import React, { useState } from 'react';
-import { Search as SearchIcon, X, SlidersHorizontal } from 'lucide-react';
+import { Search as SearchIcon, X, SlidersHorizontal, Store } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import BottomNav from '@/components/layout/BottomNav';
-import ServiceCard from '@/components/home/ServiceCard';
-import ServiceDetailSheet from '@/components/service/ServiceDetailSheet';
-import { laundryServices, categories } from '@/data/services';
-import { LaundryService } from '@/types/laundry';
+import { useStores } from '@/hooks/useStores';
 import { cn } from '@/lib/utils';
+import StoreLogo from '@/components/ui/store-logo';
+
+const categories = [
+  { id: 'all', name: 'All' },
+  { id: 'food', name: 'Food' },
+  { id: 'groceries', name: 'Groceries' },
+  { id: 'pharmacy', name: 'Pharmacy' },
+  { id: 'electronics', name: 'Electronics' },
+];
 
 const Search: React.FC = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [selectedService, setSelectedService] = useState<LaundryService | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
+  const { data: stores, isLoading } = useStores();
 
-  const filteredServices = laundryServices.filter((service) => {
-    const matchesQuery = service.name.toLowerCase().includes(query.toLowerCase()) ||
-      service.description.toLowerCase().includes(query.toLowerCase());
-    const matchesCategory = activeCategory === 'all' || service.category === activeCategory;
+  const filteredStores = stores?.filter((store) => {
+    const matchesQuery = store.name.toLowerCase().includes(query.toLowerCase()) ||
+      store.description?.toLowerCase().includes(query.toLowerCase());
+    const matchesCategory = activeCategory === 'all' || store.category === activeCategory;
     return matchesQuery && matchesCategory;
-  });
+  }) || [];
 
-  const handleServiceClick = (service: LaundryService) => {
-    setSelectedService(service);
-    setIsSheetOpen(true);
+  const handleStoreClick = (storeId: string) => {
+    navigate(`/customer/store/${storeId}`);
   };
 
   return (
@@ -36,7 +43,7 @@ const Search: React.FC = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search services..."
+              placeholder="Search stores..."
               className="w-full h-12 pl-12 pr-12 rounded-xl bg-muted/50 border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
             />
             {query && (
@@ -74,33 +81,65 @@ const Search: React.FC = () => {
 
       <main className="max-w-lg mx-auto px-4 py-4">
         <p className="text-sm text-muted-foreground mb-4">
-          {filteredServices.length} services found
+          {filteredStores.length} stores found
         </p>
 
-        <div className="grid grid-cols-2 gap-3">
-          {filteredServices.map((service) => (
-            <div key={service.id} className="w-full">
-              <ServiceCard
-                service={service}
-                onClick={() => handleServiceClick(service)}
-              />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-40 rounded-2xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {filteredStores.map((store) => (
+              <div 
+                key={store.id} 
+                onClick={() => handleStoreClick(store.id)}
+                className="bg-card rounded-2xl border border-border/50 overflow-hidden cursor-pointer hover:shadow-card transition-shadow"
+              >
+                <div className={cn(
+                  'h-20 flex items-center justify-center p-3',
+                  store.cover_color || 'bg-primary/10'
+                )}>
+                  {store.logo_url ? (
+                    <StoreLogo 
+                      src={store.logo_url} 
+                      name={store.name}
+                      className="h-12 w-auto"
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-center leading-tight text-sm">
+                      {store.name}
+                    </span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+                    {store.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {store.delivery_time} • {store.category}
+                  </p>
+                  {store.rating && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-xs">⭐</span>
+                      <span className="text-xs font-medium">{store.rating}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {filteredServices.length === 0 && (
+        {filteredStores.length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center py-12">
-            <SearchIcon className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground">No services found</p>
+            <Store className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground">No stores found</p>
           </div>
         )}
       </main>
-
-      <ServiceDetailSheet
-        service={selectedService}
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-      />
 
       <BottomNav />
     </div>
