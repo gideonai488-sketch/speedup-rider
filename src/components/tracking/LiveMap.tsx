@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Navigation } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Navigation, User, Package, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Location {
@@ -11,6 +11,7 @@ interface LiveMapProps {
   pickupLocation: Location;
   dropoffLocation: Location;
   riderLocation?: Location;
+  customerLocation?: Location;
   status: string;
 }
 
@@ -18,19 +19,24 @@ const LiveMap: React.FC<LiveMapProps> = ({
   pickupLocation, 
   dropoffLocation, 
   riderLocation,
+  customerLocation,
   status 
 }) => {
   const [animatedRiderPos, setAnimatedRiderPos] = useState({ x: 15, y: 50 });
   const [pulse, setPulse] = useState(false);
 
-  // Animate rider position
+  // Animate rider position based on status
   useEffect(() => {
     const progressMap: Record<string, number> = {
       searching: 0,
       accepted: 10,
+      confirmed: 15,
+      preparing: 25,
       arriving: 35,
-      picked_up: 50,
-      delivering: 80,
+      ready_for_pickup: 40,
+      picked_up: 55,
+      out_for_delivery: 75,
+      delivering: 85,
       delivered: 100,
     };
 
@@ -54,6 +60,8 @@ const LiveMap: React.FC<LiveMapProps> = ({
     }, 1500);
     return () => clearInterval(interval);
   }, []);
+
+  const showRider = status !== 'searching' && status !== 'pending' && status !== 'delivered';
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-secondary/50 to-secondary rounded-2xl overflow-hidden">
@@ -136,7 +144,7 @@ const LiveMap: React.FC<LiveMapProps> = ({
         />
       </svg>
 
-      {/* Pickup Location */}
+      {/* PICKUP LOCATION - Store/Restaurant with Package icon */}
       <div 
         className="absolute transition-all duration-300"
         style={{ left: '15%', top: '50%', transform: 'translate(-50%, -50%)' }}
@@ -149,18 +157,18 @@ const LiveMap: React.FC<LiveMapProps> = ({
           )} />
           
           {/* Location marker */}
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg relative z-10">
-            <div className="w-3 h-3 bg-white rounded-full" />
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg relative z-10 border-2 border-white">
+            <Package className="w-5 h-5 text-white" />
           </div>
           
           {/* Label */}
           <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-card px-3 py-1.5 rounded-lg shadow-lg border border-border whitespace-nowrap">
-            <p className="text-xs font-semibold text-primary">Pickup</p>
+            <p className="text-xs font-semibold text-primary">📦 Pickup</p>
           </div>
         </div>
       </div>
 
-      {/* Dropoff Location */}
+      {/* DROPOFF/CUSTOMER LOCATION - Green with Home icon */}
       <div 
         className="absolute transition-all duration-300"
         style={{ left: '85%', top: '40%', transform: 'translate(-50%, -50%)' }}
@@ -168,27 +176,27 @@ const LiveMap: React.FC<LiveMapProps> = ({
         <div className="relative">
           {/* Pulse ring */}
           <div className={cn(
-            "absolute inset-0 -m-4 rounded-full bg-accent/30 transition-transform duration-700",
+            "absolute inset-0 -m-4 rounded-full bg-success/30 transition-transform duration-700",
             pulse ? "scale-150 opacity-0" : "scale-100 opacity-100"
           )} style={{ animationDelay: '0.5s' }} />
           
           {/* Location marker with pin shape */}
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shadow-lg relative z-10">
-              <div className="w-4 h-4 bg-white rounded-full" />
+            <div className="w-12 h-12 rounded-full bg-success flex items-center justify-center shadow-lg relative z-10 border-2 border-white">
+              <Home className="w-6 h-6 text-white" />
             </div>
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-accent" />
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-success" />
           </div>
           
           {/* Label */}
           <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 bg-card px-3 py-1.5 rounded-lg shadow-lg border border-border whitespace-nowrap">
-            <p className="text-xs font-semibold text-accent-foreground">Dropoff</p>
+            <p className="text-xs font-semibold text-success">🏠 Customer</p>
           </div>
         </div>
       </div>
 
-      {/* Rider Marker */}
-      {status !== 'searching' && status !== 'delivered' && (
+      {/* RIDER MARKER - Animated motorcycle */}
+      {showRider && (
         <div 
           className="absolute transition-all duration-1000 ease-out"
           style={{ 
@@ -216,7 +224,7 @@ const LiveMap: React.FC<LiveMapProps> = ({
             </div>
             
             {/* Rider icon */}
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl relative z-10 animate-float">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl relative z-10 animate-float border-2 border-white">
               <span className="text-2xl">🏍️</span>
             </div>
             
@@ -224,12 +232,17 @@ const LiveMap: React.FC<LiveMapProps> = ({
             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-success flex items-center justify-center border-2 border-white shadow-lg">
               <Navigation className="w-3 h-3 text-white" style={{ transform: 'rotate(45deg)' }} />
             </div>
+            
+            {/* Rider Label */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap">
+              Rider
+            </div>
           </div>
         </div>
       )}
 
       {/* Searching animation */}
-      {status === 'searching' && (
+      {(status === 'searching' || status === 'pending') && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative">
             {[...Array(3)].map((_, i) => (
@@ -249,16 +262,39 @@ const LiveMap: React.FC<LiveMapProps> = ({
             <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
               <span className="text-2xl animate-pulse">🔍</span>
             </div>
+            <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
+              Finding a rider...
+            </p>
           </div>
         </div>
       )}
 
+      {/* Legend */}
+      <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur rounded-lg px-3 py-2 shadow-lg border border-border">
+        <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-primary" />
+            <span className="text-muted-foreground">Pickup</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-success" />
+            <span className="text-muted-foreground">Customer</span>
+          </div>
+          {showRider && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm">🏍️</span>
+              <span className="text-muted-foreground">Rider</span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* ETA indicator */}
-      {status !== 'searching' && status !== 'delivered' && (
+      {showRider && (
         <div className="absolute top-4 right-4 bg-card rounded-xl px-4 py-2 shadow-lg border border-border">
           <p className="text-xs text-muted-foreground">Arriving in</p>
           <p className="text-lg font-bold text-primary">
-            {status === 'delivering' ? '3' : status === 'picked_up' ? '8' : '12'} min
+            {status === 'out_for_delivery' || status === 'delivering' ? '3' : status === 'picked_up' ? '8' : '12'} min
           </p>
         </div>
       )}

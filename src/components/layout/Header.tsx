@@ -7,14 +7,12 @@ const Header: React.FC = () => {
     <header className="sticky top-0 z-40 gradient-glass border-b border-border/50">
       <div className="flex items-center justify-between px-4 h-16 max-w-lg mx-auto">
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground font-medium">Deliver to</span>
-          <button className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary transition-colors">
-            <MapPin className="w-4 h-4 text-primary" />
-            <span>East Legon, Accra</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-1">
+            <span className="text-lg font-bold text-foreground">Speed<span className="text-primary">Rush</span></span>
+          </div>
+          <span className="text-[9px] text-muted-foreground font-medium leading-tight -mt-0.5">
+            by Genesis Holdings, USA
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
