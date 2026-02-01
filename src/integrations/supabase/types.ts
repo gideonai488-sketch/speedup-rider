@@ -990,6 +990,7 @@ export type Database = {
       get_profile_id: { Args: { check_user_id: string }; Returns: string }
       get_surge_multiplier: { Args: never; Returns: number }
       is_admin: { Args: { check_user_id: string }; Returns: boolean }
+      is_admin_no_rls: { Args: { check_user_id: string }; Returns: boolean }
       is_rider: { Args: { check_user_id: string }; Returns: boolean }
       validate_order_payment: {
         Args: { p_order_id: string; p_user_id: string }
