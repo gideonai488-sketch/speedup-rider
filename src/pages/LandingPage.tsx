@@ -30,9 +30,14 @@ const LandingPage: React.FC = () => {
                 <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
               </svg>
             </div>
-            <span className="text-xl font-bold text-foreground">
-              Speed<span className="text-primary">Rush</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-foreground">
+                Speed<span className="text-primary">Rush</span>
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium leading-tight">
+                by Genesis Holdings, USA
+              </span>
+            </div>
           </Link>
           
           <div className="hidden md:flex items-center gap-8">
@@ -338,9 +343,14 @@ const LandingPage: React.FC = () => {
                   <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-foreground">
-                Speed<span className="text-primary">Rush</span>
-              </span>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-foreground">
+                  Speed<span className="text-primary">Rush</span>
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium leading-tight">
+                  by Genesis Holdings, USA
+                </span>
+              </div>
             </div>
             
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -349,9 +359,14 @@ const LandingPage: React.FC = () => {
               <a href="#" className="hover:text-foreground transition-colors">Support</a>
             </div>
             
-            <p className="text-sm text-muted-foreground">
-              © 2025 SpeedRush. All rights reserved.
-            </p>
+            <div className="text-center md:text-right">
+              <p className="text-sm text-muted-foreground">
+                © 2025 SpeedRush. All rights reserved.
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                A Genesis Holdings Company, USA
+              </p>
+            </div>
           </div>
         </div>
       </footer>
