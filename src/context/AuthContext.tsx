@@ -44,19 +44,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileFetchAttempts, setProfileFetchAttempts] = useState(0);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data as Profile;
+    } catch (err) {
+      console.error('Unexpected error fetching profile:', err);
       return null;
     }
-    return data as Profile;
   };
 
   useEffect(() => {
@@ -69,10 +76,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Defer profile fetch with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
-            fetchProfile(session.user.id).then(setProfile);
+            fetchProfile(session.user.id).then((p) => {
+              setProfile(p);
+              setProfileFetchAttempts(p ? 0 : 1);
+            });
           }, 0);
         } else {
           setProfile(null);
+          setProfileFetchAttempts(0);
         }
       }
     );
@@ -82,13 +93,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        fetchProfile(session.user.id).then((p) => {
+          setProfile(p);
+          setProfileFetchAttempts(p ? 0 : 1);
+        });
       }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Resilience: if profile fetch fails (network/RLS/transient), retry a few times.
+  // This prevents the app from getting stuck on auth screens after successful login.
+  useEffect(() => {
+    if (loading) return;
+    if (!user) return;
+    if (profile) return;
+    if (profileFetchAttempts <= 0) return;
+    if (profileFetchAttempts > 5) return;
+
+    const delayMs = Math.min(1000 * 2 ** (profileFetchAttempts - 1), 15000);
+    const t = window.setTimeout(() => {
+      fetchProfile(user.id).then((p) => {
+        if (p) {
+          setProfile(p);
+          setProfileFetchAttempts(0);
+        } else {
+          setProfileFetchAttempts((n) => n + 1);
+        }
+      });
+    }, delayMs);
+
+    return () => window.clearTimeout(t);
+  }, [loading, user, profile, profileFetchAttempts]);
 
   const signUp = async (
     email: string,
@@ -133,6 +171,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
     setSession(null);
     setProfile(null);
+    setProfileFetchAttempts(0);
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
