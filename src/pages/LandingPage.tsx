@@ -35,7 +35,7 @@ const LandingPage: React.FC = () => {
                 Speed<span className="text-primary">Rush</span>
               </span>
               <span className="text-[10px] text-muted-foreground font-medium leading-tight">
-                by Genesis Holdings, USA
+                by Genesis Holdings Inc. USA
               </span>
             </div>
           </Link>
@@ -348,7 +348,7 @@ const LandingPage: React.FC = () => {
                   Speed<span className="text-primary">Rush</span>
                 </span>
                 <span className="text-[10px] text-muted-foreground font-medium leading-tight">
-                  by Genesis Holdings, USA
+                  by Genesis Holdings Inc. USA
                 </span>
               </div>
             </div>
@@ -364,7 +364,7 @@ const LandingPage: React.FC = () => {
                 © 2025 SpeedRush. All rights reserved.
               </p>
               <p className="text-xs text-muted-foreground/70">
-                A Genesis Holdings Company, USA
+                A Genesis Holdings Inc. Company, USA
               </p>
             </div>
           </div>
