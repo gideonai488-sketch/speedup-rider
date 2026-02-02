@@ -11,7 +11,7 @@ const Header: React.FC = () => {
             <span className="text-lg font-bold text-foreground">Speed<span className="text-primary">Rush</span></span>
           </div>
           <span className="text-[9px] text-muted-foreground font-medium leading-tight -mt-0.5">
-            by Genesis Holdings, USA
+            by Genesis Holdings Inc. USA
           </span>
         </div>
 
