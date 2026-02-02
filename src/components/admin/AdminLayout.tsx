@@ -11,7 +11,9 @@ import {
   BarChart3,
   ChevronLeft,
   Menu,
-  CreditCard
+  CreditCard,
+  Handshake,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
@@ -43,7 +45,9 @@ const adminNavItems = [
   { path: '/admin/riders', icon: Bike, label: 'Riders' },
   { path: '/admin/rider-approvals', icon: Users, label: 'Approvals' },
   { path: '/admin/subaccounts', icon: CreditCard, label: 'Subaccounts' },
+  { path: '/admin/partner-applications', icon: Handshake, label: 'Partners' },
   { path: '/admin/users', icon: Users, label: 'Users' },
+  { path: '/admin/whatsapp', icon: MessageSquare, label: 'WhatsApp' },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { path: '/admin/settings', icon: Settings, label: 'Settings' },
 ];

@@ -27,6 +27,7 @@ import RiderHistory from "./pages/rider/RiderHistory";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Orders from "./pages/Orders";
+import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -40,6 +41,8 @@ import AdminPricing from "./pages/admin/AdminPricing";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminSubaccounts from "./pages/admin/AdminSubaccounts";
+import AdminPartnerApplications from "./pages/admin/AdminPartnerApplications";
+import AdminWhatsApp from "./pages/admin/AdminWhatsApp";
 
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
@@ -102,6 +105,7 @@ const App = () => {
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<LandingPage />} />
+                  <Route path="/become-partner" element={<BecomePartner />} />
                   <Route path="/auth" element={<CustomerAuth />} />
                   <Route path="/login" element={<CustomerAuth />} />
                   <Route path="/signup" element={<CustomerAuth />} />
@@ -152,6 +156,8 @@ const App = () => {
                   <Route path="/admin/pricing" element={<AdminPricing />} />
                   <Route path="/admin/settings" element={<AdminSettings />} />
                   <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                  <Route path="/admin/partner-applications" element={<AdminPartnerApplications />} />
+                  <Route path="/admin/whatsapp" element={<AdminWhatsApp />} />
                   
                   {/* Fallback */}
                   <Route path="*" element={<NotFound />} />

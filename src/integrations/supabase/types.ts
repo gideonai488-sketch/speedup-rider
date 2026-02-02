@@ -85,6 +85,69 @@ export type Database = {
           },
         ]
       }
+      marketing_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          delivered_count: number | null
+          failed_count: number | null
+          id: string
+          message_template: string
+          name: string
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          target_audience: string
+          total_recipients: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          message_template: string
+          name: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_audience?: string
+          total_recipients?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          message_template?: string
+          name?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_audience?: string
+          total_recipients?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -309,6 +372,144 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      otp_requests: {
+        Row: {
+          attempts: number
+          created_at: string
+          expires_at: string
+          id: string
+          is_verified: boolean
+          max_attempts: number
+          otp_code: string
+          phone: string
+          purpose: string
+          user_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_verified?: boolean
+          max_attempts?: number
+          otp_code: string
+          phone: string
+          purpose?: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_verified?: boolean
+          max_attempts?: number
+          otp_code?: string
+          phone?: string
+          purpose?: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "otp_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "otp_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_applications: {
+        Row: {
+          business_address: string
+          business_name: string
+          business_type: string
+          city: string
+          contact_name: string
+          created_at: string
+          description: string | null
+          email: string | null
+          estimated_daily_orders: string | null
+          id: string
+          logo_url: string | null
+          notes: string | null
+          operating_hours: string | null
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          business_address: string
+          business_name: string
+          business_type: string
+          city: string
+          contact_name: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          estimated_daily_orders?: string | null
+          id?: string
+          logo_url?: string | null
+          notes?: string | null
+          operating_hours?: string | null
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          business_address?: string
+          business_name?: string
+          business_type?: string
+          city?: string
+          contact_name?: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          estimated_daily_orders?: string | null
+          id?: string
+          logo_url?: string | null
+          notes?: string | null
+          operating_hours?: string | null
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -868,6 +1069,57 @@ export type Database = {
             foreignKeyName: "wallets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_settings: {
+        Row: {
+          api_key_reference: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          provider: string
+          sender_id: string | null
+          settings: Json | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          api_key_reference?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider?: string
+          sender_id?: string | null
+          settings?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          api_key_reference?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider?: string
+          sender_id?: string | null
+          settings?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
