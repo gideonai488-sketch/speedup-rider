@@ -273,10 +273,12 @@ const LandingPage: React.FC = () => {
           {/* Partner CTA */}
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Want to partner with SpeedRush?</p>
-            <Button variant="outline" className="border-2">
-              Become a Partner
-              <ExternalLink className="w-4 h-4 ml-2" />
-            </Button>
+            <Link to="/become-partner">
+              <Button variant="outline" className="border-2">
+                Become a Partner
+                <ExternalLink className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
