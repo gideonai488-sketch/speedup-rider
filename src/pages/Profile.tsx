@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sheet";
 
 const Profile: React.FC = () => {
-  const { toggleAdminMode } igate();
+  const navigate = useNavigate();
   const { profile, signOut, updateProfile } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserStats();
   const [isEditOpen, setIsEditOpen] = useState(false);
