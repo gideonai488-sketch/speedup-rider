@@ -25,9 +25,12 @@ const RiderDashboard: React.FC = () => {
 
   const updateLocation = useUpdateRiderLocation();
   const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders();
-  const acceptOrder = useAcceptOrder();
+  const createBid = useCreateBid();
+  const { data: myBids = [] } = useMyBids(profile?.id || '');
   const { data: activeOrders = [] } = useRiderActiveOrders(profile?.id || '');
   const { data: earnings } = useRiderEarnings(profile?.id || '');
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidMessage, setBidMessage] = useState('');
 
   // Check rider approval status
   const riderStatus = (profile as any)?.rider_status || 'pending';
