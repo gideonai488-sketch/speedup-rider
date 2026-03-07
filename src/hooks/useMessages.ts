@@ -83,8 +83,8 @@ export const useConversations = (profileId: string) => {
         .from('messages')
         .select(`
           *,
-          sender:sender_id(id, full_name, avatar_url, phone),
-          receiver:receiver_id(id, full_name, avatar_url, phone)
+          sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url, phone),
+          receiver:profiles!messages_receiver_id_fkey(id, full_name, avatar_url, phone)
         `)
         .or(`sender_id.eq.${profileId},receiver_id.eq.${profileId}`)
         .order('created_at', { ascending: false });
