@@ -3,14 +3,17 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Zap, MapPin, Clock, Bell, User, Navigation, Star,
-  Wallet, ChevronRight, CheckCircle2, X, Timer, AlertCircle, Loader2
+  Wallet, ChevronRight, CheckCircle2, X, Timer, AlertCircle, Loader2, Send
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
-import { useRiderPendingOrders, useAcceptOrder, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
+import { useRiderPendingOrders, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
+import { useCreateBid, useMyBids } from '@/hooks/useBids';
 import { supabase } from '@/integrations/supabase/client';
 
 const RiderDashboard: React.FC = () => {
@@ -22,9 +25,12 @@ const RiderDashboard: React.FC = () => {
 
   const updateLocation = useUpdateRiderLocation();
   const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders();
-  const acceptOrder = useAcceptOrder();
+  const createBid = useCreateBid();
+  const { data: myBids = [] } = useMyBids(profile?.id || '');
   const { data: activeOrders = [] } = useRiderActiveOrders(profile?.id || '');
   const { data: earnings } = useRiderEarnings(profile?.id || '');
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidMessage, setBidMessage] = useState('');
 
   // Check rider approval status
   const riderStatus = (profile as any)?.rider_status || 'pending';
@@ -162,31 +168,41 @@ const RiderDashboard: React.FC = () => {
 
   const handleSelectOrder = (order: any) => {
     setSelectedOrder(order);
-    setOrderTimer(30);
+    setOrderTimer(60); // Give more time for bidding
+    // Suggest a bid based on delivery fee
+    const suggestedBid = Math.max(5, (Number(order.delivery_fee) || 10) - 3);
+    setBidAmount(suggestedBid.toString());
+    setBidMessage('');
   };
 
-  const handleAcceptOrder = async () => {
+  const handlePlaceBid = async () => {
     if (!selectedOrder || !profile) return;
+    const amount = parseFloat(bidAmount);
+    if (!amount || amount <= 0) {
+      toast.error('Please enter a valid bid amount');
+      return;
+    }
     
     try {
-      await acceptOrder.mutateAsync({
+      await createBid.mutateAsync({
         orderId: selectedOrder.id,
         riderId: profile.id,
+        amount,
+        message: bidMessage.trim() || undefined,
       });
-      toast.success(`Order accepted! Navigate to ${selectedOrder.stores?.name || 'pickup'}`);
+      toast.success('Bid placed! Waiting for customer to accept.');
       setSelectedOrder(null);
-      refetchPending(); // Immediately refresh pending orders
+      setBidAmount('');
+      setBidMessage('');
+      refetchPending();
     } catch (error: any) {
-      // Show specific error message for race conditions
-      if (error?.message?.includes('already accepted')) {
-        toast.error('Order was already accepted by another rider');
-      } else if (error?.message?.includes('not found')) {
-        toast.error('Order no longer available');
+      if (error?.message?.includes('duplicate')) {
+        toast.error('You already placed a bid on this order');
       } else {
-        toast.error('Failed to accept order. Please try again.');
+        toast.error('Failed to place bid. Try again.');
       }
       setSelectedOrder(null);
-      refetchPending(); // Refresh to remove unavailable orders
+      refetchPending();
     }
   };
 
@@ -335,6 +351,31 @@ const RiderDashboard: React.FC = () => {
                 )}
               </div>
               
+              {/* Bid Form */}
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Your Bid (GH₵)</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter your price"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    className="text-lg font-bold"
+                    min="1"
+                    step="0.5"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Message (optional)</label>
+                  <Textarea
+                    placeholder="e.g. I'm nearby and can pick up in 5 mins"
+                    value={bidMessage}
+                    onChange={(e) => setBidMessage(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              </div>
+              
               <div className="flex gap-3">
                 <Button 
                   variant="outline" 
@@ -342,15 +383,15 @@ const RiderDashboard: React.FC = () => {
                   onClick={handleDeclineOrder}
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Decline
+                  Skip
                 </Button>
                 <Button 
                   className="flex-1 h-12 gradient-hero text-white" 
-                  onClick={handleAcceptOrder}
-                  disabled={acceptOrder.isPending}
+                  onClick={handlePlaceBid}
+                  disabled={createBid.isPending || !bidAmount}
                 >
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  {acceptOrder.isPending ? 'Accepting...' : 'Accept'}
+                  <Send className="w-4 h-4 mr-2" />
+                  {createBid.isPending ? 'Placing...' : 'Place Bid'}
                 </Button>
               </div>
             </div>

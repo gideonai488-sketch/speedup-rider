@@ -248,6 +248,7 @@ const TrackDelivery: React.FC = () => {
         pickupAddress={order.pickup_address || undefined}
         deliveryAddress={order.delivery_address}
         orderNumber={order.order_number || `#${orderId?.slice(0, 8)}`}
+        orderId={orderId}
         totalAmount={Number(order.total)}
         onBack={() => navigate('/orders')}
         onCancel={handleCancelOrder}

@@ -9,7 +9,6 @@ import BottomNav from '@/components/layout/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { useAdmin } from '@/context/AdminContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
@@ -24,7 +23,6 @@ import {
 } from "@/components/ui/sheet";
 
 const Profile: React.FC = () => {
-  const { toggleAdminMode } = useAdmin();
   const navigate = useNavigate();
   const { profile, signOut, updateProfile } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserStats();
@@ -312,18 +310,7 @@ const Profile: React.FC = () => {
               Switch Mode
             </h3>
             
-            {profile?.role === 'admin' && (
-              <button 
-                onClick={toggleAdminMode}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-all group"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                </div>
-                <span className="flex-1 text-left font-medium text-primary">Admin Dashboard</span>
-                <ChevronRight className="w-5 h-5 text-primary" />
-              </button>
-            )}
+            
 
             {profile?.role === 'rider' && (
               <button 
