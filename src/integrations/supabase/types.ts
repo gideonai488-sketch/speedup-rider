@@ -268,6 +268,7 @@ export type Database = {
           pickup_lng: number | null
           rider_fee: number | null
           rider_id: string | null
+          scheduled_at: string | null
           service_fee: number | null
           status: Database["public"]["Enums"]["order_status"]
           store_id: string | null
@@ -299,6 +300,7 @@ export type Database = {
           pickup_lng?: number | null
           rider_fee?: number | null
           rider_id?: string | null
+          scheduled_at?: string | null
           service_fee?: number | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string | null
@@ -330,6 +332,7 @@ export type Database = {
           pickup_lng?: number | null
           rider_fee?: number | null
           rider_id?: string | null
+          scheduled_at?: string | null
           service_fee?: number | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string | null
