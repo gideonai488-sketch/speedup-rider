@@ -347,6 +347,31 @@ const RiderDashboard: React.FC = () => {
                 )}
               </div>
               
+              {/* Bid Form */}
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Your Bid (GH₵)</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter your price"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    className="text-lg font-bold"
+                    min="1"
+                    step="0.5"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Message (optional)</label>
+                  <Textarea
+                    placeholder="e.g. I'm nearby and can pick up in 5 mins"
+                    value={bidMessage}
+                    onChange={(e) => setBidMessage(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              </div>
+              
               <div className="flex gap-3">
                 <Button 
                   variant="outline" 
@@ -354,15 +379,15 @@ const RiderDashboard: React.FC = () => {
                   onClick={handleDeclineOrder}
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Decline
+                  Skip
                 </Button>
                 <Button 
                   className="flex-1 h-12 gradient-hero text-white" 
-                  onClick={handleAcceptOrder}
-                  disabled={acceptOrder.isPending}
+                  onClick={handlePlaceBid}
+                  disabled={createBid.isPending || !bidAmount}
                 >
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  {acceptOrder.isPending ? 'Accepting...' : 'Accept'}
+                  <Send className="w-4 h-4 mr-2" />
+                  {createBid.isPending ? 'Placing...' : 'Place Bid'}
                 </Button>
               </div>
             </div>
