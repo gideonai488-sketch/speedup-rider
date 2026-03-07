@@ -171,28 +171,34 @@ const RiderDashboard: React.FC = () => {
     setOrderTimer(30);
   };
 
-  const handleAcceptOrder = async () => {
+  const handlePlaceBid = async () => {
     if (!selectedOrder || !profile) return;
+    const amount = parseFloat(bidAmount);
+    if (!amount || amount <= 0) {
+      toast.error('Please enter a valid bid amount');
+      return;
+    }
     
     try {
-      await acceptOrder.mutateAsync({
+      await createBid.mutateAsync({
         orderId: selectedOrder.id,
         riderId: profile.id,
+        amount,
+        message: bidMessage.trim() || undefined,
       });
-      toast.success(`Order accepted! Navigate to ${selectedOrder.stores?.name || 'pickup'}`);
+      toast.success('Bid placed! Waiting for customer to accept.');
       setSelectedOrder(null);
-      refetchPending(); // Immediately refresh pending orders
+      setBidAmount('');
+      setBidMessage('');
+      refetchPending();
     } catch (error: any) {
-      // Show specific error message for race conditions
-      if (error?.message?.includes('already accepted')) {
-        toast.error('Order was already accepted by another rider');
-      } else if (error?.message?.includes('not found')) {
-        toast.error('Order no longer available');
+      if (error?.message?.includes('duplicate')) {
+        toast.error('You already placed a bid on this order');
       } else {
-        toast.error('Failed to accept order. Please try again.');
+        toast.error('Failed to place bid. Try again.');
       }
       setSelectedOrder(null);
-      refetchPending(); // Refresh to remove unavailable orders
+      refetchPending();
     }
   };
 
