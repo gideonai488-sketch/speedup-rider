@@ -168,7 +168,11 @@ const RiderDashboard: React.FC = () => {
 
   const handleSelectOrder = (order: any) => {
     setSelectedOrder(order);
-    setOrderTimer(30);
+    setOrderTimer(60); // Give more time for bidding
+    // Suggest a bid based on delivery fee
+    const suggestedBid = Math.max(5, (Number(order.delivery_fee) || 10) - 3);
+    setBidAmount(suggestedBid.toString());
+    setBidMessage('');
   };
 
   const handlePlaceBid = async () => {
