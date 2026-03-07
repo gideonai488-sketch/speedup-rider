@@ -9,8 +9,7 @@ import BottomNav from '@/components/layout/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-// Admin context removed
-import { useNavigate } from 'react-router-dom';
+// Admin context removedom 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useUserStats } from '@/hooks/useUserStats';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,8 +23,7 @@ import {
 } from "@/components/ui/sheet";
 
 const Profile: React.FC = () => {
-  const { toggleAdminMode } = useAdmin();
-  const navigate = useNavigate();
+  const { toggleAdminMode } igate();
   const { profile, signOut, updateProfile } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserStats();
   const [isEditOpen, setIsEditOpen] = useState(false);
