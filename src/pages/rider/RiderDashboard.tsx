@@ -3,14 +3,17 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Zap, MapPin, Clock, Bell, User, Navigation, Star,
-  Wallet, ChevronRight, CheckCircle2, X, Timer, AlertCircle, Loader2
+  Wallet, ChevronRight, CheckCircle2, X, Timer, AlertCircle, Loader2, Send
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
-import { useRiderPendingOrders, useAcceptOrder, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
+import { useRiderPendingOrders, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
+import { useCreateBid, useMyBids } from '@/hooks/useBids';
 import { supabase } from '@/integrations/supabase/client';
 
 const RiderDashboard: React.FC = () => {
