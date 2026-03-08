@@ -6,14 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   ArrowLeft, MapPin, Store, Clock, Loader2, 
-  ShoppingBag, CreditCard, Smartphone, ChevronRight
+  ShoppingBag, ChevronRight, Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateOrder } from '@/hooks/useOrders';
 import { useAuth } from '@/context/AuthContext';
 import { useStore } from '@/hooks/useStores';
 import AddressAutocomplete from '@/components/location/AddressAutocomplete';
-import useDeliveryFee from '@/hooks/useDeliveryFee';
 import { cn } from '@/lib/utils';
 
 interface CartItemData {
@@ -23,34 +22,38 @@ interface CartItemData {
   unit_price: number;
 }
 
-const paymentMethods = [
-  { id: 'momo', name: 'Mobile Money', icon: Smartphone, description: 'MTN, Vodafone, AirtelTigo' },
-  { id: 'card', name: 'Card Payment', icon: CreditCard, description: 'Visa, Mastercard' },
-];
+const calculateDistance = (
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 const StoreCheckout: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { profile } = useAuth();
   const createOrder = useCreateOrder();
-  const { calculateFee, isCalculating } = useDeliveryFee();
 
   const storeId = searchParams.get('store');
   const itemsParam = searchParams.get('items');
   
   const { data: store, isLoading: storeLoading } = useStore(storeId || '');
   
-  const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState('momo');
   
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryLandmark, setDeliveryLandmark] = useState('');
   const [notes, setNotes] = useState('');
-  
-  const [deliveryFee, setDeliveryFee] = useState(0);
-  const [estimatedTime, setEstimatedTime] = useState('');
 
   // Parse cart items from URL
   const cartItems: CartItemData[] = React.useMemo(() => {
@@ -63,7 +66,6 @@ const StoreCheckout: React.FC = () => {
   }, [itemsParam]);
 
   const itemsTotal = cartItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-  const total = itemsTotal + deliveryFee;
 
   // Redirect if no store or items
   useEffect(() => {
@@ -79,34 +81,9 @@ const StoreCheckout: React.FC = () => {
     lng: store?.longitude ?? -0.1870
   }), [store?.latitude, store?.longitude]);
 
-  // Calculate delivery fee when address is selected
-  const handleAddressSelect = async (address: string, coords?: { lat: number; lng: number }) => {
+  const handleAddressSelect = (address: string, coords?: { lat: number; lng: number }) => {
     setDeliveryAddress(address);
     setDeliveryCoords(coords || null);
-
-    if (coords && store) {
-      const breakdown = await calculateFee(
-        storeCoords,
-        coords
-      );
-      
-      if (breakdown) {
-        setDeliveryFee(breakdown.totalFee);
-        setEstimatedTime(`${breakdown.estimatedMinutes} mins`);
-      } else {
-        // Fallback to store's default delivery fee
-        setDeliveryFee(store.delivery_fee || 5);
-        setEstimatedTime('25-35 mins');
-      }
-    }
-  };
-
-  const handleContinue = () => {
-    if (!deliveryAddress || !deliveryCoords) {
-      toast.error('Please enter your delivery address');
-      return;
-    }
-    setStep(2);
   };
 
   const handlePlaceOrder = async () => {
@@ -115,31 +92,47 @@ const StoreCheckout: React.FC = () => {
       navigate('/auth');
       return;
     }
+    if (!deliveryAddress || !deliveryCoords) {
+      toast.error('Please enter your delivery address');
+      return;
+    }
 
     setIsProcessing(true);
 
     try {
+      const distance = calculateDistance(
+        storeCoords.lat, storeCoords.lng,
+        deliveryCoords.lat, deliveryCoords.lng
+      );
+
       const orderData = {
         store_id: storeId,
         items: cartItems,
         delivery_address: deliveryAddress,
-        delivery_lat: deliveryCoords?.lat,
-        delivery_lng: deliveryCoords?.lng,
+        delivery_lat: deliveryCoords.lat,
+        delivery_lng: deliveryCoords.lng,
         pickup_address: store?.address || `${store?.name} Store`,
         pickup_lat: storeCoords.lat,
         pickup_lng: storeCoords.lng,
         notes: notes || undefined,
-        delivery_fee: deliveryFee,
+        delivery_fee: 0, // Riders will bid their price
+        distance_km: Math.round(distance * 10) / 10,
+        base_fee: 0,
+        per_km_fee: 0,
+        service_fee: 0,
+        rider_fee: 0,
+        surge_multiplier: 1,
         payment_status: 'pending',
       };
 
       const order = await createOrder.mutateAsync(orderData);
       
-      toast.success('Order placed successfully!');
+      toast.success('Order posted! Waiting for rider bids.');
       navigate(`/customer/track/${order.id}`);
     } catch (error) {
       console.error('Error creating order:', error);
       toast.error('Failed to place order. Please try again.');
+    } finally {
       setIsProcessing(false);
     }
   };
