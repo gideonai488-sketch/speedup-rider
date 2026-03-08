@@ -11,6 +11,7 @@ import {
   Loader2, Send, Phone, TrendingUp, Package, Bike, Calendar, LogOut
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { hapticSuccess, hapticMedium, hapticHeavy, hapticWarning } from '@/lib/nativeHaptics';
 import { useAuth } from '@/context/AuthContext';
 import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
 import { useRiderPendingOrders, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
