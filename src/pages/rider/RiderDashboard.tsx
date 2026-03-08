@@ -239,6 +239,7 @@ const RiderDashboard: React.FC = () => {
         amount,
         message: bidMessage.trim() || undefined,
       });
+      hapticSuccess();
       toast.success('Bid placed! Waiting for customer to accept.');
       setSelectedOrder(null);
       setBidAmount('');

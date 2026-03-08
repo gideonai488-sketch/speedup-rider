@@ -66,6 +66,7 @@ const BidView: React.FC<BidViewProps> = ({
       });
       setShowConfirmDialog(false);
       setSelectedBid(null);
+      hapticSuccess();
       toast.success(`Bid accepted! ${selectedBid.profiles?.full_name || 'Rider'} is on the way.`);
     } catch (err: any) {
       toast.error(err.message || 'Failed to accept bid');

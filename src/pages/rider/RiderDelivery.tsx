@@ -179,6 +179,7 @@ const RiderDelivery: React.FC = () => {
         toast.success(`Delivery completed! You earned GH₵ ${riderEarning.toFixed(2)}`);
         setTimeout(() => navigate('/rider'), 2000);
       } else if (nextStatus === 'out_for_delivery') {
+        hapticMedium();
         toast.success('Status updated - customer will be prompted to pay');
         toast.info('Wait for payment before completing delivery');
       } else {
