@@ -41,7 +41,7 @@ const ChatView: React.FC<ChatViewProps> = ({ otherProfileId, otherName, otherPho
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
         <button onClick={onBack}>
