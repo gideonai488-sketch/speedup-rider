@@ -125,6 +125,15 @@ export const useAcceptBid = () => {
         throw error;
       }
 
+      // Send notification to the rider
+      await createNotification(
+        riderId,
+        '🎉 Bid Accepted!',
+        `Your bid of GH₵ ${amount.toFixed(2)} has been accepted. Head to the pickup location now!`,
+        'bid_accepted',
+        { order_id: orderId, bid_id: bidId, amount }
+      );
+
       return data;
     },
     onSuccess: () => {
@@ -132,6 +141,8 @@ export const useAcceptBid = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['rider-pending-orders'] });
       queryClient.invalidateQueries({ queryKey: ['rider-active-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['my-bids'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };
