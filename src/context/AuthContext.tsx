@@ -105,6 +105,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         // Defer profile fetch with setTimeout to avoid deadlock
         if (session?.user) {
+          sessionStorage.setItem('auth_session_active', 'true');
           setTimeout(() => {
             fetchProfile(session.user.id).then((p) => {
               setProfile(p);
