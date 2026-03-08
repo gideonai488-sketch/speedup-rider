@@ -10,8 +10,14 @@ import riderCar from '@/assets/landing/rider-car.jpg';
 import riderBicycle from '@/assets/landing/rider-bicycle.jpg';
 import customerReceiving from '@/assets/landing/customer-receiving.jpg';
 import { popularStores } from '@/data/deliveryData';
+import { useCountry } from '@/context/CountryContext';
+import CountrySelector from '@/components/CountrySelector';
+import { allCountries } from '@/config/countries';
+import { Badge } from '@/components/ui/badge';
 
 const LandingPage: React.FC = () => {
+  const { t, country, formatPrice } = useCountry();
+
   const scrollToServices = () => {
     document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -46,20 +52,21 @@ const LandingPage: React.FC = () => {
           </Link>
           
           <div className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Services</a>
-            <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About Us</a>
-            <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How it Works</a>
-            <a href="#partners" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Partners</a>
-            <a href="#careers" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Drive with Us</a>
+            <a href="#services" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t.nav_services}</a>
+            <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t.nav_about}</a>
+            <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t.nav_how_it_works}</a>
+            <a href="#partners" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t.nav_partners}</a>
+            <a href="#careers" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t.nav_careers}</a>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CountrySelector variant="compact" />
             <Link to="/login">
-              <Button variant="ghost" className="hidden sm:flex font-medium">Sign In</Button>
+              <Button variant="ghost" className="hidden sm:flex font-medium">{t.nav_sign_in}</Button>
             </Link>
             <Link to="/signup">
               <Button className="gradient-hero text-white shadow-glow hover:opacity-90 transition-opacity font-semibold">
-                Get Started
+                {t.nav_get_started}
               </Button>
             </Link>
           </div>
@@ -82,32 +89,31 @@ const LandingPage: React.FC = () => {
           <div className="max-w-2xl stagger-children">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-5 py-2.5 mb-8">
               <Building2 className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">A Genesis Holdings Inc. (USA) Company</span>
+              <span className="text-sm font-semibold text-primary">{t.hero_badge}</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-foreground leading-[1.1] mb-6 tracking-tight">
-              Premium{' '}
-              <span className="text-gradient">Delivery</span>
+              {t.hero_title_1}{' '}
+              <span className="text-gradient">{t.hero_title_2}</span>
               <br />
-              At Your{' '}
-              <span className="text-gradient">Fingertips.</span>
+              {t.hero_title_3}{' '}
+              <span className="text-gradient">{t.hero_title_4}</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed">
-              From food and groceries to packages and errands — SpeedUp connects you with reliable riders for 
-              fast, secure deliveries across Ghana and Finland.
+              {t.hero_subtitle}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-14">
               <Link to="/signup">
                 <Button size="lg" className="w-full sm:w-auto gradient-hero text-white shadow-glow hover:opacity-90 transition-all text-lg px-10 h-14 font-semibold">
-                  Order a Delivery
+                  {t.hero_cta_order}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
               <Link to="/rider/auth">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 text-lg px-10 h-14 font-semibold">
-                  Earn as a Rider
+                  {t.hero_cta_rider}
                 </Button>
               </Link>
             </div>
@@ -115,16 +121,16 @@ const LandingPage: React.FC = () => {
             {/* Trust indicators */}
             <div className="grid grid-cols-3 gap-6 max-w-md">
               <div>
-                <p className="text-3xl font-bold text-foreground">15 min</p>
-                <p className="text-xs text-muted-foreground font-medium">Avg. Delivery</p>
+                <p className="text-3xl font-bold text-foreground">{t.hero_stat_delivery}</p>
+                <p className="text-xs text-muted-foreground font-medium">{t.hero_stat_delivery_label}</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">4.9★</p>
-                <p className="text-xs text-muted-foreground font-medium">Customer Rating</p>
+                <p className="text-3xl font-bold text-foreground">{t.hero_stat_rating}</p>
+                <p className="text-xs text-muted-foreground font-medium">{t.hero_stat_rating_label}</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-foreground">24/7</p>
-                <p className="text-xs text-muted-foreground font-medium">Always Available</p>
+                <p className="text-3xl font-bold text-foreground">{t.hero_stat_available}</p>
+                <p className="text-xs text-muted-foreground font-medium">{t.hero_stat_available_label}</p>
               </div>
             </div>
           </div>
@@ -199,23 +205,23 @@ const LandingPage: React.FC = () => {
       <section id="services" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Our Services</span>
+            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">{t.services_label}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              What do you need <span className="text-gradient">delivered?</span>
+              {t.services_title}
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              From meals to medicines, packages to paperwork — we deliver anything, anywhere.
+              {t.services_subtitle}
             </p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 stagger-children">
             {[
-              { icon: '🍔', name: 'Food Delivery', desc: 'Hot meals from top restaurants' },
-              { icon: '🛒', name: 'Groceries', desc: 'Fresh produce to your door' },
-              { icon: '💊', name: 'Pharmacy', desc: 'Medicine & health essentials' },
-              { icon: '📋', name: 'Errands', desc: 'We handle your tasks' },
-              { icon: '📦', name: 'Packages', desc: 'Send & receive parcels' },
-              { icon: '📄', name: 'Documents', desc: 'Secure document delivery' },
+              { icon: '🍔', name: t.service_food, desc: 'Hot meals from top restaurants' },
+              { icon: '🛒', name: t.service_groceries, desc: 'Fresh produce to your door' },
+              { icon: '💊', name: t.service_pharmacy, desc: 'Medicine & health essentials' },
+              { icon: '📋', name: t.service_errands, desc: 'We handle your tasks' },
+              { icon: '📦', name: t.service_packages, desc: 'Send & receive parcels' },
+              { icon: '📄', name: t.service_documents, desc: 'Secure document delivery' },
             ].map((service) => (
               <Link 
                 key={service.name}
@@ -235,20 +241,20 @@ const LandingPage: React.FC = () => {
       <section id="how-it-works" className="py-20 bg-secondary/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Simple & Fast</span>
+            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">{t.how_label}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How <span className="text-gradient">SpeedUp</span> Works
+              {t.how_title}
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Three simple steps to get anything delivered
+              {t.how_subtitle}
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 stagger-children">
             {[
-              { step: '01', title: 'Choose Service', desc: 'Select what you need delivered and enter your pickup & delivery locations.', icon: <MapPin className="w-8 h-8" /> },
-              { step: '02', title: 'Get Matched', desc: 'We instantly connect you with the nearest verified rider for your delivery.', icon: <Zap className="w-8 h-8" /> },
-              { step: '03', title: 'Track & Receive', desc: 'Follow your delivery in real-time on the map and receive it at your doorstep.', icon: <Shield className="w-8 h-8" /> },
+              { step: '01', title: t.how_step1_title, desc: t.how_step1_desc, icon: <MapPin className="w-8 h-8" /> },
+              { step: '02', title: t.how_step2_title, desc: t.how_step2_desc, icon: <Zap className="w-8 h-8" /> },
+              { step: '03', title: t.how_step3_title, desc: t.how_step3_desc, icon: <Shield className="w-8 h-8" /> },
             ].map((item) => (
               <div key={item.step} className="relative">
                 <div className="bg-card rounded-2xl p-8 shadow-card border border-border h-full">
@@ -281,7 +287,7 @@ const LandingPage: React.FC = () => {
               Making Life <span className="text-primary">Easier.</span>
             </h2>
             <p className="text-white/60 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-              SpeedUpvery app — it's a movement. Powered by 
+              SpeedUp isn't just an app — it's a movement. Powered by 
               <strong className="text-white"> Genesis Holdings Inc. (USA)</strong>, we're on a mission to 
               transform logistics, create massive employment, and make everyday life simpler for millions.
             </p>
@@ -307,7 +313,7 @@ const LandingPage: React.FC = () => {
               <h3 className="text-2xl font-bold text-white mb-3">50,000 Jobs by 2027</h3>
               <p className="text-white/60 leading-relaxed">
                 We're committed to creating 50,000 meaningful jobs for riders and delivery professionals 
-                across Africa and Europe — empowering people to earn on their own terms.
+                across Africa, Europe, Caribbean, and Asia — empowering people to earn on their own terms.
               </p>
             </div>
 
@@ -331,8 +337,8 @@ const LandingPage: React.FC = () => {
                 <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Jobs Target</p>
               </div>
               <div className="text-center">
-                <p className="text-4xl md:text-5xl font-bold text-white mb-2">2</p>
-                <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Countries</p>
+                <p className="text-4xl md:text-5xl font-bold text-white mb-2">5</p>
+                <p className="text-sm text-white/50 font-medium uppercase tracking-wider">{t.global_countries_label}</p>
               </div>
               <div className="text-center">
                 <p className="text-4xl md:text-5xl font-bold text-white mb-2">2027</p>
@@ -350,30 +356,79 @@ const LandingPage: React.FC = () => {
             <div className="inline-flex items-center gap-3 bg-white/10 rounded-full px-6 py-3 backdrop-blur-sm border border-white/10">
               <Building2 className="w-5 h-5 text-primary" />
               <span className="text-sm font-semibold text-white/80">
-                A product of Genesis Holdings Inc. — United States of America 🇺🇸
+                {t.footer_product_of}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Global Presence */}
+      {/* Global Presence — Country Map */}
       <section className="py-20">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Global Presence</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Delivering Across <span className="text-gradient">5 Countries</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              {t.global_network_subtitle}
+            </p>
+          </div>
+
+          {/* Country Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-12">
+            {allCountries.map((c) => (
+              <div
+                key={c.code}
+                className={`relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all ${
+                  c.isActive
+                    ? 'border-primary/50 bg-primary/5 shadow-lg'
+                    : 'border-border bg-card opacity-80'
+                }`}
+              >
+                {c.comingSoon && (
+                  <Badge className="absolute -top-2 right-2 bg-primary/90 text-primary-foreground text-[10px] px-2 py-0.5">
+                    {t.coming_soon}
+                  </Badge>
+                )}
+                {c.isActive && (
+                  <Badge className="absolute -top-2 right-2 bg-green-500 text-white text-[10px] px-2 py-0.5">
+                    Live
+                  </Badge>
+                )}
+                <span className="text-4xl">{c.flag}</span>
+                <h3 className="font-bold text-foreground text-sm">{c.name}</h3>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-xs text-muted-foreground font-medium">{c.currencySymbol} · {c.currency}</span>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {c.paymentGateways.map((gw) => (
+                      <span key={gw} className="text-[10px] bg-secondary px-2 py-0.5 rounded-full text-muted-foreground capitalize">{gw}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-[10px] text-muted-foreground text-center">
+                  {c.cities.slice(0, 3).join(' · ')}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Fleet section */}
           <div className="relative rounded-3xl overflow-hidden">
             <img src={deliveryFleet} alt="SpeedUp global delivery fleet" className="w-full h-64 md:h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-              <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">Our Global Delivery Network</h3>
-              <p className="text-white/70 max-w-2xl text-lg">Motorcycles, bicycles, scooters, and cars — our diverse fleet ensures fast, reliable deliveries across Ghana 🇬🇭 and Finland 🇫🇮.</p>
+              <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">{t.global_network_title}</h3>
+              <p className="text-white/70 max-w-2xl text-lg">{t.global_network_subtitle}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
             {[
               { icon: <Building2 className="w-7 h-7" />, title: 'US Headquartered', desc: 'Genesis Holdings Inc. — a registered American corporation driving global logistics innovation.' },
-              { icon: <Globe className="w-7 h-7" />, title: 'Ghana 🇬🇭 & Finland 🇫🇮', desc: 'Operating across two continents with plans for rapid international expansion.' },
-              { icon: <Zap className="w-7 h-7" />, title: 'Instant Access', desc: 'Riders start earning immediately — no approval delays, no barriers to entry.' },
+              { icon: <Globe className="w-7 h-7" />, title: '5 Countries', desc: 'Operating in Ghana 🇬🇭 & Finland 🇫🇮 with Ethiopia 🇪🇹, Jamaica 🇯🇲 & Philippines 🇵🇭 launching soon.' },
+              { icon: <Zap className="w-7 h-7" />, title: 'Multi-Currency', desc: 'GHS, EUR, ETB, JMD, PHP — pay in your local currency with local payment methods.' },
               { icon: <Shield className="w-7 h-7" />, title: 'Enterprise Security', desc: 'Bank-level security, real-time tracking, and verified riders on every delivery.' },
             ].map((pillar) => (
               <div key={pillar.title} className="bg-card rounded-2xl p-6 border border-border shadow-card hover:shadow-lg transition-all">
@@ -483,14 +538,12 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedUp</span>
+              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">{t.nav_careers}</span>
               <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
-                Turn Your Vehicle<br />
-                Into Your <span className="text-primary">Business.</span>
+                {t.cta_rider_title}
               </h2>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Whether you ride a motorcycle, bicycle, scooter, or drive a car — join thousands of riders 
-                earning flexible income with SpeedUp. No experience required, no approval wait.
+                {t.cta_rider_subtitle}
               </p>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
@@ -509,7 +562,7 @@ const LandingPage: React.FC = () => {
 
               <Link to="/rider/auth">
                 <Button size="lg" className="bg-white text-foreground hover:bg-white/90 text-lg px-10 h-14 font-semibold">
-                  Start Earning Today
+                  {t.cta_rider_button}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
@@ -523,6 +576,20 @@ const LandingPage: React.FC = () => {
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Select Your Country CTA */}
+      <section className="py-16 bg-secondary/20">
+        <div className="container mx-auto px-4 text-center">
+          <Globe className="w-10 h-10 text-primary mx-auto mb-4" />
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+            Select Your Country
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+            Choose your location to see local prices, payment options, and available services.
+          </p>
+          <CountrySelector variant="full" className="max-w-3xl mx-auto" />
         </div>
       </section>
 
@@ -553,16 +620,19 @@ const LandingPage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                SpeedUp is a premium on-demand delivery platform by Genesis Holdings Inc., 
-                a registered company in the United States of America. Connecting customers with 
-                reliable riders across Ghana and Finland.
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed mb-4">
+                {t.footer_description}
               </p>
+              <div className="flex gap-2 flex-wrap">
+                {allCountries.map((c) => (
+                  <span key={c.code} className="text-lg" title={c.name}>{c.flag}</span>
+                ))}
+              </div>
             </div>
             
             {/* Quick Links */}
             <div>
-              <h4 className="font-bold text-foreground mb-4 text-sm uppercase tracking-wider">Platform</h4>
+              <h4 className="font-bold text-foreground mb-4 text-sm uppercase tracking-wider">{t.footer_platform}</h4>
               <div className="space-y-3">
                 <Link to="/signup" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Order Delivery</Link>
                 <Link to="/rider/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Become a Rider</Link>
@@ -572,7 +642,7 @@ const LandingPage: React.FC = () => {
             
             {/* Legal */}
             <div>
-              <h4 className="font-bold text-foreground mb-4 text-sm uppercase tracking-wider">Company</h4>
+              <h4 className="font-bold text-foreground mb-4 text-sm uppercase tracking-wider">{t.footer_company}</h4>
               <div className="space-y-3">
                 <a href="#about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">About Us</a>
                 <a href="#" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
@@ -584,11 +654,14 @@ const LandingPage: React.FC = () => {
           
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2025 SpeedUp. All rights reserved.
+              {t.footer_rights}
             </p>
-            <p className="text-xs text-muted-foreground/70 font-medium">
-              A product of Genesis Holdings Inc. — United States of America 🇺🇸
-            </p>
+            <div className="flex items-center gap-3">
+              <CountrySelector variant="compact" />
+              <p className="text-xs text-muted-foreground/70 font-medium">
+                {t.footer_product_of}
+              </p>
+            </div>
           </div>
         </div>
       </footer>
