@@ -162,8 +162,12 @@ const BidView: React.FC<BidViewProps> = ({
                 className="bg-card rounded-xl border border-border p-4 hover:border-primary/30 transition-colors"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-                    {bid.profiles?.full_name?.charAt(0) || 'R'}
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg overflow-hidden">
+                    {bid.profiles?.avatar_url ? (
+                      <img src={bid.profiles.avatar_url} alt={bid.profiles.full_name || 'Rider'} className="w-full h-full object-cover" />
+                    ) : (
+                      bid.profiles?.full_name?.charAt(0) || 'R'
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">{bid.profiles?.full_name || 'Rider'}</p>
