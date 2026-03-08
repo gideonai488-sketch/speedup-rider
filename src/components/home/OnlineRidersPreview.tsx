@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, Bike, MapPin, MessageSquare, Phone, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useBrowseOnlineRiders } from '@/hooks/useOnlineRiders';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
+import RiderProfileModal from '@/components/rider/RiderProfileModal';
 
 const OnlineRidersPreview: React.FC = () => {
   const { data: riders = [], isLoading } = useBrowseOnlineRiders();
+  const [selectedRider, setSelectedRider] = useState<any>(null);
 
   return (
     <section>
@@ -39,9 +40,10 @@ const OnlineRidersPreview: React.FC = () => {
             </div>
           ) : (
             riders.slice(0, 8).map((rider) => (
-              <div
+              <button
                 key={rider.rider_id}
-                className="flex-shrink-0 w-36 bg-card rounded-xl border border-border p-3 hover:border-primary/50 transition-colors"
+                onClick={() => setSelectedRider(rider)}
+                className="flex-shrink-0 w-36 bg-card rounded-xl border border-border p-3 hover:border-primary/50 transition-colors text-left"
               >
                 {/* Avatar */}
                 <div className="relative mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2">
@@ -67,23 +69,27 @@ const OnlineRidersPreview: React.FC = () => {
 
                 {/* Quick actions */}
                 <div className="flex gap-1.5 mt-3">
-                  <button className="flex-1 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors">
+                  <div className="flex-1 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                     <MessageSquare className="w-3.5 h-3.5" />
-                  </button>
+                  </div>
                   {rider.profile?.phone && (
-                    <a href={`tel:${rider.profile.phone}`} className="flex-1">
-                      <button className="w-full h-7 rounded-lg bg-accent/10 text-accent flex items-center justify-center hover:bg-accent/20 transition-colors">
-                        <Phone className="w-3.5 h-3.5" />
-                      </button>
-                    </a>
+                    <div className="flex-1 h-7 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5" />
+                    </div>
                   )}
                 </div>
-              </div>
+              </button>
             ))
           )}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+
+      <RiderProfileModal
+        open={!!selectedRider}
+        onClose={() => setSelectedRider(null)}
+        rider={selectedRider}
+      />
     </section>
   );
 };

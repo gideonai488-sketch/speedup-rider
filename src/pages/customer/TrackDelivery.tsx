@@ -349,7 +349,10 @@ const TrackDelivery: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-foreground">{rider.full_name || 'Your Rider'}</p>
-                <div className="flex items-center gap-1 text-sm">
+                {rider.phone && (
+                  <p className="text-sm text-muted-foreground">{rider.phone}</p>
+                )}
+                <div className="flex items-center gap-1 text-sm mt-0.5">
                   <span className="font-medium">4.8</span>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
