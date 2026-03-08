@@ -90,10 +90,15 @@ const Orders: React.FC = () => {
                             <p className="text-xs text-primary-foreground/70">Order ID</p>
                             <p className="font-bold text-primary-foreground">{order.order_number || order.id.slice(0, 8)}</p>
                           </div>
-                          <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-                            <span className="text-xs font-semibold text-primary-foreground capitalize">
-                              {order.status.replace(/_/g, ' ')}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            {order.status === 'pending' && !order.rider_id && (
+                              <BidCountBadge orderId={order.id} />
+                            )}
+                            <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
+                              <span className="text-xs font-semibold text-primary-foreground capitalize">
+                                {order.status.replace(/_/g, ' ')}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
