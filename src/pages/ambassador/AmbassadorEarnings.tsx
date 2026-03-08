@@ -97,15 +97,15 @@ const AmbassadorEarnings: React.FC = () => {
           <Card className="border-border">
             <CardContent className="p-4">
               <TrendingUp className="w-5 h-5 text-green-500 mb-2" />
-              <p className="text-lg font-bold text-foreground">${((stats?.total_signups || 0) * 5).toFixed(0)}</p>
-              <p className="text-xs text-muted-foreground">From Signups</p>
+              <p className="text-lg font-bold text-foreground">{formatPrice(stats?.total_earnings || 0)}</p>
+              <p className="text-xs text-muted-foreground">From First Orders</p>
             </CardContent>
           </Card>
           <Card className="border-border">
             <CardContent className="p-4">
               <DollarSign className="w-5 h-5 text-blue-500 mb-2" />
-              <p className="text-lg font-bold text-foreground">${((stats?.total_orders_generated || 0) * 0.5).toFixed(0)}</p>
-              <p className="text-xs text-muted-foreground">From Orders</p>
+              <p className="text-lg font-bold text-foreground">{stats?.total_orders_generated || 0}</p>
+              <p className="text-xs text-muted-foreground">Orders Generated</p>
             </CardContent>
           </Card>
         </div>
