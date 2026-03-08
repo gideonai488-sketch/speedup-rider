@@ -24,10 +24,12 @@ interface AmbassadorStats {
 const AmbassadorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile, signOut, loading: authLoading } = useAuth();
+  const { country, formatPrice } = useCountry();
   const [stats, setStats] = useState<AmbassadorStats | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const [recentSignups, setRecentSignups] = useState<any[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [earningRate, setEarningRate] = useState<number>(2);
 
   useEffect(() => {
     if (!authLoading && !user) {
