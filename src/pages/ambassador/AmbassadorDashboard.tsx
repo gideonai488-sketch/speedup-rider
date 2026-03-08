@@ -11,6 +11,7 @@ import {
   Trophy, Bell, LogOut, Loader2, ChevronRight, Star, Target, BarChart3
 } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
+import { useCountry } from '@/context/CountryContext';
 
 interface AmbassadorStats {
   total_signups: number;
