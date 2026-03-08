@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentPosition, requestPermissions } from '@/lib/nativeGeolocation';
 
 interface UserLocation {
   city: string | null;
@@ -122,79 +123,71 @@ export const useUserLocation = (): UserLocation => {
       }
     }
 
-    if (!navigator.geolocation) {
-      setError('Geolocation not supported');
-      setCity('Accra');
-      setIsLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const coords = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setCoordinates(coords);
-
-          const { data, error: geocodeError } = await supabase.functions.invoke('mapbox-geocode', {
-            body: {
-              query: `${coords.lng},${coords.lat}`,
-              types: 'place,locality,region',
-            },
-          });
-
-          if (geocodeError) {
-            console.error('Geocode error:', geocodeError);
-            throw geocodeError;
-          }
-
-          if (data?.features?.[0]) {
-            const feature = data.features[0];
-            const detectedCity = extractCityFromContext(feature.context, feature.place_name);
-            
-            let detectedRegion: string | null = null;
-            if (feature.context) {
-              for (const ctx of feature.context) {
-                if (ctx.id?.startsWith('region.')) {
-                  detectedRegion = ctx.text;
-                  break;
-                }
-              }
-            }
-
-            setCity(detectedCity || 'Accra');
-            setRegion(detectedRegion);
-
-            sessionStorage.setItem('user_location', JSON.stringify({
-              city: detectedCity || 'Accra',
-              region: detectedRegion,
-              coordinates: coords,
-              timestamp: Date.now(),
-            }));
-          } else {
-            setCity('Accra');
-          }
-        } catch (err) {
-          console.error('Location detection error:', err);
-          setCity('Accra');
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      (geoError) => {
-        console.error('Geolocation error:', geoError);
-        setError(geoError.message);
+    try {
+      const granted = await requestPermissions();
+      if (!granted) {
+        setError('Location permission denied');
         setCity('Accra');
         setIsLoading(false);
-      },
-      {
+        return;
+      }
+
+      const position = await getCurrentPosition({
         enableHighAccuracy: false,
         timeout: 10000,
-        maximumAge: 300000,
+      });
+
+      const coords = {
+        lat: position.latitude,
+        lng: position.longitude,
+      };
+      setCoordinates(coords);
+
+      const { data, error: geocodeError } = await supabase.functions.invoke('mapbox-geocode', {
+        body: {
+          query: `${coords.lng},${coords.lat}`,
+          types: 'place,locality,region',
+        },
+      });
+
+      if (geocodeError) {
+        console.error('Geocode error:', geocodeError);
+        throw geocodeError;
       }
-    );
+
+      if (data?.features?.[0]) {
+        const feature = data.features[0];
+        const detectedCity = extractCityFromContext(feature.context, feature.place_name);
+        
+        let detectedRegion: string | null = null;
+        if (feature.context) {
+          for (const ctx of feature.context) {
+            if (ctx.id?.startsWith('region.')) {
+              detectedRegion = ctx.text;
+              break;
+            }
+          }
+        }
+
+        setCity(detectedCity || 'Accra');
+        setRegion(detectedRegion);
+
+        sessionStorage.setItem('user_location', JSON.stringify({
+          city: detectedCity || 'Accra',
+          region: detectedRegion,
+          coordinates: coords,
+          timestamp: Date.now(),
+        }));
+      } else {
+        setCity('Accra');
+      }
+    } catch (err: any) {
+      console.error('Location detection error:', err);
+      setError(err?.message || 'Location detection failed');
+      setCity('Accra');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
