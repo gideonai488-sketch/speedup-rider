@@ -264,7 +264,7 @@ const AmbassadorDashboard: React.FC = () => {
                       </p>
                     </div>
                     <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
-                      +${signup.bonus_earned || 5}
+                      +{formatPrice(signup.bonus_earned || 0)}
                     </Badge>
                   </CardContent>
                 </Card>
