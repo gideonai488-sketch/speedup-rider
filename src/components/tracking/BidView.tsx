@@ -24,6 +24,7 @@ interface BidViewProps {
   pickupAddress?: string;
   deliveryAddress: string;
   totalAmount: number;
+  distanceKm?: number;
   onBack: () => void;
   onCancel?: () => Promise<void>;
   onChat?: (riderId: string, riderName: string, riderPhone?: string) => void;
