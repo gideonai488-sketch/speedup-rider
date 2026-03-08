@@ -3,7 +3,7 @@ import {
   User, MapPin, CreditCard, Bell, HelpCircle, 
   Settings, ChevronRight, LogOut, Star, Gift, ShieldCheck,
   Package, Clock, Heart, Wallet, FileText, MessageCircle,
-  Mail, Phone, Edit2, Camera, X, Check
+  Mail, Phone, Edit2, Camera, X, Check, Loader2
 } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
 import { Button } from '@/components/ui/button';
