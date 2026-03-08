@@ -44,17 +44,27 @@ const BidView: React.FC<BidViewProps> = ({
   const { data: bids = [], isLoading } = useOrderBids(orderId);
   const acceptBid = useAcceptBid();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedBid, setSelectedBid] = useState<any>(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const handleAcceptBid = async (bid: any) => {
+  const handleAcceptBid = (bid: any) => {
+    setSelectedBid(bid);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmAcceptBid = async () => {
+    if (!selectedBid) return;
     try {
       await acceptBid.mutateAsync({
-        bidId: bid.id,
+        bidId: selectedBid.id,
         orderId,
-        riderId: bid.rider_id,
-        amount: bid.amount,
+        riderId: selectedBid.rider_id,
+        amount: selectedBid.amount,
       });
-      toast.success(`Bid accepted! ${bid.profiles?.full_name || 'Rider'} is on the way.`);
+      setShowConfirmDialog(false);
+      setSelectedBid(null);
+      toast.success(`Bid accepted! ${selectedBid.profiles?.full_name || 'Rider'} is on the way.`);
     } catch (err: any) {
       toast.error(err.message || 'Failed to accept bid');
     }
@@ -245,6 +255,80 @@ const BidView: React.FC<BidViewProps> = ({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isCancelling ? 'Cancelling...' : 'Yes, Cancel'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bid Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-xl">Confirm Bid</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 pt-2">
+                {/* Rider Info */}
+                {selectedBid && (
+                  <div className="flex items-center gap-3 bg-secondary/50 rounded-xl p-3">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg overflow-hidden">
+                      {selectedBid.profiles?.avatar_url ? (
+                        <img src={selectedBid.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        selectedBid.profiles?.full_name?.charAt(0) || 'R'
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground">{selectedBid.profiles?.full_name || 'Rider'}</p>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Star className="w-3.5 h-3.5 text-warning fill-warning" />
+                        <span>4.8</span>
+                        <span>•</span>
+                        <span className="capitalize">{selectedBid.profiles?.vehicle_type || 'motorcycle'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Route Summary */}
+                <div className="space-y-2 text-sm">
+                  {pickupAddress && (
+                    <div className="flex items-start gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                      <span className="text-muted-foreground">{pickupAddress}</span>
+                    </div>
+                  )}
+                  <div className="flex items-start gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-success mt-1.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">{deliveryAddress}</span>
+                  </div>
+                </div>
+
+                {/* Agreed Amount */}
+                {selectedBid && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Agreed Delivery Fee</p>
+                    <p className="text-3xl font-bold text-primary">{formatCurrency(Number(selectedBid.amount))}</p>
+                    {selectedBid.message && (
+                      <p className="text-xs text-muted-foreground mt-2 italic">"{selectedBid.message}"</p>
+                    )}
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground text-center">
+                  By accepting, the rider will be assigned to your delivery and will head to the pickup location.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-3 sm:flex-row">
+            <AlertDialogCancel className="flex-1 mt-0" disabled={acceptBid.isPending}>Go Back</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmAcceptBid(); }}
+              disabled={acceptBid.isPending}
+              className="flex-1 gradient-hero text-white"
+            >
+              <CheckCircle2 className="w-4 h-4 mr-1.5" />
+              {acceptBid.isPending ? 'Confirming...' : 'Confirm & Accept'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
