@@ -545,7 +545,8 @@ const RiderDelivery: React.FC = () => {
               ) : (
                 <>
                   {currentStatus === 'out_for_delivery' && canComplete() && <CheckCircle2 className="w-5 h-5 mr-2" />}
-                  {currentStatus === 'picked_up' && <Truck className="w-5 h-5 mr-2" />}
+                  {currentStatus === 'confirmed' && <Truck className="w-5 h-5 mr-2" />}
+                  {currentStatus === 'picked_up' && <MapPin className="w-5 h-5 mr-2" />}
                   {getStatusButtonText()}
                 </>
               )}
