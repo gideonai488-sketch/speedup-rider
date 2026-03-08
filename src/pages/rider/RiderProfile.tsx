@@ -293,8 +293,32 @@ const RiderProfile: React.FC = () => {
 
         {/* Profile Avatar */}
         <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-3">
-            <User className="w-12 h-12 text-primary-foreground" />
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-3 overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-12 h-12 text-primary-foreground" />
+              )}
+            </div>
+            {isUploadingAvatar && (
+              <div className="absolute inset-0 w-24 h-24 rounded-full bg-black/50 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-white" />
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-2 right-0 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center"
+            >
+              <Camera className="w-4 h-4 text-foreground" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
           </div>
           <h2 className="text-xl font-bold">{profile?.full_name}</h2>
           <p className="text-primary-foreground/80">{user?.email}</p>
