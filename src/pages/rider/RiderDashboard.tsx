@@ -271,19 +271,29 @@ const RiderDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-white relative bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20"
-              onClick={() => navigate('/rider/earnings')}
-            >
-              <Bell className="w-5 h-5" />
-              {pendingOrders.length > 0 && isOnline && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse">
-                  {pendingOrders.length}
-                </span>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white relative bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20"
+                onClick={() => navigate('/rider/earnings')}
+              >
+                <Bell className="w-5 h-5" />
+                {pendingOrders.length > 0 && isOnline && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse">
+                    {pendingOrders.length}
+                  </span>
+                )}
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white bg-white/10 backdrop-blur-sm rounded-xl hover:bg-destructive/80"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Online Toggle - Glassmorphism */}
