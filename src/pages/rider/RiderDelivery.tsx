@@ -308,6 +308,7 @@ const RiderDelivery: React.FC = () => {
         <UberStyleMap
           riderLocation={riderLocation || undefined}
           destinationLocation={destination}
+          pickupLocation={order?.pickup_lat ? { lat: Number(order.pickup_lat), lng: Number(order.pickup_lng) } : undefined}
           eta={eta}
           currentStreet={currentStreet}
           isMoving={currentStatus !== 'delivered'}
