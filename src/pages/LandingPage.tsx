@@ -265,38 +265,116 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* About / Vision Section */}
-      <section id="about" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">About SpeedRush</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Built in the <span className="text-gradient">USA</span>, Serving the <span className="text-gradient">World</span>
+      {/* Vision & Mission Section */}
+      <section id="about" className="py-24 gradient-dark text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-15">
+          <div className="absolute top-10 left-10 w-80 h-80 rounded-full bg-primary blur-[100px]" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-accent blur-[100px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/20 blur-[120px]" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <span className="text-sm font-bold text-primary uppercase tracking-[0.2em] mb-4 block">Our Vision & Mission</span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              Creating <span className="text-primary">50,000 Jobs.</span><br />
+              Making Life <span className="text-primary">Easier.</span>
             </h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-lg leading-relaxed">
-              SpeedRush is a product of <strong className="text-foreground">Genesis Holdings Inc.</strong>, headquartered in the United States. 
-              We're building a world-class logistics platform that creates economic opportunities and delivers 
-              exceptional service across continents.
+            <p className="text-white/60 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
+              SpeedRush isn't just a delivery app — it's a movement. Powered by 
+              <strong className="text-white"> Genesis Holdings Inc. (USA)</strong>, we're on a mission to 
+              transform logistics, create massive employment, and make everyday life simpler for millions.
             </p>
           </div>
 
-          {/* Fleet showcase */}
-          <div className="relative rounded-3xl overflow-hidden mb-16">
+          {/* Vision Cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
+            <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/10 hover:border-primary/40 transition-all">
+              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6">
+                <Target className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">Our Mission</h3>
+              <p className="text-white/60 leading-relaxed">
+                To build the most accessible and reliable delivery platform on earth — connecting people 
+                with everything they need, delivered fast, safe, and affordable.
+              </p>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/10 hover:border-primary/40 transition-all">
+              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">50,000 Jobs by 2027</h3>
+              <p className="text-white/60 leading-relaxed">
+                We're committed to creating 50,000 meaningful jobs for riders and delivery professionals 
+                across Africa and Europe — empowering people to earn on their own terms.
+              </p>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/10 hover:border-primary/40 transition-all">
+              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6">
+                <TrendingUp className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">Making Life Easy</h3>
+              <p className="text-white/60 leading-relaxed">
+                From food and groceries to packages and errands — we handle the logistics so you can focus 
+                on what matters most. Delivery made effortless.
+              </p>
+            </div>
+          </div>
+
+          {/* Impact Numbers */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 p-8 md:p-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <p className="text-4xl md:text-5xl font-bold text-primary mb-2">50K</p>
+                <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Jobs Target</p>
+              </div>
+              <div className="text-center">
+                <p className="text-4xl md:text-5xl font-bold text-white mb-2">2</p>
+                <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Countries</p>
+              </div>
+              <div className="text-center">
+                <p className="text-4xl md:text-5xl font-bold text-white mb-2">2027</p>
+                <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Vision Year</p>
+              </div>
+              <div className="text-center">
+                <p className="text-4xl md:text-5xl font-bold text-white mb-2">∞</p>
+                <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Possibilities</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Company Info */}
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center gap-3 bg-white/10 rounded-full px-6 py-3 backdrop-blur-sm border border-white/10">
+              <Building2 className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-white/80">
+                A product of Genesis Holdings Inc. — United States of America 🇺🇸
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Global Presence */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="relative rounded-3xl overflow-hidden">
             <img src={deliveryFleet} alt="SpeedRush global delivery fleet" className="w-full h-64 md:h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
               <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">Our Global Delivery Network</h3>
-              <p className="text-white/70 max-w-2xl text-lg">Motorcycles, bicycles, scooters, and cars — our diverse fleet ensures fast, reliable deliveries no matter the size of your order.</p>
+              <p className="text-white/70 max-w-2xl text-lg">Motorcycles, bicycles, scooters, and cars — our diverse fleet ensures fast, reliable deliveries across Ghana 🇬🇭 and Finland 🇫🇮.</p>
             </div>
           </div>
 
-          {/* Company pillars */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
             {[
-              { icon: <Building2 className="w-7 h-7" />, title: 'US Headquartered', desc: 'Genesis Holdings Inc. — a registered American corporation driving innovation in global logistics.' },
-              { icon: <Globe className="w-7 h-7" />, title: 'Ghana 🇬🇭 & Finland 🇫🇮', desc: 'Currently operating across two continents with plans for rapid international expansion.' },
-              { icon: <Target className="w-7 h-7" />, title: '50,000 Jobs by 2027', desc: 'Creating meaningful employment for riders and delivery professionals worldwide.' },
-              { icon: <Shield className="w-7 h-7" />, title: 'Enterprise Grade', desc: 'Bank-level security, real-time tracking, and verified riders for every delivery.' },
+              { icon: <Building2 className="w-7 h-7" />, title: 'US Headquartered', desc: 'Genesis Holdings Inc. — a registered American corporation driving global logistics innovation.' },
+              { icon: <Globe className="w-7 h-7" />, title: 'Ghana 🇬🇭 & Finland 🇫🇮', desc: 'Operating across two continents with plans for rapid international expansion.' },
+              { icon: <Zap className="w-7 h-7" />, title: 'Instant Access', desc: 'Riders start earning immediately — no approval delays, no barriers to entry.' },
+              { icon: <Shield className="w-7 h-7" />, title: 'Enterprise Security', desc: 'Bank-level security, real-time tracking, and verified riders on every delivery.' },
             ].map((pillar) => (
               <div key={pillar.title} className="bg-card rounded-2xl p-6 border border-border shadow-card hover:shadow-lg transition-all">
                 <div className="w-14 h-14 rounded-2xl gradient-hero flex items-center justify-center text-white mb-4 shadow-glow">
