@@ -11,6 +11,8 @@ interface UserLocation {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
+  setManualCity: (city: string) => void;
+  isManual: boolean;
 }
 
 // Map of Ghana regions/cities for better matching
@@ -24,16 +26,15 @@ const GHANA_CITIES = [
   'Suhum', 'Kibi', 'Akwatia', 'Asamankese', 'Berekum', 'Dormaa',
   'Wenchi', 'Goaso', 'Mampong', 'Ejura', 'Konongo', 'Agogo',
   'Bekwai', 'Juaben', 'Bawku', 'Navrongo', 'Zebilla', 'Damongo',
-  'Yendi', 'Salaga', 'Bimbilla', 'Kintampo', 'Atebubu', 'Yeji'
+  'Yendi', 'Salaga', 'Bimbilla', 'Kintampo', 'Atebubu', 'Yeji',
+  'East Legon', 'Ejisu', 'Nalerigu', 'Sefwi Wiawso', 'Dambai'
 ];
 
 const extractCityFromContext = (context: any[] | undefined, placeName: string): string | null => {
   if (!context) return null;
 
-  // First try to find place type in context
   for (const ctx of context) {
     if (ctx.id?.startsWith('place.') || ctx.id?.startsWith('locality.')) {
-      // Check if it matches a known Ghana city
       const cityName = ctx.text;
       const matchedCity = GHANA_CITIES.find(
         c => cityName?.toLowerCase().includes(c.toLowerCase()) ||
@@ -44,17 +45,14 @@ const extractCityFromContext = (context: any[] | undefined, placeName: string): 
     }
   }
 
-  // Try to extract from place_name
   for (const city of GHANA_CITIES) {
     if (placeName?.toLowerCase().includes(city.toLowerCase())) {
       return city;
     }
   }
 
-  // Check region context
   for (const ctx of context) {
     if (ctx.id?.startsWith('region.')) {
-      // Map region to main city
       const region = ctx.text?.toLowerCase();
       if (region?.includes('greater accra')) return 'Accra';
       if (region?.includes('ashanti')) return 'Kumasi';
@@ -74,23 +72,44 @@ const extractCityFromContext = (context: any[] | undefined, placeName: string): 
   return null;
 };
 
+const MANUAL_CITY_KEY = 'user_manual_city';
+
 export const useUserLocation = (): UserLocation => {
   const [city, setCity] = useState<string | null>(null);
   const [region, setRegion] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isManual, setIsManual] = useState(false);
+
+  // Check for manual override on mount
+  useEffect(() => {
+    const manualCity = localStorage.getItem(MANUAL_CITY_KEY);
+    if (manualCity) {
+      setCity(manualCity);
+      setIsManual(true);
+      setIsLoading(false);
+    }
+  }, []);
+
+  const setManualCity = useCallback((newCity: string) => {
+    localStorage.setItem(MANUAL_CITY_KEY, newCity);
+    sessionStorage.removeItem('user_location');
+    setCity(newCity);
+    setIsManual(true);
+  }, []);
 
   const detectLocation = useCallback(async () => {
+    // Clear manual override when user requests auto-detect
+    localStorage.removeItem(MANUAL_CITY_KEY);
+    setIsManual(false);
     setIsLoading(true);
     setError(null);
 
-    // Check if we have cached location in sessionStorage
     const cachedLocation = sessionStorage.getItem('user_location');
     if (cachedLocation) {
       try {
         const parsed = JSON.parse(cachedLocation);
-        // Check if cache is less than 30 minutes old
         if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
           setCity(parsed.city);
           setRegion(parsed.region);
@@ -105,7 +124,7 @@ export const useUserLocation = (): UserLocation => {
 
     if (!navigator.geolocation) {
       setError('Geolocation not supported');
-      setCity('Accra'); // Default fallback
+      setCity('Accra');
       setIsLoading(false);
       return;
     }
@@ -119,7 +138,6 @@ export const useUserLocation = (): UserLocation => {
           };
           setCoordinates(coords);
 
-          // Reverse geocode to get city
           const { data, error: geocodeError } = await supabase.functions.invoke('mapbox-geocode', {
             body: {
               query: `${coords.lng},${coords.lat}`,
@@ -136,7 +154,6 @@ export const useUserLocation = (): UserLocation => {
             const feature = data.features[0];
             const detectedCity = extractCityFromContext(feature.context, feature.place_name);
             
-            // Extract region from context
             let detectedRegion: string | null = null;
             if (feature.context) {
               for (const ctx of feature.context) {
@@ -150,7 +167,6 @@ export const useUserLocation = (): UserLocation => {
             setCity(detectedCity || 'Accra');
             setRegion(detectedRegion);
 
-            // Cache the location
             sessionStorage.setItem('user_location', JSON.stringify({
               city: detectedCity || 'Accra',
               region: detectedRegion,
@@ -170,19 +186,23 @@ export const useUserLocation = (): UserLocation => {
       (geoError) => {
         console.error('Geolocation error:', geoError);
         setError(geoError.message);
-        setCity('Accra'); // Default fallback
+        setCity('Accra');
         setIsLoading(false);
       },
       {
         enableHighAccuracy: false,
         timeout: 10000,
-        maximumAge: 300000, // 5 minutes
+        maximumAge: 300000,
       }
     );
   }, []);
 
   useEffect(() => {
-    detectLocation();
+    // Only auto-detect if no manual city is set
+    const manualCity = localStorage.getItem(MANUAL_CITY_KEY);
+    if (!manualCity) {
+      detectLocation();
+    }
   }, [detectLocation]);
 
   return {
@@ -192,6 +212,8 @@ export const useUserLocation = (): UserLocation => {
     isLoading,
     error,
     refetch: detectLocation,
+    setManualCity,
+    isManual,
   };
 };
 

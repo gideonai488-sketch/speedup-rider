@@ -8,11 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import StoreLogo from '@/components/ui/store-logo';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel, Check, LocateFixed
 } from 'lucide-react';
+import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
 import { useStoresByCity } from '@/hooks/useStores';
@@ -59,9 +61,11 @@ const CustomerHome: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
   
   const { user, profile, signOut, loading: authLoading } = useAuth();
-  const { city, isLoading: locationLoading, refetch: refetchLocation } = useUserLocation();
+  const { city, isLoading: locationLoading, refetch: refetchLocation, setManualCity, isManual } = useUserLocation();
   const { data: storeData, isLoading: storesLoading } = useStoresByCity(city);
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const { data: wallet } = useWallet();
@@ -69,6 +73,14 @@ const CustomerHome: React.FC = () => {
   const stores = storeData?.stores || [];
   const isFilteredByCity = storeData?.isFiltered || false;
   const currentCity = storeData?.city || city;
+
+  const citiesByRegion = getCitiesByRegion();
+  const filteredCities = citySearch
+    ? ghanaianCities.filter(c => 
+        c.label.toLowerCase().includes(citySearch.toLowerCase()) ||
+        c.region.toLowerCase().includes(citySearch.toLowerCase())
+      )
+    : ghanaianCities;
 
   React.useEffect(() => {
     if (!authLoading && !user) {
@@ -113,7 +125,7 @@ const CustomerHome: React.FC = () => {
                   Speed<span className="text-primary">Up</span>
                 </h1>
                 <button 
-                  onClick={refetchLocation}
+                  onClick={() => setCityPickerOpen(true)}
                   className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <MapPin className="w-3 h-3 text-primary" />
@@ -125,6 +137,7 @@ const CustomerHome: React.FC = () => {
                   ) : (
                     <>
                       {currentCity || profile?.address || 'Set location'}
+                      {isManual && <span className="text-[10px] text-primary">(manual)</span>}
                       <ChevronRight className="w-3 h-3" />
                     </>
                   )}
@@ -394,6 +407,104 @@ const CustomerHome: React.FC = () => {
           </Link>
         </div>
       </nav>
+
+      {/* City Picker Sheet */}
+      <Sheet open={cityPickerOpen} onOpenChange={setCityPickerOpen}>
+        <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
+          <SheetHeader className="pb-2">
+            <SheetTitle>Choose Your City</SheetTitle>
+          </SheetHeader>
+          
+          <div className="space-y-3">
+            {/* Auto-detect button */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                refetchLocation();
+                setCityPickerOpen(false);
+              }}
+            >
+              <LocateFixed className="w-4 h-4 text-primary" />
+              Auto-detect my location
+              {!isManual && city && (
+                <Check className="w-4 h-4 ml-auto text-primary" />
+              )}
+            </Button>
+
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search city..."
+                value={citySearch}
+                onChange={(e) => setCitySearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* City list */}
+            <ScrollArea className="h-[calc(80vh-200px)]">
+              <div className="space-y-1 pr-3">
+                {citySearch ? (
+                  filteredCities.map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => {
+                        setManualCity(c.label);
+                        setCityPickerOpen(false);
+                        setCitySearch('');
+                      }}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
+                        currentCity?.toLowerCase() === c.label.toLowerCase()
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "hover:bg-secondary text-foreground"
+                      )}
+                    >
+                      <div>
+                        <span>{c.label}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{c.region}</span>
+                      </div>
+                      {currentCity?.toLowerCase() === c.label.toLowerCase() && (
+                        <Check className="w-4 h-4 text-primary" />
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  Object.entries(citiesByRegion).map(([region, cities]) => (
+                    <div key={region} className="mb-3">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1.5">
+                        {region}
+                      </p>
+                      {cities.map((c) => (
+                        <button
+                          key={c.value}
+                          onClick={() => {
+                            setManualCity(c.label);
+                            setCityPickerOpen(false);
+                          }}
+                          className={cn(
+                            "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
+                            currentCity?.toLowerCase() === c.label.toLowerCase()
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "hover:bg-secondary text-foreground"
+                          )}
+                        >
+                          <span>{c.label}</span>
+                          {currentCity?.toLowerCase() === c.label.toLowerCase() && (
+                            <Check className="w-4 h-4 text-primary" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
