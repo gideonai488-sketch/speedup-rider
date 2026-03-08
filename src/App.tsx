@@ -143,6 +143,17 @@ const App = () => {
                 <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                 
+                {/* Ambassador Routes */}
+                <Route path="/ambassador/auth" element={<AmbassadorAuth />} />
+                <Route path="/ambassador" element={<AmbassadorDashboard />} />
+                <Route path="/ambassador/dashboard" element={<AmbassadorDashboard />} />
+                <Route path="/ambassador/referrals" element={<AmbassadorReferrals />} />
+                <Route path="/ambassador/earnings" element={<AmbassadorEarnings />} />
+                <Route path="/ambassador/leaderboard" element={<AmbassadorLeaderboard />} />
+                <Route path="/ambassador/resources" element={<AmbassadorResources />} />
+                <Route path="/ambassador/profile" element={<AmbassadorProfile />} />
+                <Route path="/ambassador/notifications" element={<Notifications />} />
+                
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
