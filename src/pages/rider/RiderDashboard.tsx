@@ -185,11 +185,33 @@ const RiderDashboard: React.FC = () => {
     const newStatus = !isOnline;
     setIsOnline(newStatus);
     if (profile) {
-      await updateLocation.mutateAsync({
-        latitude: 5.6037,
-        longitude: -0.1870,
-        is_online: newStatus,
-      });
+      try {
+        // Get current position or use last known
+        const pos = lastKnownPosition.current || { lat: 0, lng: 0 };
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              lastKnownPosition.current = { lat: position.coords.latitude, lng: position.coords.longitude };
+              await updateLocation.mutateAsync({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                is_online: newStatus,
+              });
+            },
+            async () => {
+              // Fallback to last known position
+              await updateLocation.mutateAsync({
+                latitude: pos.lat,
+                longitude: pos.lng,
+                is_online: newStatus,
+              });
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+          );
+        }
+      } catch (err) {
+        console.error('Toggle online error:', err);
+      }
     }
     toast.success(newStatus ? 'You are now online and receiving orders!' : 'You are now offline');
     if (!newStatus) setSelectedOrder(null);
