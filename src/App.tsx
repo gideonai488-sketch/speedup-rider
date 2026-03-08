@@ -79,6 +79,7 @@ const App = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <CountryProvider>
           <AuthProvider>
             <Toaster />
             <Sonner position="top-center" />
