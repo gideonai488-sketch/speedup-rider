@@ -37,9 +37,7 @@ const CustomerAuth: React.FC = () => {
 
   useEffect(() => {
     if (user && profile && !authLoading) {
-      if (profile.role === 'admin') {
-        navigate('/admin');
-      } else if (profile.role === 'rider') {
+      if (profile.role === 'rider') {
         toast.error('Please use the rider app to login');
         navigate('/rider/auth');
       } else {

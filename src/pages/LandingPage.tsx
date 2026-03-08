@@ -37,7 +37,7 @@ const LandingPage: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-foreground tracking-tight">
-                Speed<span className="text-primary">Rush</span>
+                Speed<span className="text-primary">Up</span>
               </span>
               <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase leading-tight">
                 Genesis Holdings Inc. USA
