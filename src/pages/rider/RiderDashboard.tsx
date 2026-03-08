@@ -126,13 +126,17 @@ const RiderDashboard: React.FC = () => {
   }, [profile?.id]);
 
   // Update rider location periodically when online
+  const updateLocationRef = useRef(updateLocation);
+  updateLocationRef.current = updateLocation;
+  
   useEffect(() => {
     if (!isOnline || !profile || !isApproved) return;
     const updateRiderLocation = () => {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            updateLocation.mutate({
+            lastKnownPosition.current = { lat: position.coords.latitude, lng: position.coords.longitude };
+            updateLocationRef.current.mutate({
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
               heading: position.coords.heading || undefined,
@@ -141,14 +145,14 @@ const RiderDashboard: React.FC = () => {
             });
           },
           (error) => console.error('Geolocation error:', error),
-          { enableHighAccuracy: true }
+          { enableHighAccuracy: true, timeout: 10000 }
         );
       }
     };
     updateRiderLocation();
     const interval = setInterval(updateRiderLocation, 10000);
     return () => clearInterval(interval);
-  }, [isOnline, profile, updateLocation, isApproved]);
+  }, [isOnline, profile, isApproved]);
 
   // Countdown timer for selected order
   useEffect(() => {
