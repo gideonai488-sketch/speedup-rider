@@ -51,6 +51,7 @@ const StoreCheckout: React.FC = () => {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryLandmark, setDeliveryLandmark] = useState('');
+  const [customerPhone, setCustomerPhone] = useState(profile?.phone || '');
   const [notes, setNotes] = useState('');
 
   const cartItems: CartItemData[] = React.useMemo(() => {
