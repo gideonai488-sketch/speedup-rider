@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SplashScreen from "@/components/SplashScreen";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
+import { initNativeUI } from "@/lib/nativeUI";
 
 // SpeedUp Pages
 import LandingPage from "./pages/LandingPage";
@@ -64,6 +65,8 @@ const App = () => {
       setShowSplash(false);
       setIsFirstVisit(false);
     }
+    // Initialize native UI plugins (status bar, splash screen, keyboard)
+    initNativeUI();
   }, []);
 
   const handleSplashComplete = () => {
