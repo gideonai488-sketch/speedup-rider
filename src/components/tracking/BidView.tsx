@@ -36,6 +36,7 @@ const BidView: React.FC<BidViewProps> = ({
   pickupAddress,
   deliveryAddress,
   totalAmount,
+  distanceKm,
   onBack,
   onCancel,
   onChat,
