@@ -337,7 +337,7 @@ const LandingPage: React.FC = () => {
                 <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Jobs Target</p>
               </div>
               <div className="text-center">
-                <p className="text-4xl md:text-5xl font-bold text-white mb-2">5</p>
+                <p className="text-4xl md:text-5xl font-bold text-white mb-2">6</p>
                 <p className="text-sm text-white/50 font-medium uppercase tracking-wider">{t.global_countries_label}</p>
               </div>
               <div className="text-center">
@@ -369,7 +369,7 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-14">
             <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Global Presence</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Delivering Across <span className="text-gradient">5 Countries</span>
+              Delivering Across <span className="text-gradient">6 Countries</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               {t.global_network_subtitle}
@@ -427,7 +427,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
             {[
               { icon: <Building2 className="w-7 h-7" />, title: 'US Headquartered', desc: 'Genesis Holdings Inc. — a registered American corporation driving global logistics innovation.' },
-              { icon: <Globe className="w-7 h-7" />, title: '5 Countries', desc: 'Operating in Ghana 🇬🇭 & Finland 🇫🇮 with Ethiopia 🇪🇹, Jamaica 🇯🇲 & Philippines 🇵🇭 launching soon.' },
+              { icon: <Globe className="w-7 h-7" />, title: '6 Countries', desc: 'Operating in Ghana 🇬🇭 & Finland 🇫🇮 with USA 🇺🇸, Ethiopia 🇪🇹, Jamaica 🇯🇲 & Philippines 🇵🇭 launching soon.' },
               { icon: <Zap className="w-7 h-7" />, title: 'Multi-Currency', desc: 'GHS, EUR, ETB, JMD, PHP — pay in your local currency with local payment methods.' },
               { icon: <Shield className="w-7 h-7" />, title: 'Enterprise Security', desc: 'Bank-level security, real-time tracking, and verified riders on every delivery.' },
             ].map((pillar) => (

@@ -1,5 +1,5 @@
-export type CountryCode = 'GH' | 'FI' | 'ET' | 'JM' | 'PH';
-export type CurrencyCode = 'GHS' | 'EUR' | 'ETB' | 'JMD' | 'PHP';
+export type CountryCode = 'GH' | 'FI' | 'ET' | 'JM' | 'PH' | 'US';
+export type CurrencyCode = 'GHS' | 'EUR' | 'ETB' | 'JMD' | 'PHP' | 'USD';
 export type LanguageCode = 'en' | 'fi' | 'am' | 'fr';
 export type PaymentGateway = 'paystack' | 'stripe' | 'telebirr' | 'gcash';
 
@@ -108,6 +108,24 @@ export const countries: Record<CountryCode, CountryConfig> = {
     riderModel: 'freelance',
     vehicleTypes: ['motorcycle', 'bicycle', 'car'],
     cities: ['Manila', 'Cebu', 'Davao', 'Quezon City'],
+    isActive: false,
+    comingSoon: true,
+  },
+  US: {
+    code: 'US',
+    name: 'United States',
+    flag: '🇺🇸',
+    currency: 'USD',
+    currencySymbol: '$',
+    defaultLanguage: 'en',
+    supportedLanguages: ['en'],
+    paymentGateways: ['stripe'],
+    paymentMethods: ['card', 'apple_pay', 'cash'],
+    timezone: 'America/New_York',
+    phonePrefix: '+1',
+    riderModel: 'freelance',
+    vehicleTypes: ['e-bike', 'bicycle', 'car', 'scooter'],
+    cities: ['Atlanta', 'Houston', 'Washington DC', 'New York', 'Philadelphia'],
     isActive: false,
     comingSoon: true,
   },
