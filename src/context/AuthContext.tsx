@@ -198,6 +198,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = async () => {
+    sessionStorage.removeItem('auth_session_active');
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
