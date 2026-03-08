@@ -151,7 +151,7 @@ const LandingPage: React.FC = () => {
               </h2>
               <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
                 Whether it's a hot meal from your favorite restaurant, weekly groceries, pharmacy essentials, 
-                or important documents — SpeedRush handles it all with care and speed.
+                or important documents — SpeedUp handles it all with care and speed.
               </p>
               <div className="space-y-4 mb-8">
                 {[
