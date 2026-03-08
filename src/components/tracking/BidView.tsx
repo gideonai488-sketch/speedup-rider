@@ -44,17 +44,27 @@ const BidView: React.FC<BidViewProps> = ({
   const { data: bids = [], isLoading } = useOrderBids(orderId);
   const acceptBid = useAcceptBid();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedBid, setSelectedBid] = useState<any>(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const handleAcceptBid = async (bid: any) => {
+  const handleAcceptBid = (bid: any) => {
+    setSelectedBid(bid);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmAcceptBid = async () => {
+    if (!selectedBid) return;
     try {
       await acceptBid.mutateAsync({
-        bidId: bid.id,
+        bidId: selectedBid.id,
         orderId,
-        riderId: bid.rider_id,
-        amount: bid.amount,
+        riderId: selectedBid.rider_id,
+        amount: selectedBid.amount,
       });
-      toast.success(`Bid accepted! ${bid.profiles?.full_name || 'Rider'} is on the way.`);
+      setShowConfirmDialog(false);
+      setSelectedBid(null);
+      toast.success(`Bid accepted! ${selectedBid.profiles?.full_name || 'Rider'} is on the way.`);
     } catch (err: any) {
       toast.error(err.message || 'Failed to accept bid');
     }
