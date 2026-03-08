@@ -23,7 +23,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'da
 const RiderDashboard: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, user, loading: authLoading } = useAuth();
+  const { profile, user, loading: authLoading, signOut } = useAuth();
   const [isOnline, setIsOnline] = useState(false);
   const [orderTimer, setOrderTimer] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
