@@ -72,6 +72,33 @@ const RiderDashboard: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, [refetchPending, isApproved]);
 
+  // Real-time toast when a bid is accepted
+  useEffect(() => {
+    if (!profile?.id) return;
+    const channel = supabase
+      .channel(`bid-accepted-${profile.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'bids',
+        filter: `rider_id=eq.${profile.id}`,
+      }, (payload) => {
+        const newBid = payload.new as any;
+        if (newBid.status === 'accepted') {
+          toast.success('🎉 Your bid has been accepted!', {
+            description: `GH₵ ${Number(newBid.amount).toFixed(2)} — Head to pickup now!`,
+            duration: 10000,
+            action: {
+              label: 'Start Delivery',
+              onClick: () => navigate(`/rider/delivery/${newBid.order_id}`),
+            },
+          });
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [profile?.id, navigate]);
+
   // Update rider location periodically when online
   useEffect(() => {
     if (!isOnline || !profile || !isApproved) return;
