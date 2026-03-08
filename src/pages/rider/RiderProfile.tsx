@@ -88,6 +88,55 @@ const RiderProfile: React.FC = () => {
     fetchBankDetails();
   }, [profile]);
 
+  // Handle avatar upload
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Add cache-bust param
+      const url = `${publicUrl}?t=${Date.now()}`;
+
+      // Update profile
+      const { error: profileError } = await updateProfile({ avatar_url: url });
+      if (profileError) throw profileError;
+
+      setAvatarUrl(url);
+      toast.success('Profile photo updated!');
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   // Verify bank account with Paystack
   const handleVerifyAccount = async () => {
     if (!bankCode || !accountNumber) {
