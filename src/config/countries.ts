@@ -1,5 +1,5 @@
-export type CountryCode = 'GH' | 'FI' | 'ET' | 'JM' | 'PH';
-export type CurrencyCode = 'GHS' | 'EUR' | 'ETB' | 'JMD' | 'PHP';
+export type CountryCode = 'GH' | 'FI' | 'ET' | 'JM' | 'PH' | 'US';
+export type CurrencyCode = 'GHS' | 'EUR' | 'ETB' | 'JMD' | 'PHP' | 'USD';
 export type LanguageCode = 'en' | 'fi' | 'am' | 'fr';
 export type PaymentGateway = 'paystack' | 'stripe' | 'telebirr' | 'gcash';
 
