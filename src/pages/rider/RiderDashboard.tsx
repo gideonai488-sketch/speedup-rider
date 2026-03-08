@@ -132,27 +132,49 @@ const RiderDashboard: React.FC = () => {
   
   useEffect(() => {
     if (!isOnline || !profile || !isApproved) return;
-    const updateRiderLocation = () => {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            lastKnownPosition.current = { lat: position.coords.latitude, lng: position.coords.longitude };
+    let cleanup: (() => void) | undefined;
+
+    const startTracking = async () => {
+      try {
+        const { getCurrentPosition, watchPosition } = await import('@/lib/nativeGeolocation');
+        
+        // Get initial position
+        try {
+          const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 10000 });
+          lastKnownPosition.current = { lat: pos.latitude, lng: pos.longitude };
+          updateLocationRef.current.mutate({
+            latitude: pos.latitude,
+            longitude: pos.longitude,
+            heading: pos.heading || undefined,
+            speed: pos.speed || undefined,
+            is_online: true,
+          });
+        } catch (err) {
+          console.error('Initial location error:', err);
+        }
+
+        // Watch for continuous updates
+        cleanup = watchPosition(
+          (pos) => {
+            lastKnownPosition.current = { lat: pos.latitude, lng: pos.longitude };
             updateLocationRef.current.mutate({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              heading: position.coords.heading || undefined,
-              speed: position.coords.speed || undefined,
+              latitude: pos.latitude,
+              longitude: pos.longitude,
+              heading: pos.heading || undefined,
+              speed: pos.speed || undefined,
               is_online: true,
             });
           },
-          (error) => console.error('Geolocation error:', error),
-          { enableHighAccuracy: true, timeout: 10000 }
+          (err) => console.error('Location watch error:', err),
+          { enableHighAccuracy: true }
         );
+      } catch (err) {
+        console.error('Geolocation init error:', err);
       }
     };
-    updateRiderLocation();
-    const interval = setInterval(updateRiderLocation, 10000);
-    return () => clearInterval(interval);
+
+    startTracking();
+    return () => { cleanup?.(); };
   }, [isOnline, profile, isApproved]);
 
   // Countdown timer for selected order

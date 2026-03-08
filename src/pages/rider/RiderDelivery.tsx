@@ -51,63 +51,78 @@ const RiderDelivery: React.FC = () => {
     return { lat: 5.6037, lng: -0.1870 };
   }, [currentStatus, order]);
 
-  // Track rider's real-time location and update server
+  // Track rider's real-time location and update server using native GPS
   useEffect(() => {
-    if (!navigator.geolocation || !profile) {
-      setGpsError('GPS not available on this device');
+    if (!profile) {
+      setGpsError('Not authenticated');
       setIsAcquiringGPS(false);
       return;
     }
 
-    const updatePos = (position: GeolocationPosition) => {
-      const newLoc = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
-      setRiderLocation(newLoc);
-      setIsAcquiringGPS(false);
-      setGpsError(null);
+    let cleanup: (() => void) | undefined;
 
-      // Update rider location in database for customer tracking
-      updateLocation.mutate({
-        latitude: newLoc.lat,
-        longitude: newLoc.lng,
-        heading: position.coords.heading || undefined,
-        speed: position.coords.speed || undefined,
-        is_online: true,
-      });
-    };
-
-    const handleError = (error: GeolocationPositionError) => {
-      console.error('GPS Error:', error);
-      setIsAcquiringGPS(false);
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
+    const startTracking = async () => {
+      try {
+        const { requestPermissions, getCurrentPosition, watchPosition } = await import('@/lib/nativeGeolocation');
+        
+        const granted = await requestPermissions();
+        if (!granted) {
           setGpsError('Location permission denied. Please enable GPS.');
-          break;
-        case error.POSITION_UNAVAILABLE:
-          setGpsError('Location unavailable. Please check GPS settings.');
-          break;
-        case error.TIMEOUT:
+          setIsAcquiringGPS(false);
+          return;
+        }
+
+        // Get initial position
+        try {
+          const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+          const newLoc = { lat: pos.latitude, lng: pos.longitude };
+          setRiderLocation(newLoc);
+          setIsAcquiringGPS(false);
+          setGpsError(null);
+          updateLocation.mutate({
+            latitude: newLoc.lat,
+            longitude: newLoc.lng,
+            heading: pos.heading || undefined,
+            speed: pos.speed || undefined,
+            is_online: true,
+          });
+        } catch (err) {
+          console.error('Initial GPS error:', err);
           setGpsError('Location request timed out. Retrying...');
-          break;
-        default:
-          setGpsError('Unable to get your location.');
+          setIsAcquiringGPS(false);
+        }
+
+        // Watch position continuously
+        cleanup = watchPosition(
+          (pos) => {
+            const newLoc = { lat: pos.latitude, lng: pos.longitude };
+            setRiderLocation(newLoc);
+            setIsAcquiringGPS(false);
+            setGpsError(null);
+            updateLocation.mutate({
+              latitude: newLoc.lat,
+              longitude: newLoc.lng,
+              heading: pos.heading || undefined,
+              speed: pos.speed || undefined,
+              is_online: true,
+            });
+          },
+          (err) => {
+            console.error('GPS watch error:', err);
+            setIsAcquiringGPS(false);
+            setGpsError('Unable to get your location.');
+          },
+          { enableHighAccuracy: true }
+        );
+      } catch (err) {
+        console.error('GPS init error:', err);
+        setGpsError('GPS not available on this device');
+        setIsAcquiringGPS(false);
       }
     };
 
-    navigator.geolocation.getCurrentPosition(updatePos, handleError, { 
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    });
-
-    const watchId = navigator.geolocation.watchPosition(updatePos, handleError, { 
-      enableHighAccuracy: true, 
-      maximumAge: 3000 
-    });
-
-    return () => navigator.geolocation.clearWatch(watchId);
+    startTracking();
+    return () => { cleanup?.(); };
   }, [profile]);
 
   // Calculate live ETA using Mapbox Directions API
