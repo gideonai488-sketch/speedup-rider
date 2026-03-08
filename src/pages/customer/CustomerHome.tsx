@@ -61,9 +61,11 @@ const CustomerHome: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
   
   const { user, profile, signOut, loading: authLoading } = useAuth();
-  const { city, isLoading: locationLoading, refetch: refetchLocation } = useUserLocation();
+  const { city, isLoading: locationLoading, refetch: refetchLocation, setManualCity, isManual } = useUserLocation();
   const { data: storeData, isLoading: storesLoading } = useStoresByCity(city);
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const { data: wallet } = useWallet();
@@ -71,6 +73,14 @@ const CustomerHome: React.FC = () => {
   const stores = storeData?.stores || [];
   const isFilteredByCity = storeData?.isFiltered || false;
   const currentCity = storeData?.city || city;
+
+  const citiesByRegion = getCitiesByRegion();
+  const filteredCities = citySearch
+    ? ghanaianCities.filter(c => 
+        c.label.toLowerCase().includes(citySearch.toLowerCase()) ||
+        c.region.toLowerCase().includes(citySearch.toLowerCase())
+      )
+    : ghanaianCities;
 
   React.useEffect(() => {
     if (!authLoading && !user) {
