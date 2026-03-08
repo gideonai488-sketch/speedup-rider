@@ -6,6 +6,7 @@ import {
   Calendar, ChevronRight, Loader2, DollarSign, Bike, Building2, 
   CheckCircle2, CreditCard
 } from 'lucide-react';
+import BottomNav from '@/components/layout/BottomNav';
 import { useAuth } from '@/context/AuthContext';
 import { useRiderWallet } from '@/hooks/useWallet';
 import { useRiderDeliveryStats } from '@/hooks/useAdminData';
