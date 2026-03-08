@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { useAuth } from '@/context/AuthContext';
@@ -60,6 +60,7 @@ export const useRiderLocation = (riderId: string) => {
 export const useUpdateRiderLocation = () => {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
+  const pendingUpdate = useRef(false);
 
   return useMutation({
     mutationFn: async (location: {
@@ -70,46 +71,45 @@ export const useUpdateRiderLocation = () => {
       is_online?: boolean;
     }) => {
       if (!profile) throw new Error('Not authenticated');
+      
+      // Prevent overlapping updates
+      if (pendingUpdate.current) return null;
+      pendingUpdate.current = true;
 
-      const { data: existing } = await supabase
-        .from('rider_locations')
-        .select('id')
-        .eq('rider_id', profile.id)
-        .single();
-
-      if (existing) {
+      try {
+        // Use upsert to avoid race condition between check + insert/update
         const { data, error } = await supabase
           .from('rider_locations')
-          .update(location)
-          .eq('rider_id', profile.id)
+          .upsert(
+            {
+              rider_id: profile.id,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              heading: location.heading ?? null,
+              speed: location.speed ?? null,
+              is_online: location.is_online ?? true,
+            },
+            { onConflict: 'rider_id' }
+          )
           .select()
           .single();
 
         if (error) throw error;
         return data;
-      } else {
-        const { data, error } = await supabase
-          .from('rider_locations')
-          .insert({
-            rider_id: profile.id,
-            ...location,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
+      } finally {
+        pendingUpdate.current = false;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rider-location'] });
     },
+    onError: (error) => {
+      console.error('Location update failed:', error);
+    },
   });
 };
 
 export const useOnlineRiders = () => {
-  const [riders, setRiders] = useState<RiderLocation[]>([]);
-
   const query = useQuery({
     queryKey: ['online-riders'],
     queryFn: async () => {
@@ -121,9 +121,13 @@ export const useOnlineRiders = () => {
       if (error) throw error;
       return data;
     },
+    refetchInterval: 15000,
   });
 
-  // Subscribe to realtime updates
+  // Subscribe to realtime updates - use stable refetch reference
+  const refetchRef = useRef(query.refetch);
+  refetchRef.current = query.refetch;
+
   useEffect(() => {
     const channel = supabase
       .channel('online-riders')
@@ -135,7 +139,7 @@ export const useOnlineRiders = () => {
           table: 'rider_locations',
         },
         () => {
-          query.refetch();
+          refetchRef.current();
         }
       )
       .subscribe();
@@ -143,7 +147,7 @@ export const useOnlineRiders = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [query]);
+  }, []); // Stable deps - refetchRef handles the changing reference
 
   return query;
 };
