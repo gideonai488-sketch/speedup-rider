@@ -281,7 +281,7 @@ const LandingPage: React.FC = () => {
               Making Life <span className="text-primary">Easier.</span>
             </h2>
             <p className="text-white/60 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-              SpeedUp isn't just a delivery app — it's a movement. Powered by 
+              SpeedUpsn't just a delivery app — it's a movement. Powered by 
               <strong className="text-white"> Genesis Holdings Inc. (USA)</strong>, we're on a mission to 
               transform logistics, create massive employment, and make everyday life simpler for millions.
             </p>
@@ -361,7 +361,7 @@ const LandingPage: React.FC = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden">
-            <img src={deliveryFleet} alt="SpeedRush global delivery fleet" className="w-full h-64 md:h-[420px] object-cover" />
+            <img src={deliveryFleet} alt="SpeedRuUplobal delivery fleet" className="w-full h-64 md:h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
               <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">Our Global Delivery Network</h3>
