@@ -180,16 +180,30 @@ const Profile: React.FC = () => {
             {/* Avatar with status */}
             <div className="relative">
               <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-xl overflow-hidden">
-                {profile?.avatar_url ? (
+                {isUploadingAvatar ? (
+                  <div className="w-full h-full flex items-center justify-center bg-white/10">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary-foreground" />
+                  </div>
+                ) : profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-10 h-10 text-primary-foreground" />
                 )}
               </div>
               {/* Camera icon for changing photo */}
-              <button className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent rounded-full border-2 border-white flex items-center justify-center shadow-lg">
+              <button 
+                onClick={() => avatarInputRef.current?.click()}
+                className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent rounded-full border-2 border-white flex items-center justify-center shadow-lg"
+              >
                 <Camera className="w-3.5 h-3.5 text-accent-foreground" />
               </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
             </div>
 
             <div className="flex-1">
