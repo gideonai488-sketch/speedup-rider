@@ -337,7 +337,12 @@ const RiderDashboard: React.FC = () => {
                       <p className="text-muted-foreground">Customer: {selectedOrder.profiles.full_name}</p>
                     )}
                     {selectedOrder.profiles?.phone && (
-                      <p className="text-muted-foreground text-xs">{selectedOrder.profiles.phone}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Phone className="w-3.5 h-3.5 text-primary" />
+                        <a href={`tel:${selectedOrder.profiles.phone}`} className="text-primary text-xs font-medium hover:underline">
+                          {selectedOrder.profiles.phone}
+                        </a>
+                      </div>
                     )}
                   </div>
                 </div>
