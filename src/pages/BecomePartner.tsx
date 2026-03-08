@@ -143,7 +143,7 @@ const BecomePartner: React.FC = () => {
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Store className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Grow Your Business with SpeedRushUp>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Grow Your Business with SpeedUp</h2>
           <p className="text-muted-foreground">
             Reach thousands of customers across Ghana. We handle the delivery, you focus on your business.
           </p>
