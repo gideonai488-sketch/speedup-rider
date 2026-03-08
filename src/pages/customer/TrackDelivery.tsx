@@ -8,6 +8,7 @@ import {
 import UberStyleMap from '@/components/tracking/UberStyleMap';
 import FindingRider from '@/components/tracking/FindingRider';
 import RatingModal from '@/components/rating/RatingModal';
+import ChatView from '@/components/chat/ChatView';
 import { useOrder, useUpdateOrderStatus } from '@/hooks/useOrders';
 import { useRiderLocation } from '@/hooks/useRiderLocation';
 import { Skeleton } from '@/components/ui/skeleton';
