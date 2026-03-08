@@ -69,7 +69,48 @@ const Profile: React.FC = () => {
     }
   };
 
-  const menuSections = [
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const currentUser = (await supabase.auth.getUser()).data.user;
+    if (!file || !currentUser) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${currentUser.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const url = `${publicUrl}?t=${Date.now()}`;
+      const { error: profileError } = await updateProfile({ avatar_url: url });
+      if (profileError) throw profileError;
+
+      toast.success('Profile photo updated!');
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+
     {
       title: 'My Account',
       items: [
