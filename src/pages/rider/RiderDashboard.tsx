@@ -99,6 +99,31 @@ const RiderDashboard: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, [profile?.id, navigate]);
 
+  // Restore rider online status when dashboard mounts
+  useEffect(() => {
+    if (!profile?.id) return;
+
+    let isMounted = true;
+
+    const loadOnlineStatus = async () => {
+      const { data, error } = await supabase
+        .from('rider_locations')
+        .select('is_online')
+        .eq('rider_id', profile.id)
+        .maybeSingle();
+
+      if (!error && isMounted && data?.is_online !== null && data?.is_online !== undefined) {
+        setIsOnline(Boolean(data.is_online));
+      }
+    };
+
+    loadOnlineStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [profile?.id]);
+
   // Update rider location periodically when online
   useEffect(() => {
     if (!isOnline || !profile || !isApproved) return;
