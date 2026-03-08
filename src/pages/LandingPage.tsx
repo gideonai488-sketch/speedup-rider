@@ -481,13 +481,15 @@ Up  Up
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedRush</spUp      Up    <hUpassNamUpext-3xUp:text-Upfont-bold mb-6 leading-tight">
+              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedUp</span>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
                 Turn Your Vehicle<br />
                 Into Your <span className="text-primary">Business.</span>
               </h2>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
                 Whether you ride a motorcycle, bicycle, scooter, or drive a car — join thousands of riders 
-                earning flexible income with SpeedRush. No eUpience reUped, no aUpval waitUp        Up</p>
+                earning flexible income with SpeedUp. No experience required, no approval wait.
+              </p>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
