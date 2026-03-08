@@ -147,6 +147,10 @@ const BookDelivery: React.FC = () => {
       toast.error('Please select addresses from the suggestions');
       return;
     }
+    if (!formData.contactPhone?.trim()) {
+      toast.error('Please enter your phone number so the rider can reach you');
+      return;
+    }
 
     setIsSubmitting(true);
     
