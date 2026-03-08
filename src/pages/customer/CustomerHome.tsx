@@ -407,6 +407,104 @@ const CustomerHome: React.FC = () => {
           </Link>
         </div>
       </nav>
+
+      {/* City Picker Sheet */}
+      <Sheet open={cityPickerOpen} onOpenChange={setCityPickerOpen}>
+        <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
+          <SheetHeader className="pb-2">
+            <SheetTitle>Choose Your City</SheetTitle>
+          </SheetHeader>
+          
+          <div className="space-y-3">
+            {/* Auto-detect button */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                refetchLocation();
+                setCityPickerOpen(false);
+              }}
+            >
+              <LocateFixed className="w-4 h-4 text-primary" />
+              Auto-detect my location
+              {!isManual && city && (
+                <Check className="w-4 h-4 ml-auto text-primary" />
+              )}
+            </Button>
+
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search city..."
+                value={citySearch}
+                onChange={(e) => setCitySearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* City list */}
+            <ScrollArea className="h-[calc(80vh-200px)]">
+              <div className="space-y-1 pr-3">
+                {citySearch ? (
+                  filteredCities.map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => {
+                        setManualCity(c.label);
+                        setCityPickerOpen(false);
+                        setCitySearch('');
+                      }}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
+                        currentCity?.toLowerCase() === c.label.toLowerCase()
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "hover:bg-secondary text-foreground"
+                      )}
+                    >
+                      <div>
+                        <span>{c.label}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{c.region}</span>
+                      </div>
+                      {currentCity?.toLowerCase() === c.label.toLowerCase() && (
+                        <Check className="w-4 h-4 text-primary" />
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  Object.entries(citiesByRegion).map(([region, cities]) => (
+                    <div key={region} className="mb-3">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1.5">
+                        {region}
+                      </p>
+                      {cities.map((c) => (
+                        <button
+                          key={c.value}
+                          onClick={() => {
+                            setManualCity(c.label);
+                            setCityPickerOpen(false);
+                          }}
+                          className={cn(
+                            "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
+                            currentCity?.toLowerCase() === c.label.toLowerCase()
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "hover:bg-secondary text-foreground"
+                          )}
+                        >
+                          <span>{c.label}</span>
+                          {currentCity?.toLowerCase() === c.label.toLowerCase() && (
+                            <Check className="w-4 h-4 text-primary" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
