@@ -111,6 +111,24 @@ export const countries: Record<CountryCode, CountryConfig> = {
     isActive: false,
     comingSoon: true,
   },
+  US: {
+    code: 'US',
+    name: 'United States',
+    flag: '🇺🇸',
+    currency: 'USD',
+    currencySymbol: '$',
+    defaultLanguage: 'en',
+    supportedLanguages: ['en'],
+    paymentGateways: ['stripe'],
+    paymentMethods: ['card', 'apple_pay', 'cash'],
+    timezone: 'America/New_York',
+    phonePrefix: '+1',
+    riderModel: 'freelance',
+    vehicleTypes: ['e-bike', 'bicycle', 'car', 'scooter'],
+    cities: ['Atlanta', 'Houston', 'Washington DC', 'New York', 'Philadelphia'],
+    isActive: false,
+    comingSoon: true,
+  },
 };
 
 export const activeCountries = Object.values(countries).filter(c => c.isActive);
