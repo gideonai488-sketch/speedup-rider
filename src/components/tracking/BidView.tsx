@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOrderBids, useAcceptBid } from '@/hooks/useBids';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { hapticSuccess, hapticMedium } from '@/lib/nativeHaptics';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +50,7 @@ const BidView: React.FC<BidViewProps> = ({
   const [isCancelling, setIsCancelling] = useState(false);
 
   const handleAcceptBid = (bid: any) => {
+    hapticMedium();
     setSelectedBid(bid);
     setShowConfirmDialog(true);
   };
@@ -64,6 +66,7 @@ const BidView: React.FC<BidViewProps> = ({
       });
       setShowConfirmDialog(false);
       setSelectedBid(null);
+      hapticSuccess();
       toast.success(`Bid accepted! ${selectedBid.profiles?.full_name || 'Rider'} is on the way.`);
     } catch (err: any) {
       toast.error(err.message || 'Failed to accept bid');

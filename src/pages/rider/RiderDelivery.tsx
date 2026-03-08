@@ -11,6 +11,7 @@ import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { hapticSuccess, hapticHeavy, hapticMedium } from '@/lib/nativeHaptics';
 import { cn } from '@/lib/utils';
 import UberStyleMap from '@/components/tracking/UberStyleMap';
 import ChatView from '@/components/chat/ChatView';
@@ -173,11 +174,12 @@ const RiderDelivery: React.FC = () => {
       await updateStatus.mutateAsync({ orderId: order.id, status: nextStatus });
       
       if (nextStatus === 'delivered') {
-        // Rider just reports delivery - earnings were already credited via payment
         const riderEarning = Number(order.delivery_fee) || 15;
+        hapticSuccess();
         toast.success(`Delivery completed! You earned GH₵ ${riderEarning.toFixed(2)}`);
         setTimeout(() => navigate('/rider'), 2000);
       } else if (nextStatus === 'out_for_delivery') {
+        hapticMedium();
         toast.success('Status updated - customer will be prompted to pay');
         toast.info('Wait for payment before completing delivery');
       } else {

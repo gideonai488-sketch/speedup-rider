@@ -11,6 +11,7 @@ import {
   Loader2, Send, Phone, TrendingUp, Package, Bike, Calendar, LogOut
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { hapticSuccess, hapticMedium, hapticHeavy, hapticWarning } from '@/lib/nativeHaptics';
 import { useAuth } from '@/context/AuthContext';
 import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
 import { useRiderPendingOrders, useRiderActiveOrders, useRiderEarnings } from '@/hooks/useAdminData';
@@ -218,6 +219,7 @@ const RiderDashboard: React.FC = () => {
   };
 
   const handleSelectOrder = (order: any) => {
+    hapticHeavy();
     setSelectedOrder(order);
     setOrderTimer(60);
     setBidAmount('');
@@ -238,6 +240,7 @@ const RiderDashboard: React.FC = () => {
         amount,
         message: bidMessage.trim() || undefined,
       });
+      hapticSuccess();
       toast.success('Bid placed! Waiting for customer to accept.');
       setSelectedOrder(null);
       setBidAmount('');
