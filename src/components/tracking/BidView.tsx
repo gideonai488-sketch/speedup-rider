@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOrderBids, useAcceptBid } from '@/hooks/useBids';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { hapticSuccess, hapticMedium } from '@/lib/nativeHaptics';
 import {
   AlertDialog,
   AlertDialogAction,
