@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Search, ClipboardList, User, Zap, Wallet, Clock } from 'lucide-react';
+import { Home, Search, ClipboardList, User, Zap, Wallet, Clock, GraduationCap, Users, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 
@@ -18,13 +18,21 @@ const riderNavItems = [
   { path: '/rider/profile', icon: User, label: 'Profile' },
 ];
 
+const ambassadorNavItems = [
+  { path: '/ambassador', icon: GraduationCap, label: 'Home' },
+  { path: '/ambassador/referrals', icon: Users, label: 'Referrals' },
+  { path: '/ambassador/earnings', icon: Wallet, label: 'Earnings' },
+  { path: '/ambassador/leaderboard', icon: Trophy, label: 'Ranks' },
+  { path: '/ambassador/profile', icon: User, label: 'Profile' },
+];
+
 const BottomNav: React.FC = () => {
   const location = useLocation();
   const { profile } = useAuth();
 
-  // Determine if user is a rider based on profile role or current route
+  const isAmbassador = profile?.role === 'ambassador' || location.pathname.startsWith('/ambassador');
   const isRider = profile?.role === 'rider' || location.pathname.startsWith('/rider');
-  const navItems = isRider ? riderNavItems : customerNavItems;
+  const navItems = isAmbassador ? ambassadorNavItems : isRider ? riderNavItems : customerNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 gradient-glass border-t border-border/50 safe-area-pb">
