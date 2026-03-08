@@ -84,10 +84,10 @@ const AmbassadorEarnings: React.FC = () => {
           <CardContent className="p-6 text-center">
             <p className="text-sm text-muted-foreground mb-1">Total Earned</p>
             <p className="text-4xl font-bold text-foreground mb-1">
-              ${(stats?.total_earnings || 0).toFixed(2)}
+              {formatPrice(stats?.total_earnings || 0)}
             </p>
             <p className="text-sm text-muted-foreground">
-              This month: <span className="text-primary font-semibold">${(stats?.current_month_earnings || 0).toFixed(2)}</span>
+              This month: <span className="text-primary font-semibold">{formatPrice(stats?.current_month_earnings || 0)}</span>
             </p>
           </CardContent>
         </Card>
