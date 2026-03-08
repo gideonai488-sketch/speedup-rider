@@ -24,10 +24,12 @@ import {
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { profile, signOut, updateProfile } = useAuth();
+  const { profile, user, signOut, updateProfile } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserStats();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const [editForm, setEditForm] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
