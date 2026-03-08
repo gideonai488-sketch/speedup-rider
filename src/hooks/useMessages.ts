@@ -7,8 +7,10 @@ export const useConversation = (profileId: string, otherProfileId: string) => {
 
   useEffect(() => {
     if (!profileId || !otherProfileId) return;
+    // Use sorted IDs for consistent channel name regardless of who initiates
+    const sortedIds = [profileId, otherProfileId].sort().join('-');
     const channel = supabase
-      .channel(`chat-${profileId}-${otherProfileId}`)
+      .channel(`chat-${sortedIds}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
