@@ -8,11 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import StoreLogo from '@/components/ui/store-logo';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel, Check, LocateFixed
 } from 'lucide-react';
+import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
 import { useStoresByCity } from '@/hooks/useStores';
