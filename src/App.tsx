@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SplashScreen from "@/components/SplashScreen";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
+import { CountryProvider } from "@/context/CountryContext";
 import { initNativeUI } from "@/lib/nativeUI";
 
 // SpeedUp Pages
