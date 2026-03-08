@@ -90,7 +90,7 @@ const BecomePartner: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-3">Application Submitted!</h1>
           <p className="text-muted-foreground mb-6">
-            Thank you for your interest in partnering with SpeedUp. Our team will review your application and contact you within 2-3 business days.
+            Thank you for your interest in partnering with SpeedUpOur team will review your application and contact you within 2-3 business days.
           </p>
           <div className="space-y-3">
             <Button onClick={() => navigate('/')} className="w-full gradient-hero text-primary-foreground">
@@ -132,7 +132,7 @@ const BecomePartner: React.FC = () => {
           </Link>
           <div>
             <h1 className="font-bold text-foreground">Become a Partner</h1>
-            <p className="text-xs text-muted-foreground">Join the SpeedRush network</p>
+            <p className="text-xs text-muted-foreground">Join the SpeedRuUpetwork</p>
           </div>
         </div>
       </header>
