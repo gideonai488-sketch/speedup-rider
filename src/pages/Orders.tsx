@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle2, Truck, Sparkles, Droplets, MapPin, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle2, Truck, Sparkles, Droplets, MapPin, ShoppingBag, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BottomNav from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
 import { useUserOrders } from '@/hooks/useUserStats';
+import { useOrderBids } from '@/hooks/useBids';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
@@ -16,6 +17,18 @@ const statusSteps = [
   { key: 'out_for_delivery', label: 'Out for Delivery', icon: Truck },
   { key: 'delivered', label: 'Delivered', icon: CheckCircle2 },
 ];
+
+// Small component to show bid count badge for an order
+const BidCountBadge: React.FC<{ orderId: string }> = ({ orderId }) => {
+  const { data: bids = [] } = useOrderBids(orderId);
+  if (bids.length === 0) return null;
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full animate-pulse">
+      <Gavel className="w-3 h-3" />
+      {bids.length} bid{bids.length > 1 ? 's' : ''}
+    </span>
+  );
+};
 
 const Orders: React.FC = () => {
   const navigate = useNavigate();
