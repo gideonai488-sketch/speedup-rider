@@ -135,7 +135,7 @@ const RiderAuth: React.FC = () => {
     }
 
     setIsLoading(false);
-    toast.success('Rider account created! Welcome to SpeedRushUp
+    toast.success('Rider account created! Welcome to SpeedUp.');
   };
 
   if (authLoading) {

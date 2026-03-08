@@ -543,15 +543,15 @@ Up  Up
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xl font-bold text-foreground tracking-tight">
-                    Speed<span className="text-primary">Rush</span>
-  Up            Upan>
-        Up      <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase leading-tight">
+                    Speed<span className="text-primary">Up</span>
+                  </span>
+                  <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase leading-tight">
                     Genesis Holdings Inc. USA
                   </span>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                SpeedRush is a premiuUp-demand deliveUplatform by Genesis Holdings Inc., 
+                SpeedUp is a premium on-demand delivery platform by Genesis Holdings Inc., 
                 a registered company in the United States of America. Connecting customers with 
                 reliable riders across Ghana and Finland.
               </p>
