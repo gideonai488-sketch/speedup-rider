@@ -281,7 +281,7 @@ const LandingPage: React.FC = () => {
               Making Life <span className="text-primary">Easier.</span>
             </h2>
             <p className="text-white/60 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-              SpeedUpa delivery app — it's a movement. Powered by 
+              SpeedUpdelivery app — it's a movement. Powered by 
               <strong className="text-white"> Genesis Holdings Inc. (USA)</strong>, we're on a mission to 
               transform logistics, create massive employment, and make everyday life simpler for millions.
             </p>
@@ -361,7 +361,7 @@ const LandingPage: React.FC = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden">
-            <img src={deliveryFleet} alt="SpeedRuUpUpUpUpUpUp" className="w-full h-64 md:h-[420px] object-cover" />
+            <img src={deliveryFleet} alt="SpeedRuUpUpUpUpUpUpUpassName="w-full h-64 md:h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
               <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">Our Global Delivery Network</h3>
@@ -430,7 +430,7 @@ const LandingPage: React.FC = () => {
               Order from <span className="text-gradient">Top Brands</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Your favorite restaurants and stores, delivered to your door with SpeedRushUp  Up  Upp>Up  Up </div>
+              Your favorite restaurants and stores, delivered to your door with SpeedRushUp  Up  Upp>Up  Up <Up>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-12">
             {popularStores.map((store) => (
@@ -461,7 +461,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Want your business on SpeedRush?<Up    Up    Upk toUpecome-partner">
+            <p className="text-muted-foreground mb-4">Want your business on SpeedRush?<Up    Up    Upk toUpecomUprtner">
               <Button variant="outline" className="border-2 font-semibold">
                 Become a Partner
                 <ExternalLink className="w-4 h-4 ml-2" />
@@ -481,13 +481,13 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedRush</spUp      Up    <hUpassName="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedRush</spUp      Up    <hUpassNamUpext-3xl md:text-4xl font-bold mb-6 leading-tight">
                 Turn Your Vehicle<br />
                 Into Your <span className="text-primary">Business.</span>
               </h2>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
                 Whether you ride a motorcycle, bicycle, scooter, or drive a car — join thousands of riders 
-                earning flexible income with SpeedRush. No eUpience reUped, no approval wait.
+                earning flexible income with SpeedRush. No eUpience reUped, no aUpval wait.
               </p>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
@@ -515,8 +515,7 @@ const LandingPage: React.FC = () => {
             <div className="hidden md:block">
               <img 
                 src={heroDelivery} 
-                alt="SpeedRush riders Upcustomers"
-                className="rounded-3xl shadow-2xl w-full object-cover aspect-video"
+                alt="SpeedRush riders Upcustomers"Up             className="rounded-3xl shadow-2xl w-full object-cover aspect-video"
               />
             </div>
           </div>
@@ -544,7 +543,7 @@ const LandingPage: React.FC = () => {
                 <div className="flex flex-col">
                   <span className="text-xl font-bold text-foreground tracking-tight">
                     Speed<span className="text-primary">Rush</span>
-                  </span>
+  Up            </span>
                   <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase leading-tight">
                     Genesis Holdings Inc. USA
                   </span>
