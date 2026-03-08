@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe } from 'lucide-react';
-import heroScooter from '@/assets/landing/hero-scooter-delivery.jpg';
+import heroRider from '@/assets/hero-rider.jpg';
 import deliveryFleet from '@/assets/landing/delivery-fleet.jpg';
 import riderMotorcycle from '@/assets/landing/rider-motorcycle.jpg';
 import riderCar from '@/assets/landing/rider-car.jpg';
