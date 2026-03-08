@@ -33,6 +33,15 @@ import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
 import CampusAmbassador from "./pages/CampusAmbassador";
 
+// Ambassador Pages
+import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
+import AmbassadorDashboard from "./pages/ambassador/AmbassadorDashboard";
+import AmbassadorReferrals from "./pages/ambassador/AmbassadorReferrals";
+import AmbassadorEarnings from "./pages/ambassador/AmbassadorEarnings";
+import AmbassadorLeaderboard from "./pages/ambassador/AmbassadorLeaderboard";
+import AmbassadorResources from "./pages/ambassador/AmbassadorResources";
+import AmbassadorProfile from "./pages/ambassador/AmbassadorProfile";
+
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
 import RiderDelivery from "./pages/rider/RiderDelivery";
@@ -133,6 +142,17 @@ const App = () => {
                 <Route path="/rider/deliveries" element={<RiderHistory />} />
                 <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
+                
+                {/* Ambassador Routes */}
+                <Route path="/ambassador/auth" element={<AmbassadorAuth />} />
+                <Route path="/ambassador" element={<AmbassadorDashboard />} />
+                <Route path="/ambassador/dashboard" element={<AmbassadorDashboard />} />
+                <Route path="/ambassador/referrals" element={<AmbassadorReferrals />} />
+                <Route path="/ambassador/earnings" element={<AmbassadorEarnings />} />
+                <Route path="/ambassador/leaderboard" element={<AmbassadorLeaderboard />} />
+                <Route path="/ambassador/resources" element={<AmbassadorResources />} />
+                <Route path="/ambassador/profile" element={<AmbassadorProfile />} />
+                <Route path="/ambassador/notifications" element={<Notifications />} />
                 
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />

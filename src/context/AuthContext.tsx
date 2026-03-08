@@ -17,6 +17,7 @@ interface Profile {
   rider_status: string | null;
   vehicle_type: string | null;
   vehicle_plate: string | null;
+  university: string | null;
 }
 
 interface AuthContextType {
