@@ -190,24 +190,24 @@ serve(async (req) => {
               order_id: order_id,
             });
 
-            // Update ambassador stats
-            await supabase
+            // Update ambassador stats  
+            const { data: currentStats } = await supabase
               .from("ambassador_stats")
-              .update({
-                total_earnings: await supabase.rpc("increment", {
-                  table_name: "ambassador_stats",
-                  column_name: "total_earnings",
-                  x: serviceFee,
-                  row_id: ambassadorSignup.ambassador_id
-                }).then(() => undefined), // We'll handle this differently
-                total_orders_generated: await supabase.rpc("increment", {
-                  table_name: "ambassador_stats", 
-                  column_name: "total_orders_generated",
-                  x: 1,
-                  row_id: ambassadorSignup.ambassador_id
-                }).then(() => undefined) // We'll handle this differently
-              })
-              .eq("ambassador_id", ambassadorSignup.ambassador_id);
+              .select("total_earnings, total_orders_generated, current_month_earnings")
+              .eq("ambassador_id", ambassadorSignup.ambassador_id)
+              .single();
+
+            if (currentStats) {
+              await supabase
+                .from("ambassador_stats")
+                .update({
+                  total_earnings: (currentStats.total_earnings || 0) + serviceFee,
+                  total_orders_generated: (currentStats.total_orders_generated || 0) + 1,
+                  current_month_earnings: (currentStats.current_month_earnings || 0) + serviceFee,
+                  updated_at: new Date().toISOString()
+                })
+                .eq("ambassador_id", ambassadorSignup.ambassador_id);
+            }
 
             console.log(`Service fee of GH₵${serviceFee} credited to ambassador`);
           }
