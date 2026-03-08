@@ -40,15 +40,18 @@ const GHANA_BANKS = [
 
 const RiderProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, signOut, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Profile fields
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [vehicleType, setVehicleType] = useState(profile?.vehicle_type || '');
   const [vehiclePlate, setVehiclePlate] = useState(profile?.vehicle_plate || '');
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   
   // Bank details - fetch from profile
   const [bankName, setBankName] = useState('');
