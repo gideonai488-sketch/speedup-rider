@@ -78,6 +78,11 @@ const CustomerHome: React.FC = () => {
 
   const featuredStores = stores.filter(s => s.is_featured) || [];
 
+  // Orders waiting for rider (pending, no rider assigned) — these can have bids
+  const pendingBidOrders = (orders || []).filter(
+    (o: any) => o.status === 'pending' && !o.rider_id
+  );
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
