@@ -137,6 +137,7 @@ const App = () => {
               </Routes>
             </BrowserRouter>
           </AuthProvider>
+          </CountryProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
