@@ -315,6 +315,18 @@ const BookDelivery: React.FC = () => {
             />
 
             <div>
+              <Label>Your Phone Number <span className="text-destructive">*</span></Label>
+              <Input
+                type="tel"
+                placeholder="e.g. 0241234567"
+                value={formData.contactPhone}
+                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                className="mt-1.5"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Rider will use this to contact you</p>
+            </div>
+
+            <div>
               <Label>Package Description (optional)</Label>
               <Textarea
                 placeholder="Describe what you're sending..."
