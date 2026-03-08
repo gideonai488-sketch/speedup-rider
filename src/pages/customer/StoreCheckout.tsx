@@ -114,7 +114,7 @@ const StoreCheckout: React.FC = () => {
         pickup_address: store?.address || `${store?.name} Store`,
         pickup_lat: storeCoords.lat,
         pickup_lng: storeCoords.lng,
-        notes: notes || undefined,
+        notes: `📞 ${customerPhone.trim()}${notes ? ' | ' + notes : ''}`,
         delivery_fee: 0,
         distance_km: Math.round(distance * 10) / 10,
         base_fee: 0,
