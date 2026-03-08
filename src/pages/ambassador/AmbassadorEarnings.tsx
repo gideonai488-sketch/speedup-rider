@@ -156,7 +156,7 @@ const AmbassadorEarnings: React.FC = () => {
                       </p>
                     </div>
                     <span className={`font-semibold text-sm ${tx.amount >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                      {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(2)}
+                      {tx.amount >= 0 ? '+' : ''}{formatPrice(Math.abs(tx.amount))}
                     </span>
                   </CardContent>
                 </Card>

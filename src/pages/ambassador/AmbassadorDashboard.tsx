@@ -282,20 +282,20 @@ const AmbassadorDashboard: React.FC = () => {
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
-                <span>Per student signup</span>
-                <span className="font-medium text-foreground">$5.00</span>
+                <span>Per referred user's first order</span>
+                <span className="font-medium text-foreground">{formatPrice(earningRate)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
-                <span>Per order from your signups</span>
-                <span className="font-medium text-foreground">$0.50</span>
+                <span>100 students × 1 order each</span>
+                <span className="font-medium text-foreground">{formatPrice(earningRate * 100)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Monthly top ambassador bonus</span>
-                <span className="font-medium text-foreground">$200</span>
+                <span className="font-medium text-foreground">{formatPrice(200)}</span>
               </div>
               <div className="border-t border-border pt-2 flex justify-between font-semibold">
-                <span className="text-foreground">Potential monthly (100 signups)</span>
-                <span className="text-primary">$500+</span>
+                <span className="text-foreground">Potential monthly</span>
+                <span className="text-primary">{formatPrice((earningRate * 100) + 200)}+</span>
               </div>
             </div>
           </CardContent>
