@@ -164,6 +164,67 @@ const CustomerHome: React.FC = () => {
         {/* 1. Hero Carousel with ads/videos/images */}
         <HeroCarousel />
 
+        {/* Active Deliveries Awaiting Bids */}
+        {pendingBidOrders.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Gavel className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground">Incoming Bids</h2>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-success bg-success/10 px-2.5 py-1 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                Live
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {pendingBidOrders.map((order: any) => (
+                <button
+                  key={order.id}
+                  onClick={() => navigate(`/track/${order.id}`)}
+                  className="w-full text-left bg-card rounded-2xl border-2 border-primary/30 p-4 hover:border-primary/60 transition-all shadow-[0_0_15px_rgba(var(--primary),0.08)] active:scale-[0.98]"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                        {order.stores?.logo_url ? (
+                          <img src={order.stores.logo_url} alt="" className="w-8 h-8 object-contain rounded-lg" />
+                        ) : (
+                          <Package className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">{order.order_number || order.id.slice(0, 8)}</p>
+                        <p className="text-xs text-muted-foreground">{order.stores?.name || 'Delivery'}</p>
+                      </div>
+                    </div>
+                    <OrderBidCount orderId={order.id} />
+                  </div>
+
+                  <div className="space-y-1.5 text-xs mb-3">
+                    {order.pickup_address && (
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
+                        <span className="text-muted-foreground truncate">{order.pickup_address}</span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success mt-1 flex-shrink-0" />
+                      <span className="text-foreground font-medium truncate">{order.delivery_address}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Tap to view & accept bids</span>
+                    <ChevronRight className="w-4 h-4 text-primary" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* 2. Services Grid */}
         <section>
           <div className="flex items-center justify-between mb-4">
