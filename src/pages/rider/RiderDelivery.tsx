@@ -368,9 +368,9 @@ const RiderDelivery: React.FC = () => {
                 {currentStatus === 'delivered' 
                   ? 'Delivery complete!' 
                   : currentStatus === 'confirmed'
-                    ? 'Head to pickup location'
+                    ? 'Heading to pickup location'
                     : currentStatus === 'picked_up' 
-                      ? 'Mark as picked up & start delivery'
+                      ? 'At pickup - confirm arrival'
                       : (order as any)?.payment_status === 'paid'
                         ? 'Payment received - complete delivery'
                         : 'At customer - waiting for payment'}
