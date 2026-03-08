@@ -134,8 +134,8 @@ const LandingPage: React.FC = () => {
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">16 Regions</p>
-                  <p className="text-sm text-muted-foreground">Across Ghana</p>
+                  <p className="text-2xl font-bold text-foreground">2 Countries</p>
+                  <p className="text-sm text-muted-foreground">Ghana & Finland</p>
                 </div>
               </div>
             </div>
