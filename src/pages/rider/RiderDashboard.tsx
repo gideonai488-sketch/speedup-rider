@@ -347,11 +347,9 @@ const RiderDashboard: React.FC = () => {
                       <Package className="w-7 h-7 text-white" />
                     )}
                   </div>
-                  <div>
+                    <div>
                     <p className="font-bold text-foreground">New Delivery Request!</p>
-                    <p className="text-sm text-success font-semibold">
-                      Earn {formatCurrency(Number(selectedOrder.delivery_fee) || 15)}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Place your bid to earn</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-2 rounded-xl">
