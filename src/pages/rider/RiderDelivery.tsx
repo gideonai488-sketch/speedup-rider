@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 type DeliveryStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
-const statusFlow: DeliveryStatus[] = ['picked_up', 'out_for_delivery', 'delivered'];
+const statusFlow: DeliveryStatus[] = ['confirmed', 'picked_up', 'out_for_delivery', 'delivered'];
 
 const RiderDelivery: React.FC = () => {
   const navigate = useNavigate();
@@ -193,6 +193,8 @@ const RiderDelivery: React.FC = () => {
   const getStatusButtonText = () => {
     const paymentStatus = (order as any)?.payment_status || 'pending';
     switch (currentStatus) {
+      case 'confirmed':
+        return 'Arrived at Pickup';
       case 'picked_up':
         return 'Start Delivery';
       case 'out_for_delivery':
@@ -363,11 +365,13 @@ const RiderDelivery: React.FC = () => {
               )}>
                 {currentStatus === 'delivered' 
                   ? 'Delivery complete!' 
-                  : currentStatus === 'picked_up' 
+                  : currentStatus === 'confirmed'
                     ? 'Head to pickup location'
-                    : (order as any)?.payment_status === 'paid'
-                      ? 'Payment received - complete delivery'
-                      : 'At customer - waiting for payment'}
+                    : currentStatus === 'picked_up' 
+                      ? 'Mark as picked up & start delivery'
+                      : (order as any)?.payment_status === 'paid'
+                        ? 'Payment received - complete delivery'
+                        : 'At customer - waiting for payment'}
               </p>
             </div>
             <div className="text-right">

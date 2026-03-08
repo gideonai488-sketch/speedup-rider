@@ -88,6 +88,16 @@ export const useAcceptBid = () => {
       riderId: string;
       amount: number;
     }) => {
+      // First get the order to know the subtotal
+      const { data: orderData, error: orderFetchError } = await supabase
+        .from('orders')
+        .select('subtotal')
+        .eq('id', orderId)
+        .single();
+
+      if (orderFetchError) throw orderFetchError;
+      const subtotal = Number(orderData?.subtotal) || 0;
+
       // Accept the bid
       const { error: bidError } = await supabase
         .from('bids')
@@ -104,12 +114,13 @@ export const useAcceptBid = () => {
         .neq('id', bidId);
 
       // Assign rider to order with the bid amount as delivery fee
+      // Total = subtotal (items) + delivery fee (bid amount)
       const { data, error } = await supabase
         .from('orders')
         .update({
           rider_id: riderId,
           delivery_fee: amount,
-          total: amount,
+          total: subtotal + amount,
           status: 'confirmed',
           updated_at: new Date().toISOString(),
         })
