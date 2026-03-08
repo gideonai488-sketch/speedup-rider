@@ -160,7 +160,7 @@ const LandingPage: React.FC = () => {
             </h2>
             <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
               We believe everyone deserves the opportunity to earn a living. SpeedRush is on a mission to create 
-              <strong className="text-foreground"> 50,000 jobs</strong> for Ghanaians by 2027 through our delivery platform.
+              <strong className="text-foreground"> 50,000 jobs</strong> across Ghana and Finland by 2027 through our delivery platform.
             </p>
           </div>
 
