@@ -113,6 +113,13 @@ const BidView: React.FC<BidViewProps> = ({
               <p className="text-sm font-medium">{deliveryAddress}</p>
             </div>
           </div>
+          {distanceKm && distanceKm > 0 && (
+            <div className="flex items-center gap-2 pt-3 border-t border-border">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">{distanceKm.toFixed(1)} km</span>
+              <span className="text-xs text-muted-foreground">estimated distance</span>
+            </div>
+          )}
         </div>
 
         {/* Bids List */}
