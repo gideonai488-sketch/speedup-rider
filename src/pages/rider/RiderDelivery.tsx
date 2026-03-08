@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 type DeliveryStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
-const statusFlow: DeliveryStatus[] = ['picked_up', 'out_for_delivery', 'delivered'];
+const statusFlow: DeliveryStatus[] = ['confirmed', 'picked_up', 'out_for_delivery', 'delivered'];
 
 const RiderDelivery: React.FC = () => {
   const navigate = useNavigate();
