@@ -120,14 +120,14 @@ const AmbassadorEarnings: React.FC = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Minimum withdrawal: $20. Payouts are processed weekly via mobile money or bank transfer.
+              Minimum withdrawal: {formatPrice(20)}. Payouts are processed weekly via mobile money or bank transfer.
             </p>
             <Button
               className="w-full bg-primary hover:bg-primary/90"
               disabled={(stats?.total_earnings || 0) < 20}
             >
               {(stats?.total_earnings || 0) < 20
-                ? `Need $${(20 - (stats?.total_earnings || 0)).toFixed(0)} more`
+                ? `Need ${formatPrice(20 - (stats?.total_earnings || 0))} more`
                 : 'Request Payout'
               }
             </Button>
