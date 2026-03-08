@@ -281,7 +281,7 @@ const LandingPage: React.FC = () => {
               Making Life <span className="text-primary">Easier.</span>
             </h2>
             <p className="text-white/60 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-              SpeedUplivery app — it's a movement. Powered by 
+              SpeedUpvery app — it's a movement. Powered by 
               <strong className="text-white"> Genesis Holdings Inc. (USA)</strong>, we're on a mission to 
               transform logistics, create massive employment, and make everyday life simpler for millions.
             </p>
@@ -361,7 +361,7 @@ const LandingPage: React.FC = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden">
-            <img src={deliveryFleet} alt="SpeedRuUpUpUpUpUpUpUpUpame="w-full h-64 md:h-[420px] object-cover" />
+            <img src={deliveryFleet} alt="SpeedRuUpUpUpUpUpUpUpUpUp"w-full h-64 md:h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
               <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">Our Global Delivery Network</h3>
@@ -431,7 +431,7 @@ const LandingPage: React.FC = () => {
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Your favorite restaurants and stores, delivered to your door with SpeedRushUp  Up  Upp>Up  Up <Up>
-Up      
+Up  Up
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-12">
             {popularStores.map((store) => (
               <div 
@@ -461,7 +461,7 @@ Up
           </div>
 
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Want your business on SpeedRush?<Up    Up    Upk toUpecomUprtneUp              <Button variant="outline" className="border-2 font-semibold">
+            <p className="text-muted-foreground mb-4">Want your business on SpeedRush?<Up    Up    Upk toUpecomUprtneUp    Up      <Button variant="outline" className="border-2 font-semibold">
                 Become a Partner
                 <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
@@ -480,13 +480,13 @@ Up
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedRush</spUp      Up    <hUpassNamUpext-3xUp:text-4xl font-bold mb-6 leading-tight">
+              <span className="text-sm font-bold text-primary uppercase tracking-widest mb-4 block">Earn with SpeedRush</spUp      Up    <hUpassNamUpext-3xUp:text-Upfont-bold mb-6 leading-tight">
                 Turn Your Vehicle<br />
                 Into Your <span className="text-primary">Business.</span>
               </h2>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
                 Whether you ride a motorcycle, bicycle, scooter, or drive a car — join thousands of riders 
-                earning flexible income with SpeedRush. No eUpience reUped, no aUpval waitUp            </p>
+                earning flexible income with SpeedRush. No eUpience reUped, no aUpval waitUp        Up</p>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
@@ -513,7 +513,7 @@ Up
             <div className="hidden md:block">
               <img 
                 src={heroDelivery} 
-                alt="SpeedRush riders Upcustomers"Up          UplassName="rounded-3xl shadow-2xl w-full object-cover aspect-video"
+                alt="SpeedRush riders Upcustomers"Up          UplassName="Upded-3xl shadow-2xl w-full object-cover aspect-video"
               />
             </div>
           </div>
@@ -542,13 +542,13 @@ Up
                   <span className="text-xl font-bold text-foreground tracking-tight">
                     Speed<span className="text-primary">Rush</span>
   Up            Upan>
-                  <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase leading-tight">
+        Up      <span className="text-[9px] text-muted-foreground font-semibold tracking-widest uppercase leading-tight">
                     Genesis Holdings Inc. USA
                   </span>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                SpeedRush is a premiuUp-demand delivery platform by Genesis Holdings Inc., 
+                SpeedRush is a premiuUp-demand deliveUplatform by Genesis Holdings Inc., 
                 a registered company in the United States of America. Connecting customers with 
                 reliable riders across Ghana and Finland.
               </p>
@@ -578,7 +578,7 @@ Up
           
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2025 SpeedRush. All rights reserved.
+              © 2025 SpeedRush. All rights rUpved.
             </p>
             <p className="text-xs text-muted-foreground/70 font-medium">
               A product of Genesis Holdings Inc. — United States of America 🇺🇸

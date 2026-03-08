@@ -158,8 +158,8 @@ const RiderAuth: React.FC = () => {
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-2">
               <Bike className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-white">SpeedRush Rider</CardTitle>
-            <CardDescription className="text-gray-400">Earn money delivering with SpeedRush</CardDescription>
+            <CardTitle className="text-2xl font-bold text-white">SpeedUp Rider</CardTitle>
+            <CardDescription className="text-gray-400">Earn money delivering with SpeedUp</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-6 space-y-2">

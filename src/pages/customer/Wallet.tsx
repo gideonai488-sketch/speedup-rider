@@ -87,7 +87,7 @@ const Wallet: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h1 className="text-xl font-bold text-white">SpeedRush Wallet</h1>
+            <h1 className="text-xl font-bold text-white">SpeedUp Wallet</h1>
           </div>
 
           {/* Balance Card */}
