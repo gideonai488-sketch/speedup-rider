@@ -1,0 +1,70 @@
+workflows:
+  speedup-android:
+    name: SpeedUp Android
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 18
+      java: 17
+      groups:
+        - google_play # Add your Google Play credentials in Codemagic dashboard
+    scripts:
+      - name: Install dependencies
+        script: npm install
+      - name: Build web assets
+        script: npm run build
+      - name: Add Android platform
+        script: npx cap sync android
+      - name: Build Android
+        script: |
+          cd android
+          ./gradlew assembleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+  speedup-ios:
+    name: SpeedUp iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Lovable SpeedUp # Set up in Codemagic dashboard
+    environment:
+      node: 18
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: app.lovable.4dd003882489427e9d138d2b4a851dbe
+      groups:
+        - app_store_connect # Add your App Store Connect API key in Codemagic
+    scripts:
+      - name: Install dependencies
+        script: npm install
+      - name: Build web assets
+        script: npm run build
+      - name: Add iOS platform
+        script: npx cap sync ios
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build iOS
+        script: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath build/ipa
+    artifacts:
+      - ios/App/build/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
