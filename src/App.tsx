@@ -33,6 +33,15 @@ import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
 import CampusAmbassador from "./pages/CampusAmbassador";
 
+// Ambassador Pages
+import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
+import AmbassadorDashboard from "./pages/ambassador/AmbassadorDashboard";
+import AmbassadorReferrals from "./pages/ambassador/AmbassadorReferrals";
+import AmbassadorEarnings from "./pages/ambassador/AmbassadorEarnings";
+import AmbassadorLeaderboard from "./pages/ambassador/AmbassadorLeaderboard";
+import AmbassadorResources from "./pages/ambassador/AmbassadorResources";
+import AmbassadorProfile from "./pages/ambassador/AmbassadorProfile";
+
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
 import RiderDelivery from "./pages/rider/RiderDelivery";
