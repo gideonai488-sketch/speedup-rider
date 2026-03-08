@@ -374,7 +374,7 @@ const TrackDelivery: React.FC = () => {
                   variant="outline"
                   size="icon"
                   className="rounded-full h-11 w-11"
-                  onClick={() => toast.info('Messaging rider...')}
+                  onClick={() => setShowChat(true)}
                 >
                   <MessageSquare className="w-5 h-5" />
                 </Button>
