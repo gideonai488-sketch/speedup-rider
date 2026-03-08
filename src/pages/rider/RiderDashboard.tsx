@@ -540,8 +540,7 @@ const RiderDashboard: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-success text-sm">{formatCurrency((Number(order.delivery_fee) || 10) - 5)}</p>
-                      <p className="text-[10px] text-muted-foreground">Your earning</p>
+                      <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">Bid Now</span>
                     </div>
                   </div>
                   
