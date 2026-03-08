@@ -583,7 +583,7 @@ const LandingPage: React.FC = () => {
           
           <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2025 SpeedRush. All rights rUpved.
+              © 2025 SpeedUp. All rights reserved.
             </p>
             <p className="text-xs text-muted-foreground/70 font-medium">
               A product of Genesis Holdings Inc. — United States of America 🇺🇸
