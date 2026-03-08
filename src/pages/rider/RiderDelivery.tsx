@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
-  ArrowLeft, Phone, Navigation, MapPin,
+  ArrowLeft, Phone, MessageSquare, Navigation, MapPin,
   CheckCircle2, Package, Truck, User, ChevronDown, ChevronUp, Clock,
   Locate, AlertTriangle
 } from 'lucide-react';
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import UberStyleMap from '@/components/tracking/UberStyleMap';
+import ChatView from '@/components/chat/ChatView';
 import { supabase } from '@/integrations/supabase/client';
 
 type DeliveryStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
