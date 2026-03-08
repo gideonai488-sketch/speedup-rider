@@ -90,7 +90,7 @@ const BecomePartner: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-3">Application Submitted!</h1>
           <p className="text-muted-foreground mb-6">
-            Thank you for your interest in partnering with SpeedRush. Our team will review your application and contact you within 2-3 business days.
+            Thank you for your interest in partnering with SpeedUpr team will review your application and contact you within 2-3 business days.
           </p>
           <div className="space-y-3">
             <Button onClick={() => navigate('/')} className="w-full gradient-hero text-primary-foreground">
@@ -132,7 +132,7 @@ const BecomePartner: React.FC = () => {
           </Link>
           <div>
             <h1 className="font-bold text-foreground">Become a Partner</h1>
-            <p className="text-xs text-muted-foreground">Join the SpeedRush network</p>
+            <p className="text-xs text-muted-foreground">Join the SpeedRuUpUprk</p>
           </div>
         </div>
       </header>
@@ -143,7 +143,7 @@ const BecomePartner: React.FC = () => {
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Store className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Grow Your Business with SpeedRush</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Grow Your Business with SpeedUp</h2>
           <p className="text-muted-foreground">
             Reach thousands of customers across Ghana. We handle the delivery, you focus on your business.
           </p>

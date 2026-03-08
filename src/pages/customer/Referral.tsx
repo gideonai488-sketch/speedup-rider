@@ -28,7 +28,7 @@ const Referral: React.FC = () => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const referralCode = 'SPEED2024';
-  const referralLink = `https://speedrush.app/ref/${referralCode}`;
+  const referralLink = `https://speeduppp/ref/${referralCode}`;
   const totalEarned = 40;
   const pendingRewards = 20;
 
@@ -46,7 +46,7 @@ const Referral: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join SpeedRush',
+          title: 'Join SpeedUp',
           text: `Get GH₵20 off your first order! Use my code: ${referralCode}`,
           url: referralLink,
         });
@@ -101,7 +101,7 @@ const Referral: React.FC = () => {
               Give GH₵20, Get GH₵20
             </h2>
             <p className="text-white/80">
-              Invite friends to SpeedRush and you both get GH₵20 wallet credit
+              Invite friends to SpeedUp and you both get GH₵20 wallet credit
             </p>
           </div>
         </div>

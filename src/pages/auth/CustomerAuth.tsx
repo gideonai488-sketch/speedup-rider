@@ -37,9 +37,7 @@ const CustomerAuth: React.FC = () => {
 
   useEffect(() => {
     if (user && profile && !authLoading) {
-      if (profile.role === 'admin') {
-        navigate('/admin');
-      } else if (profile.role === 'rider') {
+      if (profile.role === 'rider') {
         toast.error('Please use the rider app to login');
         navigate('/rider/auth');
       } else {
@@ -63,7 +61,7 @@ const CustomerAuth: React.FC = () => {
 
     setIsLoading(true);
     // Use phone as email format for Supabase auth
-    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speeduph`;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
 
@@ -108,7 +106,7 @@ const CustomerAuth: React.FC = () => {
 
     setIsLoading(true);
     // Use phone as email format for Supabase auth
-    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedruuph`;
     const cityLabel = ghanaianCities.find(c => c.value === signupCity)?.label || signupCity;
     const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, cityLabel);
     setIsLoading(false);
@@ -146,7 +144,7 @@ const CustomerAuth: React.FC = () => {
             <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-2">
               <ShoppingBag className="w-8 h-8 text-primary-foreground" />
             </div>
-            <CardTitle className="text-2xl font-bold">SpeedRush</CardTitle>
+            <CardTitle className="text-2xl font-bold">SpeedUp</CardTitle>
             <CardDescription>Order deliveries at your fingertips</CardDescription>
           </CardHeader>
           <CardContent>

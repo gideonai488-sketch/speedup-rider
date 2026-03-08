@@ -8,7 +8,7 @@ const Header: React.FC = () => {
       <div className="flex items-center justify-between px-4 h-16 max-w-lg mx-auto">
         <div className="flex flex-col">
           <div className="flex items-center gap-1">
-            <span className="text-lg font-bold text-foreground">Speed<span className="text-primary">Rush</span></span>
+            <span className="text-lg font-bold text-foreground">Speed<span className="text-primary">Up</span></span>
           </div>
           <span className="text-[9px] text-muted-foreground font-medium leading-tight -mt-0.5">
             by Genesis Holdings Inc. USA

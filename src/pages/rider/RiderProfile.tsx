@@ -212,7 +212,7 @@ const RiderProfile: React.FC = () => {
           body: {
             bank_code: bankCode,
             account_number: accountNumber,
-            business_name: `${fullName} - SpeedRush Rider`,
+            business_name: `${fullName} - SpeedUp Rider`,
           }
         });
 

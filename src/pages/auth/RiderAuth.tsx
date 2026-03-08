@@ -36,9 +36,7 @@ const RiderAuth: React.FC = () => {
 
   useEffect(() => {
     if (user && profile && !authLoading) {
-      if (profile.role === 'admin') {
-        navigate('/admin');
-      } else if (profile.role === 'rider') {
+      if (profile.role === 'rider') {
         navigate('/rider');
       } else {
         toast.error('Please use the customer app to login');
@@ -83,7 +81,7 @@ const RiderAuth: React.FC = () => {
       }
     }
     setIsLoading(true);
-    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedup.gh`;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
     if (error) {
@@ -114,7 +112,7 @@ const RiderAuth: React.FC = () => {
     }
 
     setIsLoading(true);
-    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedup.gh`;
     const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone);
     
     if (error) {
@@ -137,7 +135,7 @@ const RiderAuth: React.FC = () => {
     }
 
     setIsLoading(false);
-    toast.success('Rider account created! Welcome to SpeedRush.');
+    toast.success('Rider account created! Welcome to SpeedUp.');
   };
 
   if (authLoading) {
@@ -161,8 +159,8 @@ const RiderAuth: React.FC = () => {
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-2">
               <Bike className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-white">SpeedRush Rider</CardTitle>
-            <CardDescription className="text-gray-400">Earn money delivering with SpeedRush</CardDescription>
+            <CardTitle className="text-2xl font-bold text-white">SpeedUp Rider</CardTitle>
+            <CardDescription className="text-gray-400">Earn money delivering with SpeedUp</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-6 space-y-2">

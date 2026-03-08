@@ -8,7 +8,7 @@ import SplashScreen from "@/components/SplashScreen";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
 
-// SpeedRush Pages
+// SpeedUp Pages
 import LandingPage from "./pages/LandingPage";
 import CustomerAuth from "./pages/auth/CustomerAuth";
 import RiderAuth from "./pages/auth/RiderAuth";
