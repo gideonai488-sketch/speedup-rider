@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Zap, MapPin, Clock, Bell, User, Navigation, Star,
-  Wallet, ChevronRight, CheckCircle2, X, Timer, AlertCircle, Loader2, Send
+  Wallet, ChevronRight, CheckCircle2, X, Timer, AlertCircle, Loader2, Send, Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
