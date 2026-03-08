@@ -281,7 +281,7 @@ const LandingPage: React.FC = () => {
               Making Life <span className="text-primary">Easier.</span>
             </h2>
             <p className="text-white/60 max-w-3xl mx-auto text-lg md:text-xl leading-relaxed">
-              SpeedRush isn't just a delivery app — it's a movement. Powered by 
+              SpeedUp isn't just a delivery app — it's a movement. Powered by 
               <strong className="text-white"> Genesis Holdings Inc. (USA)</strong>, we're on a mission to 
               transform logistics, create massive employment, and make everyday life simpler for millions.
             </p>
