@@ -31,6 +31,7 @@ import Search from "./pages/Search";
 import Orders from "./pages/Orders";
 import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
+import CampusAmbassador from "./pages/CampusAmbassador";
 
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
