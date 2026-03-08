@@ -337,7 +337,7 @@ const LandingPage: React.FC = () => {
                 <p className="text-sm text-white/50 font-medium uppercase tracking-wider">Jobs Target</p>
               </div>
               <div className="text-center">
-                <p className="text-4xl md:text-5xl font-bold text-white mb-2">5</p>
+                <p className="text-4xl md:text-5xl font-bold text-white mb-2">6</p>
                 <p className="text-sm text-white/50 font-medium uppercase tracking-wider">{t.global_countries_label}</p>
               </div>
               <div className="text-center">
