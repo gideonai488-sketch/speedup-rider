@@ -134,7 +134,7 @@ const RiderDelivery: React.FC = () => {
 
         // Also get current street name
         const geoResponse = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${riderLocation.lng},${riderLocation.lat}.json?access_token=${tokenData.token}&types=address,street`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${riderLocation.lng},${riderLocation.lat}.json?access_token=${tokenData.token}&types=address,neighborhood,place`
         );
         const geoData = await geoResponse.json();
         if (geoData.features?.[0]?.text) {

@@ -53,12 +53,18 @@ export const useOrder = (orderId: string) => {
           customer:profiles!orders_customer_id_fkey(*)
         `)
         .eq('id', orderId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Order not found or access denied');
       return data as OrderWithDetails & { customer?: { full_name?: string; phone?: string } };
     },
     enabled: !!orderId,
+    retry: (failureCount, error) => {
+      // Don't retry if order not found / access denied
+      if (error?.message?.includes('Order not found')) return false;
+      return failureCount < 2;
+    },
   });
 };
 
