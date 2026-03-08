@@ -273,17 +273,17 @@ export const useAdminAnalytics = () => {
   });
 };
 
-// Pending orders for riders - includes 'pending' status since delivery orders need riders immediately
-export const useRiderPendingOrders = () => {
+// Pending orders for riders - filtered by rider's city
+export const useRiderPendingOrders = (riderCity?: string | null) => {
   return useQuery({
-    queryKey: ['rider-pending-orders'],
+    queryKey: ['rider-pending-orders', riderCity],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
         .select(`
           *,
           order_items(*),
-          stores(name, address, logo_url),
+          stores(name, address, logo_url, city),
           profiles!orders_customer_id_fkey(full_name, phone, address)
         `)
         .in('status', ['pending', 'confirmed', 'ready_for_pickup'])
@@ -291,9 +291,26 @@ export const useRiderPendingOrders = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+
+      // Filter by rider's city if available
+      if (riderCity && data) {
+        const cityLower = riderCity.toLowerCase();
+        return data.filter(order => {
+          // Match by store city
+          const storeCity = (order as any).stores?.city?.toLowerCase();
+          if (storeCity && storeCity === cityLower) return true;
+          // Match by delivery address containing the city name
+          if (order.delivery_address?.toLowerCase().includes(cityLower)) return true;
+          // Match by pickup address containing the city name
+          if (order.pickup_address?.toLowerCase().includes(cityLower)) return true;
+          // If order has no city info, don't show to city-filtered riders
+          return false;
+        });
+      }
+
       return data;
     },
-    refetchInterval: 5000, // Refetch every 5 seconds to get new orders quickly
+    refetchInterval: 5000,
   });
 };
 
