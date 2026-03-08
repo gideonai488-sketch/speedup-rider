@@ -119,6 +119,7 @@ const FindingRider: React.FC<FindingRiderProps> = ({
         pickupAddress={pickupAddress}
         deliveryAddress={deliveryAddress}
         totalAmount={totalAmount}
+        distanceKm={distanceKm}
         onBack={() => setMode('choose')}
         onCancel={onCancel}
         onChat={(riderId, name, phone) => {
