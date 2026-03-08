@@ -50,6 +50,7 @@ const BidView: React.FC<BidViewProps> = ({
   const [isCancelling, setIsCancelling] = useState(false);
 
   const handleAcceptBid = (bid: any) => {
+    hapticMedium();
     setSelectedBid(bid);
     setShowConfirmDialog(true);
   };
