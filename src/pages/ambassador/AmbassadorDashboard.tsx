@@ -193,7 +193,7 @@ const AmbassadorDashboard: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Total Signups', value: stats?.total_signups || 0, icon: <Users className="w-5 h-5" />, color: 'text-blue-500' },
-            { label: 'Total Earned', value: `$${(stats?.total_earnings || 0).toFixed(0)}`, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-500' },
+            { label: 'Total Earned', value: formatPrice(stats?.total_earnings || 0), icon: <DollarSign className="w-5 h-5" />, color: 'text-green-500' },
             { label: 'This Month', value: stats?.current_month_signups || 0, icon: <TrendingUp className="w-5 h-5" />, color: 'text-primary' },
             { label: 'Rank', value: stats?.rank ? `#${stats.rank}` : '--', icon: <Trophy className="w-5 h-5" />, color: 'text-yellow-500' },
           ].map((stat, i) => (
