@@ -237,7 +237,7 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-14">
             <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Simple & Fast</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How <span className="text-gradient">SpeedRush</span> Works
+              How <span className="text-gradient">SpeedUp</span> Works
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Three simple steps to get anything delivered

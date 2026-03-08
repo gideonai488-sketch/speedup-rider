@@ -101,7 +101,7 @@ const Referral: React.FC = () => {
               Give GH₵20, Get GH₵20
             </h2>
             <p className="text-white/80">
-              Invite friends to SpeedRush and you both get GH₵20 wallet credit
+              Invite friends to SpeedUp and you both get GH₵20 wallet credit
             </p>
           </div>
         </div>
