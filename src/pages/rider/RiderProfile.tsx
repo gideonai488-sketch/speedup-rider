@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, User, Phone, MapPin, CreditCard, Building2, 
   ChevronRight, LogOut, Shield, Star, Truck, Edit2, Save, Loader2,
-  CheckCircle2, XCircle
+  CheckCircle2, XCircle, Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
