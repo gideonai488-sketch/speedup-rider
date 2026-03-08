@@ -46,7 +46,7 @@ const Referral: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join SpeedRuUp
+          title: 'Join SpeedUp',
           text: `Get GH₵20 off your first order! Use my code: ${referralCode}`,
           url: referralLink,
         });
