@@ -200,26 +200,24 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
         const waypoints = `${riderLocation.lng},${riderLocation.lat};${destinationLocation.lng},${destinationLocation.lat}`;
 
         const response = await fetch(
-          `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${mapboxToken}`
+          `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&overview=full&steps=true&access_token=${mapboxToken}`
         );
         const data = await response.json();
 
         if (data.routes && data.routes[0] && map.current && map.current.isStyleLoaded()) {
           setRouteDistance(data.routes[0].distance / 1000);
 
-          // Safely remove existing route
+          // Safely remove existing route layers/sources
           try {
-            if (map.current.getLayer('route')) {
-              map.current.removeLayer('route');
-            }
-            if (map.current.getSource('route')) {
-              map.current.removeSource('route');
-            }
+            if (map.current.getLayer('route-outline')) map.current.removeLayer('route-outline');
+            if (map.current.getLayer('route')) map.current.removeLayer('route');
+            if (map.current.getLayer('route-arrow')) map.current.removeLayer('route-arrow');
+            if (map.current.getSource('route')) map.current.removeSource('route');
           } catch (e) {
             // Ignore removal errors
           }
 
-          // Add new route
+          // Add route source with full geometry
           map.current.addSource('route', {
             type: 'geojson',
             data: {
@@ -229,6 +227,23 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
             },
           });
 
+          // Route outline (wider, darker)
+          map.current.addLayer({
+            id: 'route-outline',
+            type: 'line',
+            source: 'route',
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round',
+            },
+            paint: {
+              'line-color': '#1a1a1a',
+              'line-width': 8,
+              'line-opacity': 0.3,
+            },
+          });
+
+          // Main route line (orange primary)
           map.current.addLayer({
             id: 'route',
             type: 'line',
@@ -238,11 +253,27 @@ const UberStyleMap = forwardRef<UberStyleMapRef, UberStyleMapProps>(({
               'line-cap': 'round',
             },
             paint: {
-              'line-color': '#1a1a1a',
+              'line-color': '#f97316',
               'line-width': 5,
               'line-opacity': 0.9,
             },
           });
+
+          // Fit bounds to the route
+          const coords = data.routes[0].geometry.coordinates;
+          if (coords.length > 0) {
+            const routeBounds = new mapboxgl.LngLatBounds();
+            coords.forEach((coord: [number, number]) => routeBounds.extend(coord));
+            try {
+              map.current.fitBounds(routeBounds, {
+                padding: { top: 100, bottom: 140, left: 50, right: 50 },
+                maxZoom: 16,
+                duration: 1000,
+              });
+            } catch (e) {
+              console.warn('Could not fit route bounds');
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to fetch route:', err);
