@@ -28,6 +28,7 @@ const RiderDelivery: React.FC = () => {
   const updateStatus = useUpdateOrderStatus();
   const updateLocation = useUpdateRiderLocation();
   const [showDetails, setShowDetails] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [eta, setEta] = useState<number>(10);
   const [distance, setDistance] = useState<number | null>(null);
