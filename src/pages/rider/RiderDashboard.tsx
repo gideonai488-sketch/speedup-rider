@@ -38,8 +38,8 @@ const RiderDashboard: React.FC = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [bidMessage, setBidMessage] = useState('');
 
-  const riderStatus = (profile as any)?.rider_status || 'pending';
-  const isApproved = riderStatus === 'approved';
+  // All riders are auto-approved — no pending gate
+  const isApproved = true;
 
   // Weekly earnings chart data
   const weekDays = eachDayOfInterval({
