@@ -125,7 +125,7 @@ const CustomerHome: React.FC = () => {
                   Speed<span className="text-primary">Up</span>
                 </h1>
                 <button 
-                  onClick={refetchLocation}
+                  onClick={() => setCityPickerOpen(true)}
                   className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <MapPin className="w-3 h-3 text-primary" />
@@ -137,6 +137,7 @@ const CustomerHome: React.FC = () => {
                   ) : (
                     <>
                       {currentCity || profile?.address || 'Set location'}
+                      {isManual && <span className="text-[10px] text-primary">(manual)</span>}
                       <ChevronRight className="w-3 h-3" />
                     </>
                   )}
