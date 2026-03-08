@@ -95,6 +95,116 @@ export type Database = {
           },
         ]
       }
+      ambassador_signups: {
+        Row: {
+          ambassador_id: string
+          bonus_earned: number | null
+          created_at: string
+          id: string
+          referral_code: string
+          signed_up_user_id: string
+          status: string
+        }
+        Insert: {
+          ambassador_id: string
+          bonus_earned?: number | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          signed_up_user_id: string
+          status?: string
+        }
+        Update: {
+          ambassador_id?: string
+          bonus_earned?: number | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          signed_up_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambassador_signups_ambassador_id_fkey"
+            columns: ["ambassador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambassador_signups_ambassador_id_fkey"
+            columns: ["ambassador_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambassador_signups_signed_up_user_id_fkey"
+            columns: ["signed_up_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambassador_signups_signed_up_user_id_fkey"
+            columns: ["signed_up_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ambassador_stats: {
+        Row: {
+          ambassador_id: string
+          current_month_earnings: number
+          current_month_signups: number
+          id: string
+          rank: number | null
+          total_earnings: number
+          total_orders_generated: number
+          total_signups: number
+          updated_at: string
+        }
+        Insert: {
+          ambassador_id: string
+          current_month_earnings?: number
+          current_month_signups?: number
+          id?: string
+          rank?: number | null
+          total_earnings?: number
+          total_orders_generated?: number
+          total_signups?: number
+          updated_at?: string
+        }
+        Update: {
+          ambassador_id?: string
+          current_month_earnings?: number
+          current_month_signups?: number
+          id?: string
+          rank?: number | null
+          total_earnings?: number
+          total_orders_generated?: number
+          total_signups?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambassador_stats_ambassador_id_fkey"
+            columns: ["ambassador_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambassador_stats_ambassador_id_fkey"
+            columns: ["ambassador_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           id: string
@@ -830,6 +940,7 @@ export type Database = {
           rider_status: string | null
           role: Database["public"]["Enums"]["user_role"]
           subaccount_code: string | null
+          university: string | null
           updated_at: string
           user_id: string
           vehicle_plate: string | null
@@ -850,6 +961,7 @@ export type Database = {
           rider_status?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           subaccount_code?: string | null
+          university?: string | null
           updated_at?: string
           user_id: string
           vehicle_plate?: string | null
@@ -870,6 +982,7 @@ export type Database = {
           rider_status?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           subaccount_code?: string | null
+          university?: string | null
           updated_at?: string
           user_id?: string
           vehicle_plate?: string | null
@@ -1476,7 +1589,7 @@ export type Database = {
         | "order_refund"
         | "rider_earning"
         | "referral_bonus"
-      user_role: "customer" | "rider" | "admin"
+      user_role: "customer" | "rider" | "admin" | "ambassador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1623,7 +1736,7 @@ export const Constants = {
         "rider_earning",
         "referral_bonus",
       ],
-      user_role: ["customer", "rider", "admin"],
+      user_role: ["customer", "rider", "admin", "ambassador"],
     },
   },
 } as const
