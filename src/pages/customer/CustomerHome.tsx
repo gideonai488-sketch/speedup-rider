@@ -358,7 +358,7 @@ const CustomerHome: React.FC = () => {
                       <span>{store.delivery_time}</span>
                     </div>
                     <div className="text-xs text-primary mt-1.5 font-medium">
-                      GH₵{store.delivery_fee?.toFixed(0)} delivery
+                      Rider bids for delivery
                     </div>
                   </div>
                 </Link>

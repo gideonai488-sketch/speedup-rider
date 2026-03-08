@@ -114,12 +114,13 @@ export const useAcceptBid = () => {
         .neq('id', bidId);
 
       // Assign rider to order with the bid amount as delivery fee
+      // Total = subtotal (items) + delivery fee (bid amount)
       const { data, error } = await supabase
         .from('orders')
         .update({
           rider_id: riderId,
           delivery_fee: amount,
-          total: amount,
+          total: subtotal + amount,
           status: 'confirmed',
           updated_at: new Date().toISOString(),
         })
