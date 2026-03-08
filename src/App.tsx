@@ -65,6 +65,8 @@ const App = () => {
       setShowSplash(false);
       setIsFirstVisit(false);
     }
+    // Initialize native UI plugins (status bar, splash screen, keyboard)
+    initNativeUI();
   }, []);
 
   const handleSplashComplete = () => {
