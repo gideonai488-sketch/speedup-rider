@@ -81,7 +81,7 @@ const RiderAuth: React.FC = () => {
       }
     }
     setIsLoading(true);
-    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speeduph`;
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedup;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
     if (error) {
@@ -112,8 +112,7 @@ const RiderAuth: React.FC = () => {
     }
 
     setIsLoading(true);
-    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedruuph`;
-    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone);
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedruupup    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone);
     
     if (error) {
       setIsLoading(false);
@@ -135,7 +134,7 @@ const RiderAuth: React.FC = () => {
     }
 
     setIsLoading(false);
-    toast.success('Rider account created! Welcome to SpeedRush.');
+    toast.success('Rider account created! Welcome to SpeedRushUp
   };
 
   if (authLoading) {
