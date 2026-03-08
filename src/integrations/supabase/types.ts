@@ -95,12 +95,48 @@ export type Database = {
           },
         ]
       }
+      ambassador_earning_rates: {
+        Row: {
+          country_code: string
+          created_at: string
+          currency_symbol: string
+          description: string | null
+          first_order_bonus: number
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          currency_symbol: string
+          description?: string | null
+          first_order_bonus?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          currency_symbol?: string
+          description?: string | null
+          first_order_bonus?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ambassador_signups: {
         Row: {
           ambassador_id: string
           bonus_earned: number | null
           created_at: string
+          first_order_id: string | null
+          first_order_paid: boolean | null
           id: string
+          paid_at: string | null
           referral_code: string
           signed_up_user_id: string
           status: string
@@ -109,7 +145,10 @@ export type Database = {
           ambassador_id: string
           bonus_earned?: number | null
           created_at?: string
+          first_order_id?: string | null
+          first_order_paid?: boolean | null
           id?: string
+          paid_at?: string | null
           referral_code: string
           signed_up_user_id: string
           status?: string
@@ -118,7 +157,10 @@ export type Database = {
           ambassador_id?: string
           bonus_earned?: number | null
           created_at?: string
+          first_order_id?: string | null
+          first_order_paid?: boolean | null
           id?: string
+          paid_at?: string | null
           referral_code?: string
           signed_up_user_id?: string
           status?: string
@@ -136,6 +178,13 @@ export type Database = {
             columns: ["ambassador_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambassador_signups_first_order_id_fkey"
+            columns: ["first_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
           {
@@ -933,6 +982,7 @@ export type Database = {
           bank_code: string | null
           bank_name: string | null
           city: string | null
+          country_code: string | null
           created_at: string
           full_name: string
           id: string
@@ -954,6 +1004,7 @@ export type Database = {
           bank_code?: string | null
           bank_name?: string | null
           city?: string | null
+          country_code?: string | null
           created_at?: string
           full_name: string
           id?: string
@@ -975,6 +1026,7 @@ export type Database = {
           bank_code?: string | null
           bank_name?: string | null
           city?: string | null
+          country_code?: string | null
           created_at?: string
           full_name?: string
           id?: string
