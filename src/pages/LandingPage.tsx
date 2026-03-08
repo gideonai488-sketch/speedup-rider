@@ -518,7 +518,8 @@ const LandingPage: React.FC = () => {
             <div className="hidden md:block">
               <img 
                 src={heroDelivery} 
-                alt="SpeedRush riders Upcustomers"Up          UplassName="Upded-3xl shadow-2xl w-full object-cover aspect-video"
+                alt="SpeedUp riders and customers"
+                className="rounded-3xl shadow-2xl w-full object-cover aspect-video"
               />
             </div>
           </div>
