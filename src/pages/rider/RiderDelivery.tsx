@@ -174,8 +174,8 @@ const RiderDelivery: React.FC = () => {
       await updateStatus.mutateAsync({ orderId: order.id, status: nextStatus });
       
       if (nextStatus === 'delivered') {
-        // Rider just reports delivery - earnings were already credited via payment
         const riderEarning = Number(order.delivery_fee) || 15;
+        hapticSuccess();
         toast.success(`Delivery completed! You earned GH₵ ${riderEarning.toFixed(2)}`);
         setTimeout(() => navigate('/rider'), 2000);
       } else if (nextStatus === 'out_for_delivery') {
