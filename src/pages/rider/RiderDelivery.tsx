@@ -196,9 +196,9 @@ const RiderDelivery: React.FC = () => {
     const paymentStatus = (order as any)?.payment_status || 'pending';
     switch (currentStatus) {
       case 'confirmed':
-        return 'Arrived at Pickup';
-      case 'picked_up':
         return 'Start Delivery';
+      case 'picked_up':
+        return 'Arrived at Pickup';
       case 'out_for_delivery':
         return paymentStatus === 'paid' ? 'Complete Delivery' : 'Waiting for Payment...';
       case 'delivered':
@@ -368,9 +368,9 @@ const RiderDelivery: React.FC = () => {
                 {currentStatus === 'delivered' 
                   ? 'Delivery complete!' 
                   : currentStatus === 'confirmed'
-                    ? 'Head to pickup location'
+                    ? 'Heading to pickup location'
                     : currentStatus === 'picked_up' 
-                      ? 'Mark as picked up & start delivery'
+                      ? 'At pickup - confirm arrival'
                       : (order as any)?.payment_status === 'paid'
                         ? 'Payment received - complete delivery'
                         : 'At customer - waiting for payment'}
@@ -545,7 +545,8 @@ const RiderDelivery: React.FC = () => {
               ) : (
                 <>
                   {currentStatus === 'out_for_delivery' && canComplete() && <CheckCircle2 className="w-5 h-5 mr-2" />}
-                  {currentStatus === 'picked_up' && <Truck className="w-5 h-5 mr-2" />}
+                  {currentStatus === 'confirmed' && <Truck className="w-5 h-5 mr-2" />}
+                  {currentStatus === 'picked_up' && <MapPin className="w-5 h-5 mr-2" />}
                   {getStatusButtonText()}
                 </>
               )}
