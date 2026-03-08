@@ -553,6 +553,18 @@ const TrackDelivery: React.FC = () => {
         riderName={rider?.full_name}
         storeName={(order as any).stores?.name}
       />
+      {/* Chat Overlay */}
+      {showChat && order?.rider_id && (
+        <div className="fixed inset-0 z-50">
+          <ChatView
+            otherProfileId={order.rider_id}
+            otherName={rider?.full_name || 'Rider'}
+            otherPhone={rider?.phone}
+            orderId={order.id}
+            onBack={() => setShowChat(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
