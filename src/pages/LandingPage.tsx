@@ -443,6 +443,34 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Campus Ambassador CTA */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-3xl p-8 md:p-12 border border-primary/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <div className="relative flex flex-col md:flex-row items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-8 h-8 text-primary" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+                  🎓 Become a Campus Ambassador
+                </h3>
+                <p className="text-muted-foreground">
+                  Launch SpeedUp at your university. Earn up to $500/month, build your resume, and lead the delivery revolution on campus.
+                </p>
+              </div>
+              <Button
+                onClick={() => navigate('/campus-ambassador')}
+                className="bg-primary hover:bg-primary/90 shrink-0 px-6"
+              >
+                Apply Now <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Delivery Methods */}
       <section className="py-20 bg-secondary/20">
         <div className="container mx-auto px-4">
