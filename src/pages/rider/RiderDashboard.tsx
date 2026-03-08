@@ -141,8 +141,7 @@ const RiderDashboard: React.FC = () => {
   const handleSelectOrder = (order: any) => {
     setSelectedOrder(order);
     setOrderTimer(60);
-    const suggestedBid = Math.max(5, (Number(order.delivery_fee) || 10) - 3);
-    setBidAmount(suggestedBid.toString());
+    setBidAmount('');
     setBidMessage('');
   };
 
@@ -348,11 +347,9 @@ const RiderDashboard: React.FC = () => {
                       <Package className="w-7 h-7 text-white" />
                     )}
                   </div>
-                  <div>
+                    <div>
                     <p className="font-bold text-foreground">New Delivery Request!</p>
-                    <p className="text-sm text-success font-semibold">
-                      Earn {formatCurrency(Number(selectedOrder.delivery_fee) || 15)}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Place your bid to earn</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-2 rounded-xl">
@@ -543,8 +540,7 @@ const RiderDashboard: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-success text-sm">{formatCurrency((Number(order.delivery_fee) || 10) - 5)}</p>
-                      <p className="text-[10px] text-muted-foreground">Your earning</p>
+                      <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">Bid Now</span>
                     </div>
                   </div>
                   
