@@ -38,8 +38,8 @@ const RiderDashboard: React.FC = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [bidMessage, setBidMessage] = useState('');
 
-  const riderStatus = (profile as any)?.rider_status || 'pending';
-  const isApproved = riderStatus === 'approved';
+  // All riders are auto-approved — no pending gate
+  const isApproved = true;
 
   // Weekly earnings chart data
   const weekDays = eachDayOfInterval({
@@ -122,38 +122,7 @@ const RiderDashboard: React.FC = () => {
     );
   }
 
-  // Pending approval screen
-  if (!isApproved && profile?.role === 'rider') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
-        <div className="w-24 h-24 rounded-full bg-warning/10 flex items-center justify-center mb-6 animate-pulse">
-          {riderStatus === 'rejected' ? (
-            <X className="w-12 h-12 text-destructive" />
-          ) : (
-            <Clock className="w-12 h-12 text-warning" />
-          )}
-        </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">
-          {riderStatus === 'rejected' ? 'Application Rejected' : 'Application Pending'}
-        </h1>
-        <p className="text-muted-foreground text-center max-w-md mb-6">
-          {riderStatus === 'rejected' 
-            ? 'Unfortunately, your rider application has been rejected. Please contact support for more information.'
-            : 'Your rider application is under review. We\'ll notify you once you\'re approved to start accepting deliveries.'
-          }
-        </p>
-        {riderStatus === 'pending' && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary rounded-xl px-5 py-3">
-            <AlertCircle className="w-4 h-4" />
-            <span>This usually takes 24-48 hours</span>
-          </div>
-        )}
-        <Link to="/" className="mt-8 text-primary hover:underline font-medium">
-          Return to Home
-        </Link>
-      </div>
-    );
-  }
+  // No approval gate — riders can access dashboard immediately
 
   const toggleOnline = async () => {
     const newStatus = !isOnline;

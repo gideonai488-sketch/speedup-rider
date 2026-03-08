@@ -79,7 +79,7 @@ const LandingPage: React.FC = () => {
           <div className="max-w-2xl stagger-children">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-medium text-primary">Creating 50,000 jobs by 2027</span>
+              <span className="text-sm font-medium text-primary">Now in Ghana 🇬🇭 & Finland 🇫🇮 — Creating 50,000 jobs by 2027</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-tight mb-6">
@@ -92,7 +92,7 @@ const LandingPage: React.FC = () => {
             
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">
               Scooter, motorcycle, bicycle, or car — anyone can join SpeedRush and start earning. 
-              We're building Africa's largest delivery network, one rider at a time.
+              We're building the largest delivery network across Ghana and Finland, one rider at a time.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -134,8 +134,8 @@ const LandingPage: React.FC = () => {
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">16 Regions</p>
-                  <p className="text-sm text-muted-foreground">Across Ghana</p>
+                  <p className="text-2xl font-bold text-foreground">2 Countries</p>
+                  <p className="text-sm text-muted-foreground">Ghana & Finland</p>
                 </div>
               </div>
             </div>
@@ -160,7 +160,7 @@ const LandingPage: React.FC = () => {
             </h2>
             <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
               We believe everyone deserves the opportunity to earn a living. SpeedRush is on a mission to create 
-              <strong className="text-foreground"> 50,000 jobs</strong> for Ghanaians by 2027 through our delivery platform.
+              <strong className="text-foreground"> 50,000 jobs</strong> across Ghana and Finland by 2027 through our delivery platform.
             </p>
           </div>
 
@@ -196,10 +196,10 @@ const LandingPage: React.FC = () => {
           {/* Vision pillars */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: <Target className="w-7 h-7" />, title: '50,000 Jobs', desc: 'Creating meaningful employment opportunities across all 16 regions of Ghana by 2027.' },
-              { icon: <Users className="w-7 h-7" />, title: 'Inclusive Platform', desc: 'Anyone with any vehicle can join — motorcycle, scooter, bicycle, or car. No discrimination.' },
-              { icon: <TrendingUp className="w-7 h-7" />, title: 'Daily Earnings', desc: 'Riders earn competitive pay with instant daily payouts. Be your own boss, set your own hours.' },
-              { icon: <Globe className="w-7 h-7" />, title: 'Pan-Africa Vision', desc: 'Starting in Ghana, expanding across West Africa. Building the continent\'s delivery backbone.' },
+              { icon: <Target className="w-7 h-7" />, title: '50,000 Jobs', desc: 'Creating meaningful employment opportunities across Ghana and Finland by 2027.' },
+              { icon: <Users className="w-7 h-7" />, title: 'Inclusive Platform', desc: 'Anyone with any vehicle can join — motorcycle, scooter, bicycle, or car. No barriers to entry.' },
+              { icon: <TrendingUp className="w-7 h-7" />, title: 'Instant Access', desc: 'Sign up and start earning immediately. No waiting for approval — your dashboard is ready from day one.' },
+              { icon: <Globe className="w-7 h-7" />, title: 'Global Vision', desc: 'Operating in Ghana 🇬🇭 and Finland 🇫🇮, with plans to expand across Africa and Europe.' },
             ].map((pillar) => (
               <div key={pillar.title} className="bg-card rounded-2xl p-6 border border-border shadow-card">
                 <div className="w-14 h-14 rounded-2xl gradient-hero flex items-center justify-center text-white mb-4 shadow-glow">
@@ -346,11 +346,11 @@ const LandingPage: React.FC = () => {
               Join the Movement. Create Your Future.
             </h2>
             <p className="text-lg text-white/70 mb-4">
-              We're not just building a delivery app — we're creating <strong className="text-white">50,000 jobs</strong> for the people of Ghana by 2027. 
+              We're not just building a delivery app — we're creating <strong className="text-white">50,000 jobs</strong> across Ghana and Finland by 2027. 
               Whether you have a scooter, motorcycle, bicycle, or car, you can start earning today.
             </p>
             <p className="text-white/50 mb-8">
-              No experience needed. No vehicle restrictions. Just you, your ride, and unlimited earning potential.
+              No experience needed. No approval wait. No vehicle restrictions. Sign up and start delivering immediately.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/rider/auth">
