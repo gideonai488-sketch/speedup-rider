@@ -231,6 +231,18 @@ const StoreCheckout: React.FC = () => {
           </div>
 
           <div>
+            <Label>Your Phone Number <span className="text-destructive">*</span></Label>
+            <Input
+              type="tel"
+              placeholder="e.g. 0241234567"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              className="mt-1.5"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Rider will use this to contact you</p>
+          </div>
+
+          <div>
             <Label>Special Instructions (optional)</Label>
             <Textarea
               placeholder="E.g., Extra ketchup, no onions, ring doorbell..."
