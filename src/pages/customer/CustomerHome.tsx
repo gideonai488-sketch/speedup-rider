@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel
 } from 'lucide-react';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
@@ -20,6 +20,8 @@ import { useOrders } from '@/hooks/useOrders';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/context/AuthContext';
 import { useUserLocation } from '@/hooks/useUserLocation';
+import { useOrderBids } from '@/hooks/useBids';
+import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
 type StoreCategory = Database['public']['Enums']['store_category'];
@@ -40,6 +42,17 @@ const serviceColors: Record<string, string> = {
   errands: 'bg-purple-500/10 text-purple-500',
   packages: 'bg-blue-500/10 text-blue-500',
   documents: 'bg-cyan-500/10 text-cyan-500',
+};
+
+// Inline bid count for a single order
+const OrderBidCount: React.FC<{ orderId: string }> = ({ orderId }) => {
+  const { data: bids = [] } = useOrderBids(orderId);
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
+      <Gavel className="w-3.5 h-3.5" />
+      {bids.length} bid{bids.length !== 1 ? 's' : ''}
+    </span>
+  );
 };
 
 const CustomerHome: React.FC = () => {
@@ -64,6 +77,11 @@ const CustomerHome: React.FC = () => {
   }, [user, authLoading, navigate]);
 
   const featuredStores = stores.filter(s => s.is_featured) || [];
+
+  // Orders waiting for rider (pending, no rider assigned) — these can have bids
+  const pendingBidOrders = (orders || []).filter(
+    (o: any) => o.status === 'pending' && !o.rider_id
+  );
 
   const handleSignOut = async () => {
     await signOut();
@@ -150,6 +168,67 @@ const CustomerHome: React.FC = () => {
       <main className="px-4 py-5 space-y-7">
         {/* 1. Hero Carousel with ads/videos/images */}
         <HeroCarousel />
+
+        {/* Active Deliveries Awaiting Bids */}
+        {pendingBidOrders.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Gavel className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground">Incoming Bids</h2>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-success bg-success/10 px-2.5 py-1 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                Live
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {pendingBidOrders.map((order: any) => (
+                <button
+                  key={order.id}
+                  onClick={() => navigate(`/track/${order.id}`)}
+                  className="w-full text-left bg-card rounded-2xl border-2 border-primary/30 p-4 hover:border-primary/60 transition-all shadow-[0_0_15px_rgba(var(--primary),0.08)] active:scale-[0.98]"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                        {order.stores?.logo_url ? (
+                          <img src={order.stores.logo_url} alt="" className="w-8 h-8 object-contain rounded-lg" />
+                        ) : (
+                          <Package className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">{order.order_number || order.id.slice(0, 8)}</p>
+                        <p className="text-xs text-muted-foreground">{order.stores?.name || 'Delivery'}</p>
+                      </div>
+                    </div>
+                    <OrderBidCount orderId={order.id} />
+                  </div>
+
+                  <div className="space-y-1.5 text-xs mb-3">
+                    {order.pickup_address && (
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
+                        <span className="text-muted-foreground truncate">{order.pickup_address}</span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success mt-1 flex-shrink-0" />
+                      <span className="text-foreground font-medium truncate">{order.delivery_address}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Tap to view & accept bids</span>
+                    <ChevronRight className="w-4 h-4 text-primary" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 2. Services Grid */}
         <section>
