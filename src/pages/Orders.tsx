@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle2, Truck, Sparkles, Droplets, MapPin, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle2, Truck, Sparkles, Droplets, MapPin, ShoppingBag, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BottomNav from '@/components/layout/BottomNav';
 import { cn } from '@/lib/utils';
 import { useUserOrders } from '@/hooks/useUserStats';
+import { useOrderBids } from '@/hooks/useBids';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
@@ -16,6 +17,18 @@ const statusSteps = [
   { key: 'out_for_delivery', label: 'Out for Delivery', icon: Truck },
   { key: 'delivered', label: 'Delivered', icon: CheckCircle2 },
 ];
+
+// Small component to show bid count badge for an order
+const BidCountBadge: React.FC<{ orderId: string }> = ({ orderId }) => {
+  const { data: bids = [] } = useOrderBids(orderId);
+  if (bids.length === 0) return null;
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full animate-pulse">
+      <Gavel className="w-3 h-3" />
+      {bids.length} bid{bids.length > 1 ? 's' : ''}
+    </span>
+  );
+};
 
 const Orders: React.FC = () => {
   const navigate = useNavigate();
@@ -77,10 +90,15 @@ const Orders: React.FC = () => {
                             <p className="text-xs text-primary-foreground/70">Order ID</p>
                             <p className="font-bold text-primary-foreground">{order.order_number || order.id.slice(0, 8)}</p>
                           </div>
-                          <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-                            <span className="text-xs font-semibold text-primary-foreground capitalize">
-                              {order.status.replace(/_/g, ' ')}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            {order.status === 'pending' && !order.rider_id && (
+                              <BidCountBadge orderId={order.id} />
+                            )}
+                            <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
+                              <span className="text-xs font-semibold text-primary-foreground capitalize">
+                                {order.status.replace(/_/g, ' ')}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -170,14 +188,24 @@ const Orders: React.FC = () => {
                           })}
                         </div>
 
-                        {/* Track Order Button */}
-                        <Button 
-                          onClick={() => navigate(`/track/${order.id}`)}
-                          className="w-full mt-4 gradient-coral text-coral-foreground shadow-coral"
-                        >
-                          <MapPin className="w-4 h-4 mr-2" />
-                          Track Live Location
-                        </Button>
+                        {/* Action Button */}
+                        {order.status === 'pending' && !order.rider_id ? (
+                          <Button 
+                            onClick={() => navigate(`/track/${order.id}`)}
+                            className="w-full mt-4 gradient-hero text-white"
+                          >
+                            <Gavel className="w-4 h-4 mr-2" />
+                            View Bids
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => navigate(`/track/${order.id}`)}
+                            className="w-full mt-4 gradient-coral text-coral-foreground shadow-coral"
+                          >
+                            <MapPin className="w-4 h-4 mr-2" />
+                            Track Live Location
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
