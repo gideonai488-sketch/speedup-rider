@@ -81,7 +81,7 @@ const RiderAuth: React.FC = () => {
       }
     }
     setIsLoading(true);
-    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedup;
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedup.gh`;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
     if (error) {
