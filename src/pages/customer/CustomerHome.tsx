@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel
 } from 'lucide-react';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
@@ -20,6 +20,8 @@ import { useOrders } from '@/hooks/useOrders';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/context/AuthContext';
 import { useUserLocation } from '@/hooks/useUserLocation';
+import { useOrderBids } from '@/hooks/useBids';
+import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
 type StoreCategory = Database['public']['Enums']['store_category'];
@@ -40,6 +42,17 @@ const serviceColors: Record<string, string> = {
   errands: 'bg-purple-500/10 text-purple-500',
   packages: 'bg-blue-500/10 text-blue-500',
   documents: 'bg-cyan-500/10 text-cyan-500',
+};
+
+// Inline bid count for a single order
+const OrderBidCount: React.FC<{ orderId: string }> = ({ orderId }) => {
+  const { data: bids = [] } = useOrderBids(orderId);
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
+      <Gavel className="w-3.5 h-3.5" />
+      {bids.length} bid{bids.length !== 1 ? 's' : ''}
+    </span>
+  );
 };
 
 const CustomerHome: React.FC = () => {
