@@ -25,6 +25,7 @@ interface FindingRiderProps {
   orderNumber?: string;
   orderId?: string;
   totalAmount: number;
+  distanceKm?: number;
   onBack: () => void;
   onCancel?: () => Promise<void>;
 }
