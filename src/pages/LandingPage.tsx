@@ -196,10 +196,10 @@ const LandingPage: React.FC = () => {
           {/* Vision pillars */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: <Target className="w-7 h-7" />, title: '50,000 Jobs', desc: 'Creating meaningful employment opportunities across all 16 regions of Ghana by 2027.' },
-              { icon: <Users className="w-7 h-7" />, title: 'Inclusive Platform', desc: 'Anyone with any vehicle can join — motorcycle, scooter, bicycle, or car. No discrimination.' },
-              { icon: <TrendingUp className="w-7 h-7" />, title: 'Daily Earnings', desc: 'Riders earn competitive pay with instant daily payouts. Be your own boss, set your own hours.' },
-              { icon: <Globe className="w-7 h-7" />, title: 'Pan-Africa Vision', desc: 'Starting in Ghana, expanding across West Africa. Building the continent\'s delivery backbone.' },
+              { icon: <Target className="w-7 h-7" />, title: '50,000 Jobs', desc: 'Creating meaningful employment opportunities across Ghana and Finland by 2027.' },
+              { icon: <Users className="w-7 h-7" />, title: 'Inclusive Platform', desc: 'Anyone with any vehicle can join — motorcycle, scooter, bicycle, or car. No barriers to entry.' },
+              { icon: <TrendingUp className="w-7 h-7" />, title: 'Instant Access', desc: 'Sign up and start earning immediately. No waiting for approval — your dashboard is ready from day one.' },
+              { icon: <Globe className="w-7 h-7" />, title: 'Global Vision', desc: 'Operating in Ghana 🇬🇭 and Finland 🇫🇮, with plans to expand across Africa and Europe.' },
             ].map((pillar) => (
               <div key={pillar.title} className="bg-card rounded-2xl p-6 border border-border shadow-card">
                 <div className="w-14 h-14 rounded-2xl gradient-hero flex items-center justify-center text-white mb-4 shadow-glow">
