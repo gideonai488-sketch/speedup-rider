@@ -120,7 +120,7 @@ serve(async (req) => {
 
     // Get customer email from auth.users via service role
     const { data: authUser } = await supabase.auth.admin.getUserById(authenticatedUserId);
-    const customerEmail = authUser?.user?.email || `customer_${userProfile.id}@speedrush.app`;
+    const customerEmail = authUser?.user?.email || `customer_${userProfile.id}@speedup.app`;
 
     const { data: customerWallet } = await supabase
       .from("wallets")

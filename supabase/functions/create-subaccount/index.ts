@@ -133,7 +133,7 @@ serve(async (req) => {
         settlement_bank: bank_code,
         account_number,
         percentage_charge: 0,
-        primary_contact_email: userEmail || `rider_${profile.id}@speedrush.app`,
+        primary_contact_email: userEmail || `rider_${profile.id}@speedup.app`,
         primary_contact_name: profile.full_name,
         primary_contact_phone: profile.phone,
       }),

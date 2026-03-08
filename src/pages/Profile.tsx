@@ -118,7 +118,7 @@ const Profile: React.FC = () => {
         { icon: MapPin, label: 'Saved Addresses' },
         { icon: CreditCard, label: 'Payment Methods' },
         { icon: Heart, label: 'Favorites' },
-        { icon: Wallet, label: 'SpeedUp Wallet', value: `GH₵ ${stats?.walletBalance?.toFixed(2) || '0.00'}`, path: '/customer/wallet' },
+        { icon: Wallet, label: 'SpeedUpallet', value: `GH₵ ${stats?.walletBalance?.toFixed(2) || '0.00'}`, path: '/customer/wallet' },
       ]
     },
     {
@@ -397,7 +397,7 @@ const Profile: React.FC = () => {
 
         {/* App version */}
         <p className="text-center text-xs text-muted-foreground pt-4">
-          SpeedRush v1.0.0 • Made with ❤️ in Ghana
+          SpeedRuUp1.0.0 • Made with ❤️ in Ghana
         </p>
       </div>
 
