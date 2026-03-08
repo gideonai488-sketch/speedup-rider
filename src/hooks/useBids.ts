@@ -88,6 +88,16 @@ export const useAcceptBid = () => {
       riderId: string;
       amount: number;
     }) => {
+      // First get the order to know the subtotal
+      const { data: orderData, error: orderFetchError } = await supabase
+        .from('orders')
+        .select('subtotal')
+        .eq('id', orderId)
+        .single();
+
+      if (orderFetchError) throw orderFetchError;
+      const subtotal = Number(orderData?.subtotal) || 0;
+
       // Accept the bid
       const { error: bidError } = await supabase
         .from('bids')
