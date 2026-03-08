@@ -299,20 +299,18 @@ const RiderDelivery: React.FC = () => {
               {gpsError}
             </p>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 setIsAcquiringGPS(true);
                 setGpsError(null);
-                navigator.geolocation.getCurrentPosition(
-                  (pos) => {
-                    setRiderLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-                    setIsAcquiringGPS(false);
-                  },
-                  () => {
-                    setGpsError('Still unable to get location. Please check device settings.');
-                    setIsAcquiringGPS(false);
-                  },
-                  { enableHighAccuracy: true, timeout: 15000 }
-                );
+                try {
+                  const { getCurrentPosition } = await import('@/lib/nativeGeolocation');
+                  const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+                  setRiderLocation({ lat: pos.latitude, lng: pos.longitude });
+                  setIsAcquiringGPS(false);
+                } catch {
+                  setGpsError('Still unable to get location. Please check device settings.');
+                  setIsAcquiringGPS(false);
+                }
               }}
               className="gap-2"
             >
