@@ -12,6 +12,7 @@ import { useCountry } from '@/context/CountryContext';
 const AmbassadorEarnings: React.FC = () => {
   const navigate = useNavigate();
   const { profile, loading: authLoading, user } = useAuth();
+  const { formatPrice } = useCountry();
   const [stats, setStats] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
