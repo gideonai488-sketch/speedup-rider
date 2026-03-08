@@ -23,6 +23,7 @@ import Notifications from "./pages/customer/Notifications";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import RiderProfile from "./pages/rider/RiderProfile";
 import RiderHistory from "./pages/rider/RiderHistory";
+import RiderBids from "./pages/rider/RiderBids";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Orders from "./pages/Orders";
@@ -123,6 +124,7 @@ const App = () => {
                 <Route path="/rider/profile" element={<RiderProfile />} />
                 <Route path="/rider/history" element={<RiderHistory />} />
                 <Route path="/rider/deliveries" element={<RiderHistory />} />
+                <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                 
                 {/* Fallback */}

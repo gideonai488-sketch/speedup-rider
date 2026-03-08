@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
+import { createNotification } from '@/hooks/useNotifications';
 
 // Fetch bids for an order (customer view)
 export const useOrderBids = (orderId: string) => {
@@ -124,6 +125,15 @@ export const useAcceptBid = () => {
         throw error;
       }
 
+      // Send notification to the rider
+      await createNotification(
+        riderId,
+        '🎉 Bid Accepted!',
+        `Your bid of GH₵ ${amount.toFixed(2)} has been accepted. Head to the pickup location now!`,
+        'bid_accepted',
+        { order_id: orderId, bid_id: bidId, amount }
+      );
+
       return data;
     },
     onSuccess: () => {
@@ -131,12 +141,33 @@ export const useAcceptBid = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['rider-pending-orders'] });
       queryClient.invalidateQueries({ queryKey: ['rider-active-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['my-bids'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };
 
-// Get rider's own bids
+// Get rider's own bids (all statuses)
 export const useMyBids = (riderId: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!riderId) return;
+    const channel = supabase
+      .channel(`my-bids-${riderId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'bids',
+        filter: `rider_id=eq.${riderId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['my-bids', riderId] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [riderId, queryClient]);
+
   return useQuery({
     queryKey: ['my-bids', riderId],
     queryFn: async () => {
@@ -144,11 +175,11 @@ export const useMyBids = (riderId: string) => {
         .from('bids')
         .select(`
           *,
-          orders(id, order_number, pickup_address, delivery_address, status)
+          orders(id, order_number, pickup_address, delivery_address, status, delivery_fee, stores(name, logo_url))
         `)
         .eq('rider_id', riderId)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       return data;
