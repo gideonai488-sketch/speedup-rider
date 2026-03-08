@@ -469,7 +469,6 @@ const LandingPage: React.FC = () => {
                 <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            </Link>
           </div>
         </div>
       </section>
