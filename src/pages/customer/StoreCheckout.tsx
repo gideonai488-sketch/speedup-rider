@@ -92,6 +92,10 @@ const StoreCheckout: React.FC = () => {
       toast.error('Please enter your delivery address');
       return;
     }
+    if (!customerPhone.trim()) {
+      toast.error('Please enter your phone number so the rider can reach you');
+      return;
+    }
 
     setIsProcessing(true);
 
