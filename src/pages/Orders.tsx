@@ -188,14 +188,24 @@ const Orders: React.FC = () => {
                           })}
                         </div>
 
-                        {/* Track Order Button */}
-                        <Button 
-                          onClick={() => navigate(`/track/${order.id}`)}
-                          className="w-full mt-4 gradient-coral text-coral-foreground shadow-coral"
-                        >
-                          <MapPin className="w-4 h-4 mr-2" />
-                          Track Live Location
-                        </Button>
+                        {/* Action Button */}
+                        {order.status === 'pending' && !order.rider_id ? (
+                          <Button 
+                            onClick={() => navigate(`/track/${order.id}`)}
+                            className="w-full mt-4 gradient-hero text-white"
+                          >
+                            <Gavel className="w-4 h-4 mr-2" />
+                            View Bids
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => navigate(`/track/${order.id}`)}
+                            className="w-full mt-4 gradient-coral text-coral-foreground shadow-coral"
+                          >
+                            <MapPin className="w-4 h-4 mr-2" />
+                            Track Live Location
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
