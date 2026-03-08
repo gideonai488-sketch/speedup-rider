@@ -124,6 +124,7 @@ const App = () => {
                 <Route path="/rider/profile" element={<RiderProfile />} />
                 <Route path="/rider/history" element={<RiderHistory />} />
                 <Route path="/rider/deliveries" element={<RiderHistory />} />
+                <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                 
                 {/* Fallback */}
