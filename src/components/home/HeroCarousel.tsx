@@ -5,6 +5,9 @@ import heroFastDelivery from '@/assets/hero/hero-fast-delivery.jpg';
 import heroFoodDelivery from '@/assets/hero/hero-food-delivery.jpg';
 import heroGroceries from '@/assets/hero/hero-groceries.jpg';
 import heroPackage from '@/assets/hero/hero-package.jpg';
+import heroIphoneGiveaway from '@/assets/hero/hero-iphone-giveaway.jpg';
+import heroDiscountSale from '@/assets/hero/hero-discount-sale.jpg';
+import heroReferralBonus from '@/assets/hero/hero-referral-bonus.jpg';
 
 interface HeroSlide {
   id: string;
@@ -21,6 +24,33 @@ const defaultSlides: HeroSlide[] = [
   {
     id: '1',
     type: 'image',
+    src: heroIphoneGiveaway,
+    title: '🎉 Win an iPhone This Week!',
+    subtitle: 'Place 5 orders to stand a chance to win',
+    cta: { label: 'Order Now', link: '/customer/book' },
+    gradient: 'from-black/60 via-black/30 to-transparent',
+  },
+  {
+    id: '2',
+    type: 'image',
+    src: heroDiscountSale,
+    title: '50% Off Delivery Fee',
+    subtitle: 'Use code SPEED50 on your next 3 orders',
+    cta: { label: 'Shop Now', link: '/customer/book?service=food' },
+    gradient: 'from-orange-900/70 via-orange-900/30 to-transparent',
+  },
+  {
+    id: '3',
+    type: 'image',
+    src: heroReferralBonus,
+    title: 'Refer & Earn GH₵20',
+    subtitle: 'Share your code and earn when friends order',
+    cta: { label: 'Refer Now', link: '/customer/referral' },
+    gradient: 'from-emerald-900/70 via-emerald-900/30 to-transparent',
+  },
+  {
+    id: '4',
+    type: 'image',
     src: heroFastDelivery,
     title: 'Lightning Fast Delivery',
     subtitle: 'From any store to your door in minutes',
@@ -28,7 +58,7 @@ const defaultSlides: HeroSlide[] = [
     gradient: 'from-black/70 via-black/40 to-transparent',
   },
   {
-    id: '2',
+    id: '5',
     type: 'image',
     src: heroFoodDelivery,
     title: 'Delicious Food Delivered',
@@ -37,7 +67,7 @@ const defaultSlides: HeroSlide[] = [
     gradient: 'from-primary/80 via-primary/40 to-transparent',
   },
   {
-    id: '3',
+    id: '6',
     type: 'image',
     src: heroGroceries,
     title: 'Fresh Groceries',
@@ -46,7 +76,7 @@ const defaultSlides: HeroSlide[] = [
     gradient: 'from-accent/80 via-accent/40 to-transparent',
   },
   {
-    id: '4',
+    id: '7',
     type: 'image',
     src: heroPackage,
     title: 'Send Packages Anywhere',
