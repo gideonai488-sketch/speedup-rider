@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ const RiderDashboard: React.FC = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [orderTimer, setOrderTimer] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const lastKnownPosition = useRef<{ lat: number; lng: number } | null>(null);
 
   const updateLocation = useUpdateRiderLocation();
   const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders(profile?.city);
@@ -125,13 +126,17 @@ const RiderDashboard: React.FC = () => {
   }, [profile?.id]);
 
   // Update rider location periodically when online
+  const updateLocationRef = useRef(updateLocation);
+  updateLocationRef.current = updateLocation;
+  
   useEffect(() => {
     if (!isOnline || !profile || !isApproved) return;
     const updateRiderLocation = () => {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            updateLocation.mutate({
+            lastKnownPosition.current = { lat: position.coords.latitude, lng: position.coords.longitude };
+            updateLocationRef.current.mutate({
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
               heading: position.coords.heading || undefined,
@@ -140,14 +145,14 @@ const RiderDashboard: React.FC = () => {
             });
           },
           (error) => console.error('Geolocation error:', error),
-          { enableHighAccuracy: true }
+          { enableHighAccuracy: true, timeout: 10000 }
         );
       }
     };
     updateRiderLocation();
     const interval = setInterval(updateRiderLocation, 10000);
     return () => clearInterval(interval);
-  }, [isOnline, profile, updateLocation, isApproved]);
+  }, [isOnline, profile, isApproved]);
 
   // Countdown timer for selected order
   useEffect(() => {
@@ -180,11 +185,33 @@ const RiderDashboard: React.FC = () => {
     const newStatus = !isOnline;
     setIsOnline(newStatus);
     if (profile) {
-      await updateLocation.mutateAsync({
-        latitude: 5.6037,
-        longitude: -0.1870,
-        is_online: newStatus,
-      });
+      try {
+        // Get current position or use last known
+        const pos = lastKnownPosition.current || { lat: 0, lng: 0 };
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              lastKnownPosition.current = { lat: position.coords.latitude, lng: position.coords.longitude };
+              await updateLocation.mutateAsync({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                is_online: newStatus,
+              });
+            },
+            async () => {
+              // Fallback to last known position
+              await updateLocation.mutateAsync({
+                latitude: pos.lat,
+                longitude: pos.lng,
+                is_online: newStatus,
+              });
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+          );
+        }
+      } catch (err) {
+        console.error('Toggle online error:', err);
+      }
     }
     toast.success(newStatus ? 'You are now online and receiving orders!' : 'You are now offline');
     if (!newStatus) setSelectedOrder(null);
@@ -234,11 +261,16 @@ const RiderDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     if (isOnline && profile) {
-      await updateLocation.mutateAsync({
-        latitude: 5.6037,
-        longitude: -0.1870,
-        is_online: false,
-      });
+      try {
+        const pos = lastKnownPosition.current || { lat: 0, lng: 0 };
+        await updateLocation.mutateAsync({
+          latitude: pos.lat,
+          longitude: pos.lng,
+          is_online: false,
+        });
+      } catch (err) {
+        console.error('Error setting offline on logout:', err);
+      }
     }
     await signOut();
     navigate('/');
