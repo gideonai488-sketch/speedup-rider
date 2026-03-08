@@ -68,6 +68,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
+    // Force login on every fresh app open (no persistent sessions)
+    const sessionActive = sessionStorage.getItem('auth_session_active');
+    if (!sessionActive) {
+      // Fresh app open — clear any persisted session
+      supabase.auth.signOut().then(() => {
+        setLoading(false);
+      });
+      // Don't set up listener until after signout completes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            sessionStorage.setItem('auth_session_active', 'true');
+            setTimeout(() => {
+              fetchProfile(session.user.id).then((p) => {
+                setProfile(p);
+                setProfileFetchAttempts(p ? 0 : 1);
+              });
+            }, 0);
+          } else {
+            setProfile(null);
+            setProfileFetchAttempts(0);
+          }
+        }
+      );
+      return () => subscription.unsubscribe();
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
