@@ -141,8 +141,7 @@ const RiderDashboard: React.FC = () => {
   const handleSelectOrder = (order: any) => {
     setSelectedOrder(order);
     setOrderTimer(60);
-    const suggestedBid = Math.max(5, (Number(order.delivery_fee) || 10) - 3);
-    setBidAmount(suggestedBid.toString());
+    setBidAmount('');
     setBidMessage('');
   };
 
