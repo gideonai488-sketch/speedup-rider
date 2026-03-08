@@ -459,7 +459,7 @@ const RiderDelivery: React.FC = () => {
             </div>
           </section>
 
-          {/* Customer Info */}
+          {/* Customer Info with Message & Call */}
           <section className="bg-secondary/50 rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -473,13 +473,23 @@ const RiderDelivery: React.FC = () => {
                   )}
                 </div>
               </div>
-              {customer?.phone && (
-                <a href={`tel:${customer.phone}`}>
-                  <Button size="icon" className="rounded-full h-11 w-11 bg-success hover:bg-success/90">
-                    <Phone className="w-5 h-5" />
-                  </Button>
-                </a>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="rounded-full h-11 w-11"
+                  onClick={() => setShowChat(true)}
+                >
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                </Button>
+                {customer?.phone && (
+                  <a href={`tel:${customer.phone}`}>
+                    <Button size="icon" className="rounded-full h-11 w-11 bg-success hover:bg-success/90">
+                      <Phone className="w-5 h-5" />
+                    </Button>
+                  </a>
+                )}
+              </div>
             </div>
           </section>
 
