@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Clock, X, Star, CheckCircle2, MessageSquare, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, X, Star, CheckCircle2, MessageSquare, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
