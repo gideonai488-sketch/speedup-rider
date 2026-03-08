@@ -27,6 +27,7 @@ const RiderDashboard: React.FC = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [orderTimer, setOrderTimer] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const lastKnownPosition = useRef<{ lat: number; lng: number } | null>(null);
 
   const updateLocation = useUpdateRiderLocation();
   const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders(profile?.city);
