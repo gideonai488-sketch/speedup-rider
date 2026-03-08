@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      ambassador_applications: {
+        Row: {
+          country: string
+          created_at: string
+          email: string
+          follower_count: string | null
+          full_name: string
+          id: string
+          major: string | null
+          phone: string
+          referral_code: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          social_media_handle: string | null
+          status: string
+          student_id_number: string | null
+          university_city: string
+          university_name: string
+          updated_at: string
+          why_ambassador: string
+          year_of_study: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          email: string
+          follower_count?: string | null
+          full_name: string
+          id?: string
+          major?: string | null
+          phone: string
+          referral_code?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_media_handle?: string | null
+          status?: string
+          student_id_number?: string | null
+          university_city: string
+          university_name: string
+          updated_at?: string
+          why_ambassador: string
+          year_of_study: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          email?: string
+          follower_count?: string | null
+          full_name?: string
+          id?: string
+          major?: string | null
+          phone?: string
+          referral_code?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_media_handle?: string | null
+          status?: string
+          student_id_number?: string | null
+          university_city?: string
+          university_name?: string
+          updated_at?: string
+          why_ambassador?: string
+          year_of_study?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambassador_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambassador_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           id: string

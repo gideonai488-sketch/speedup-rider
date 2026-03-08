@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2, GraduationCap, ChevronRight } from 'lucide-react';
 import heroRider from '@/assets/hero-rider.jpg';
 import heroDelivery from '@/assets/landing/hero-scooter-delivery.jpg';
 import deliveryFleet from '@/assets/landing/delivery-fleet.jpg';
@@ -439,6 +439,33 @@ const LandingPage: React.FC = () => {
                 <p className="text-sm text-muted-foreground leading-relaxed">{pillar.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Campus Ambassador CTA */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-3xl p-8 md:p-12 border border-primary/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <div className="relative flex flex-col md:flex-row items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-8 h-8 text-primary" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+                  🎓 Become a Campus Ambassador
+                </h3>
+                <p className="text-muted-foreground">
+                  Launch SpeedUp at your university. Earn up to $500/month, build your resume, and lead the delivery revolution on campus.
+                </p>
+              </div>
+              <Link to="/campus-ambassador">
+                <Button className="bg-primary hover:bg-primary/90 shrink-0 px-6">
+                  Apply Now <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

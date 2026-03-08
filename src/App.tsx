@@ -31,6 +31,7 @@ import Search from "./pages/Search";
 import Orders from "./pages/Orders";
 import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
+import CampusAmbassador from "./pages/CampusAmbassador";
 
 // Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
@@ -93,6 +94,7 @@ const App = () => {
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/become-partner" element={<BecomePartner />} />
+                <Route path="/campus-ambassador" element={<CampusAmbassador />} />
                 <Route path="/auth" element={<CustomerAuth />} />
                 <Route path="/login" element={<CustomerAuth />} />
                 <Route path="/signup" element={<CustomerAuth />} />
