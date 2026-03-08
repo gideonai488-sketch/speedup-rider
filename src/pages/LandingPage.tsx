@@ -430,8 +430,9 @@ const LandingPage: React.FC = () => {
               Order from <span className="text-gradient">Top Brands</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Your favorite restaurants and stores, delivered to your door with SpeedRushUp  Up  Upp>Up  Up <Up>
-Up  Up
+              Your favorite restaurants and stores, delivered to your door with SpeedUp.
+            </p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-12">
             {popularStores.map((store) => (
               <div 
