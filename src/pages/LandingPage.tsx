@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2, GraduationCap, ChevronRight } from 'lucide-react';
 import heroRider from '@/assets/hero-rider.jpg';
 import heroDelivery from '@/assets/landing/hero-scooter-delivery.jpg';
 import deliveryFleet from '@/assets/landing/delivery-fleet.jpg';
