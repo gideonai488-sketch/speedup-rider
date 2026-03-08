@@ -11,6 +11,7 @@ import { useUpdateRiderLocation } from '@/hooks/useRiderLocation';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { hapticSuccess, hapticHeavy, hapticMedium } from '@/lib/nativeHaptics';
 import { cn } from '@/lib/utils';
 import UberStyleMap from '@/components/tracking/UberStyleMap';
 import ChatView from '@/components/chat/ChatView';
