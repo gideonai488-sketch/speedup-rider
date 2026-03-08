@@ -28,7 +28,7 @@ const Referral: React.FC = () => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const referralCode = 'SPEED2024';
-  const referralLink = `https://speeduppp/ref/${referralCode}`;
+  const referralLink = `https://speedup.app/ref/${referralCode}`;
   const totalEarned = 40;
   const pendingRewards = 20;
 

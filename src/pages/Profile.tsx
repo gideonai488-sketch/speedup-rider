@@ -118,7 +118,7 @@ const Profile: React.FC = () => {
         { icon: MapPin, label: 'Saved Addresses' },
         { icon: CreditCard, label: 'Payment Methods' },
         { icon: Heart, label: 'Favorites' },
-        { icon: Wallet, label: 'SpeedUpallet', value: `GH₵ ${stats?.walletBalance?.toFixed(2) || '0.00'}`, path: '/customer/wallet' },
+        { icon: Wallet, label: 'SpeedUp Wallet', value: `GH₵ ${stats?.walletBalance?.toFixed(2) || '0.00'}`, path: '/customer/wallet' },
       ]
     },
     {
