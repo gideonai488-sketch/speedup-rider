@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import heroFastDelivery from '@/assets/hero/hero-fast-delivery.jpg';
+import heroFoodDelivery from '@/assets/hero/hero-food-delivery.jpg';
+import heroGroceries from '@/assets/hero/hero-groceries.jpg';
+import heroPackage from '@/assets/hero/hero-package.jpg';
 
 interface HeroSlide {
   id: string;
@@ -16,9 +20,8 @@ interface HeroSlide {
 const defaultSlides: HeroSlide[] = [
   {
     id: '1',
-    type: 'video',
-    src: 'https://videos.pexels.com/video-files/4488162/4488162-hd_1080_1920_24fps.mp4',
-    poster: '',
+    type: 'image',
+    src: heroFastDelivery,
     title: 'Lightning Fast Delivery',
     subtitle: 'From any store to your door in minutes',
     cta: { label: 'Order Now', link: '/customer/book' },
@@ -27,16 +30,16 @@ const defaultSlides: HeroSlide[] = [
   {
     id: '2',
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&q=80',
-    title: '20% Off First Order',
-    subtitle: 'Use code SPEEDRUSH20 at checkout',
-    cta: { label: 'Shop Now', link: '/customer/book?service=food' },
+    src: heroFoodDelivery,
+    title: 'Delicious Food Delivered',
+    subtitle: 'Your favourite meals, hot & fresh to your door',
+    cta: { label: 'Order Food', link: '/customer/book?service=food' },
     gradient: 'from-primary/80 via-primary/40 to-transparent',
   },
   {
     id: '3',
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+    src: heroGroceries,
     title: 'Fresh Groceries',
     subtitle: 'Get fresh produce delivered from top stores',
     cta: { label: 'Browse Stores', link: '/customer/book?service=groceries' },
@@ -45,7 +48,7 @@ const defaultSlides: HeroSlide[] = [
   {
     id: '4',
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
+    src: heroPackage,
     title: 'Send Packages Anywhere',
     subtitle: 'Reliable same-day package delivery across Ghana',
     cta: { label: 'Send Package', link: '/customer/book?service=packages' },
