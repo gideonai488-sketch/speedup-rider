@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, User, Phone, MapPin, CreditCard, Building2, 
   ChevronRight, LogOut, Shield, Star, Truck, Edit2, Save, Loader2,
-  CheckCircle2, XCircle
+  CheckCircle2, XCircle, Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,15 +40,18 @@ const GHANA_BANKS = [
 
 const RiderProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, signOut, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Profile fields
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [vehicleType, setVehicleType] = useState(profile?.vehicle_type || '');
   const [vehiclePlate, setVehiclePlate] = useState(profile?.vehicle_plate || '');
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   
   // Bank details - fetch from profile
   const [bankName, setBankName] = useState('');
@@ -84,6 +87,55 @@ const RiderProfile: React.FC = () => {
     
     fetchBankDetails();
   }, [profile]);
+
+  // Handle avatar upload
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Add cache-bust param
+      const url = `${publicUrl}?t=${Date.now()}`;
+
+      // Update profile
+      const { error: profileError } = await updateProfile({ avatar_url: url });
+      if (profileError) throw profileError;
+
+      setAvatarUrl(url);
+      toast.success('Profile photo updated!');
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   // Verify bank account with Paystack
   const handleVerifyAccount = async () => {
@@ -241,8 +293,32 @@ const RiderProfile: React.FC = () => {
 
         {/* Profile Avatar */}
         <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-3">
-            <User className="w-12 h-12 text-primary-foreground" />
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-3 overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-12 h-12 text-primary-foreground" />
+              )}
+            </div>
+            {isUploadingAvatar && (
+              <div className="absolute inset-0 w-24 h-24 rounded-full bg-black/50 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-white" />
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-2 right-0 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center"
+            >
+              <Camera className="w-4 h-4 text-foreground" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
           </div>
           <h2 className="text-xl font-bold">{profile?.full_name}</h2>
           <p className="text-primary-foreground/80">{user?.email}</p>

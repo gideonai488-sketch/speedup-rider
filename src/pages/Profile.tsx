@@ -3,7 +3,7 @@ import {
   User, MapPin, CreditCard, Bell, HelpCircle, 
   Settings, ChevronRight, LogOut, Star, Gift, ShieldCheck,
   Package, Clock, Heart, Wallet, FileText, MessageCircle,
-  Mail, Phone, Edit2, Camera, X, Check
+  Mail, Phone, Edit2, Camera, X, Check, Loader2
 } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
 import { Button } from '@/components/ui/button';
@@ -24,10 +24,12 @@ import {
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { profile, signOut, updateProfile } = useAuth();
+  const { profile, user, signOut, updateProfile } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserStats();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const [editForm, setEditForm] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
@@ -64,6 +66,47 @@ const Profile: React.FC = () => {
       toast.error(error.message || 'Failed to update profile');
     } finally {
       setIsEditing(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const currentUser = (await supabase.auth.getUser()).data.user;
+    if (!file || !currentUser) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${currentUser.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const url = `${publicUrl}?t=${Date.now()}`;
+      const { error: profileError } = await updateProfile({ avatar_url: url });
+      if (profileError) throw profileError;
+
+      toast.success('Profile photo updated!');
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -137,16 +180,30 @@ const Profile: React.FC = () => {
             {/* Avatar with status */}
             <div className="relative">
               <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 shadow-xl overflow-hidden">
-                {profile?.avatar_url ? (
+                {isUploadingAvatar ? (
+                  <div className="w-full h-full flex items-center justify-center bg-white/10">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary-foreground" />
+                  </div>
+                ) : profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-10 h-10 text-primary-foreground" />
                 )}
               </div>
               {/* Camera icon for changing photo */}
-              <button className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent rounded-full border-2 border-white flex items-center justify-center shadow-lg">
+              <button 
+                onClick={() => avatarInputRef.current?.click()}
+                className="absolute -bottom-1 -right-1 w-7 h-7 bg-accent rounded-full border-2 border-white flex items-center justify-center shadow-lg"
+              >
                 <Camera className="w-3.5 h-3.5 text-accent-foreground" />
               </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
             </div>
 
             <div className="flex-1">
