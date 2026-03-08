@@ -46,7 +46,7 @@ const FindingRider: React.FC<FindingRiderProps> = ({
   pickupLat, pickupLng, pickupAddress, deliveryAddress,
   orderNumber, orderId, totalAmount, onBack, onCancel,
 }) => {
-  const [mode, setMode] = useState<Mode>('choose');
+  const [mode, setMode] = useState<Mode>('bids');
   const [currentRadiusIndex, setCurrentRadiusIndex] = useState(0);
   const [searchComplete, setSearchComplete] = useState(false);
   const [ridersInRange, setRidersInRange] = useState(0);
