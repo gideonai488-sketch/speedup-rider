@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, DollarSign, TrendingUp, Wallet, Loader2, Calendar } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
+import { useCountry } from '@/context/CountryContext';
 
 const AmbassadorEarnings: React.FC = () => {
   const navigate = useNavigate();
