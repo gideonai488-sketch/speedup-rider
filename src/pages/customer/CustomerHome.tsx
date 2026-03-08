@@ -110,7 +110,7 @@ const CustomerHome: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-foreground">
-                  Speed<span className="text-primary">Rush</span>
+                  Speed<span className="text-primary">Up</span>
                 </h1>
                 <button 
                   onClick={refetchLocation}
