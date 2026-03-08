@@ -196,9 +196,9 @@ const RiderDelivery: React.FC = () => {
     const paymentStatus = (order as any)?.payment_status || 'pending';
     switch (currentStatus) {
       case 'confirmed':
-        return 'Arrived at Pickup';
-      case 'picked_up':
         return 'Start Delivery';
+      case 'picked_up':
+        return 'Arrived at Pickup';
       case 'out_for_delivery':
         return paymentStatus === 'paid' ? 'Complete Delivery' : 'Waiting for Payment...';
       case 'delivered':
