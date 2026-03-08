@@ -7,18 +7,37 @@ workflows:
       node: 18
       java: 17
       groups:
-        - google_play # Add your Google Play credentials in Codemagic dashboard
+        - google_play       # GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (JSON, base64-encoded)
+        - app_credentials   # KEYSTORE (base64), KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+        - environment       # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
+      vars:
+        PACKAGE_NAME: "app.lovable.4dd003882489427e9d138d2b4a851dbe"
     scripts:
       - name: Install dependencies
         script: npm install
+      - name: Set up environment
+        script: |
+          echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY" >> .env
       - name: Build web assets
         script: npm run build
       - name: Add Android platform
         script: npx cap sync android
+      - name: Set up Android signing
+        script: |
+          if [ ! -z "$KEYSTORE" ]; then
+            echo $KEYSTORE | base64 --decode > android/app/keystore.jks
+            cat > android/key.properties <<EOF
+          storeFile=keystore.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          fi
       - name: Build Android
         script: |
           cd android
-          ./gradlew assembleRelease
+          ./gradlew bundleRelease
     artifacts:
       - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
@@ -32,17 +51,24 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: Lovable SpeedUp # Set up in Codemagic dashboard
+      app_store_connect: SpeedUp
     environment:
       node: 18
       ios_signing:
         distribution_type: app_store
         bundle_identifier: app.lovable.4dd003882489427e9d138d2b4a851dbe
       groups:
-        - app_store_connect # Add your App Store Connect API key in Codemagic
+        - app_store_connect  # APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_PRIVATE_KEY
+        - environment        # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
+      vars:
+        PACKAGE_NAME: "app.lovable.4dd003882489427e9d138d2b4a851dbe"
     scripts:
       - name: Install dependencies
         script: npm install
+      - name: Set up environment
+        script: |
+          echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY" >> .env
       - name: Build web assets
         script: npm run build
       - name: Add iOS platform
