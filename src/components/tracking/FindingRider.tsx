@@ -45,7 +45,7 @@ type Mode = 'choose' | 'auto' | 'browse' | 'bids' | 'chat';
 
 const FindingRider: React.FC<FindingRiderProps> = ({
   pickupLat, pickupLng, pickupAddress, deliveryAddress,
-  orderNumber, orderId, totalAmount, onBack, onCancel,
+  orderNumber, orderId, totalAmount, distanceKm, onBack, onCancel,
 }) => {
   const [mode, setMode] = useState<Mode>('bids');
   const [currentRadiusIndex, setCurrentRadiusIndex] = useState(0);
