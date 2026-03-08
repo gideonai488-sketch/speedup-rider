@@ -67,8 +67,8 @@ const LandingPage: React.FC = () => {
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src={heroScooter} 
-            alt="SpeedRush delivery rider on scooter" 
+            src={heroRider} 
+            alt="SpeedRush Rider"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
