@@ -26,6 +26,7 @@ const TrackDelivery: React.FC = () => {
   const { data: riderLocation } = useRiderLocation(order?.rider_id || '');
   const [showPayment, setShowPayment] = useState(false);
   const [showRating, setShowRating] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [eta, setEta] = useState(15);
   const [currentStreet, setCurrentStreet] = useState('En route to you');
