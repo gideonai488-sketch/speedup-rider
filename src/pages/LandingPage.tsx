@@ -460,12 +460,11 @@ const LandingPage: React.FC = () => {
                   Launch SpeedUp at your university. Earn up to $500/month, build your resume, and lead the delivery revolution on campus.
                 </p>
               </div>
-              <Button
-                onClick={() => navigate('/campus-ambassador')}
-                className="bg-primary hover:bg-primary/90 shrink-0 px-6"
-              >
-                Apply Now <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+              <Link to="/campus-ambassador">
+                <Button className="bg-primary hover:bg-primary/90 shrink-0 px-6">
+                  Apply Now <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
