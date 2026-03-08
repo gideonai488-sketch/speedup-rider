@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
+import { createNotification } from '@/hooks/useNotifications';
 
 // Fetch bids for an order (customer view)
 export const useOrderBids = (orderId: string) => {
