@@ -232,6 +232,18 @@ const RiderDashboard: React.FC = () => {
     toast.info('Order declined. Looking for new orders...');
   };
 
+  const handleLogout = async () => {
+    if (isOnline && profile) {
+      await updateLocation.mutateAsync({
+        latitude: 5.6037,
+        longitude: -0.1870,
+        is_online: false,
+      });
+    }
+    await signOut();
+    navigate('/');
+  };
+
   const formatCurrency = (value: number) => `GH₵ ${value?.toLocaleString() || 0}`;
 
   return (
