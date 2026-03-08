@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
-  ArrowLeft, Phone, Navigation, MapPin,
+  ArrowLeft, Phone, MessageSquare, Navigation, MapPin,
   CheckCircle2, Package, Truck, User, ChevronDown, ChevronUp, Clock,
   Locate, AlertTriangle
 } from 'lucide-react';
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import UberStyleMap from '@/components/tracking/UberStyleMap';
+import ChatView from '@/components/chat/ChatView';
 import { supabase } from '@/integrations/supabase/client';
 
 type DeliveryStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled';
@@ -27,6 +28,7 @@ const RiderDelivery: React.FC = () => {
   const updateStatus = useUpdateOrderStatus();
   const updateLocation = useUpdateRiderLocation();
   const [showDetails, setShowDetails] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [eta, setEta] = useState<number>(10);
   const [distance, setDistance] = useState<number | null>(null);
@@ -457,7 +459,7 @@ const RiderDelivery: React.FC = () => {
             </div>
           </section>
 
-          {/* Customer Info */}
+          {/* Customer Info with Message & Call */}
           <section className="bg-secondary/50 rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -471,13 +473,23 @@ const RiderDelivery: React.FC = () => {
                   )}
                 </div>
               </div>
-              {customer?.phone && (
-                <a href={`tel:${customer.phone}`}>
-                  <Button size="icon" className="rounded-full h-11 w-11 bg-success hover:bg-success/90">
-                    <Phone className="w-5 h-5" />
-                  </Button>
-                </a>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="rounded-full h-11 w-11"
+                  onClick={() => setShowChat(true)}
+                >
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                </Button>
+                {customer?.phone && (
+                  <a href={`tel:${customer.phone}`}>
+                    <Button size="icon" className="rounded-full h-11 w-11 bg-success hover:bg-success/90">
+                      <Phone className="w-5 h-5" />
+                    </Button>
+                  </a>
+                )}
+              </div>
             </div>
           </section>
 
@@ -541,6 +553,18 @@ const RiderDelivery: React.FC = () => {
           </div>
         )}
       </div>
+      {/* Chat Overlay */}
+      {showChat && order?.customer_id && (
+        <div className="fixed inset-0 z-50">
+          <ChatView
+            otherProfileId={order.customer_id}
+            otherName={customer?.full_name || 'Customer'}
+            otherPhone={customer?.phone}
+            orderId={order.id}
+            onBack={() => setShowChat(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

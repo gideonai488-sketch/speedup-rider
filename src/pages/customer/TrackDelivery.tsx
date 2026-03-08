@@ -8,6 +8,7 @@ import {
 import UberStyleMap from '@/components/tracking/UberStyleMap';
 import FindingRider from '@/components/tracking/FindingRider';
 import RatingModal from '@/components/rating/RatingModal';
+import ChatView from '@/components/chat/ChatView';
 import { useOrder, useUpdateOrderStatus } from '@/hooks/useOrders';
 import { useRiderLocation } from '@/hooks/useRiderLocation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +26,7 @@ const TrackDelivery: React.FC = () => {
   const { data: riderLocation } = useRiderLocation(order?.rider_id || '');
   const [showPayment, setShowPayment] = useState(false);
   const [showRating, setShowRating] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [eta, setEta] = useState(15);
   const [currentStreet, setCurrentStreet] = useState('En route to you');
@@ -372,7 +374,7 @@ const TrackDelivery: React.FC = () => {
                   variant="outline"
                   size="icon"
                   className="rounded-full h-11 w-11"
-                  onClick={() => toast.info('Messaging rider...')}
+                  onClick={() => setShowChat(true)}
                 >
                   <MessageSquare className="w-5 h-5" />
                 </Button>
@@ -551,6 +553,18 @@ const TrackDelivery: React.FC = () => {
         riderName={rider?.full_name}
         storeName={(order as any).stores?.name}
       />
+      {/* Chat Overlay */}
+      {showChat && order?.rider_id && (
+        <div className="fixed inset-0 z-50">
+          <ChatView
+            otherProfileId={order.rider_id}
+            otherName={rider?.full_name || 'Rider'}
+            otherPhone={rider?.phone}
+            orderId={order.id}
+            onBack={() => setShowChat(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

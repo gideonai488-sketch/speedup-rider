@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, MapPin, Navigation, ChevronRight, Loader2, Zap, Clock } from 'lucide-react';
@@ -147,6 +148,10 @@ const BookDelivery: React.FC = () => {
       toast.error('Please select addresses from the suggestions');
       return;
     }
+    if (!formData.contactPhone?.trim()) {
+      toast.error('Please enter your phone number so the rider can reach you');
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -189,7 +194,7 @@ const BookDelivery: React.FC = () => {
         pickup_address: formData.pickupAddress,
         pickup_lat: formData.pickupCoords?.lat,
         pickup_lng: formData.pickupCoords?.lng,
-        notes: notes.trim(),
+        notes: `📞 ${formData.contactPhone?.trim() || ''}${notes.trim() ? ' | ' + notes.trim() : ''}`,
         delivery_fee: 0, // Riders will bid their price
         distance_km: Math.round(distance * 10) / 10,
         base_fee: 0,
@@ -309,6 +314,18 @@ const BookDelivery: React.FC = () => {
               onChange={(dropoffs) => setFormData({ ...formData, dropoffs })}
               maxStops={3}
             />
+
+            <div>
+              <Label>Your Phone Number <span className="text-destructive">*</span></Label>
+              <Input
+                type="tel"
+                placeholder="e.g. 0241234567"
+                value={formData.contactPhone}
+                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                className="mt-1.5"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Rider will use this to contact you</p>
+            </div>
 
             <div>
               <Label>Package Description (optional)</Label>

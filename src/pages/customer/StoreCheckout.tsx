@@ -51,6 +51,7 @@ const StoreCheckout: React.FC = () => {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryLandmark, setDeliveryLandmark] = useState('');
+  const [customerPhone, setCustomerPhone] = useState(profile?.phone || '');
   const [notes, setNotes] = useState('');
 
   const cartItems: CartItemData[] = React.useMemo(() => {
@@ -91,6 +92,10 @@ const StoreCheckout: React.FC = () => {
       toast.error('Please enter your delivery address');
       return;
     }
+    if (!customerPhone.trim()) {
+      toast.error('Please enter your phone number so the rider can reach you');
+      return;
+    }
 
     setIsProcessing(true);
 
@@ -109,7 +114,7 @@ const StoreCheckout: React.FC = () => {
         pickup_address: store?.address || `${store?.name} Store`,
         pickup_lat: storeCoords.lat,
         pickup_lng: storeCoords.lng,
-        notes: notes || undefined,
+        notes: `📞 ${customerPhone.trim()}${notes ? ' | ' + notes : ''}`,
         delivery_fee: 0,
         distance_km: Math.round(distance * 10) / 10,
         base_fee: 0,
@@ -230,6 +235,18 @@ const StoreCheckout: React.FC = () => {
           </div>
 
           <div>
+            <Label>Your Phone Number <span className="text-destructive">*</span></Label>
+            <Input
+              type="tel"
+              placeholder="e.g. 0241234567"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              className="mt-1.5"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Rider will use this to contact you</p>
+          </div>
+
+          <div>
             <Label>Special Instructions (optional)</Label>
             <Textarea
               placeholder="E.g., Extra ketchup, no onions, ring doorbell..."
@@ -261,7 +278,7 @@ const StoreCheckout: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4">
         <Button 
           onClick={handlePlaceOrder}
-          disabled={isProcessing || !deliveryAddress}
+          disabled={isProcessing || !deliveryAddress || !customerPhone.trim()}
           className="w-full h-14 gradient-hero text-white shadow-glow text-lg"
         >
           {isProcessing ? (
