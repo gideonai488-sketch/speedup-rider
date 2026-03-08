@@ -365,11 +365,13 @@ const RiderDelivery: React.FC = () => {
               )}>
                 {currentStatus === 'delivered' 
                   ? 'Delivery complete!' 
-                  : currentStatus === 'picked_up' 
+                  : currentStatus === 'confirmed'
                     ? 'Head to pickup location'
-                    : (order as any)?.payment_status === 'paid'
-                      ? 'Payment received - complete delivery'
-                      : 'At customer - waiting for payment'}
+                    : currentStatus === 'picked_up' 
+                      ? 'Mark as picked up & start delivery'
+                      : (order as any)?.payment_status === 'paid'
+                        ? 'Payment received - complete delivery'
+                        : 'At customer - waiting for payment'}
               </p>
             </div>
             <div className="text-right">
