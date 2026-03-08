@@ -55,9 +55,7 @@ const AmbassadorDashboard: React.FC = () => {
         .limit(1)
         .single();
 
-      if (referralData) {
-        setReferralCode(referralData.referral_code);
-      }
+      if (referralData) setReferralCode(referralData.referral_code);
 
       // Get ambassador stats
       const { data: statsData } = await supabase
@@ -69,34 +67,33 @@ const AmbassadorDashboard: React.FC = () => {
       if (statsData) {
         setStats(statsData as any);
       } else {
-        // Create initial stats record
         await supabase.from('ambassador_stats' as any).insert([{
           ambassador_id: profile.id,
-          total_signups: 0,
-          total_earnings: 0,
-          current_month_signups: 0,
-          current_month_earnings: 0,
+          total_signups: 0, total_earnings: 0,
+          current_month_signups: 0, current_month_earnings: 0,
         }]);
-        setStats({
-          total_signups: 0,
-          total_earnings: 0,
-          current_month_signups: 0,
-          current_month_earnings: 0,
-          rank: null,
-        });
+        setStats({ total_signups: 0, total_earnings: 0, current_month_signups: 0, current_month_earnings: 0, rank: null });
       }
+
+      // Get country-specific earning rate
+      const profileCountry = (profile as any).country_code || country.code;
+      const { data: rateData } = await supabase
+        .from('ambassador_earning_rates' as any)
+        .select('first_order_bonus, currency_symbol')
+        .eq('country_code', profileCountry)
+        .eq('is_active', true)
+        .single();
+      if (rateData) setEarningRate((rateData as any).first_order_bonus);
 
       // Get recent signups
       const { data: signupsData } = await supabase
         .from('ambassador_signups' as any)
-        .select('*, signed_up_user_id(full_name, created_at)')
+        .select('*')
         .eq('ambassador_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (signupsData) {
-        setRecentSignups(signupsData);
-      }
+      if (signupsData) setRecentSignups(signupsData);
     } catch (err) {
       console.error('Error loading dashboard:', err);
     } finally {
