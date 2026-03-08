@@ -144,6 +144,76 @@ serve(async (req) => {
         }
       }
 
+      // Credit ambassador with service fee if customer was referred
+      const serviceFee = Number(order.service_fee) || 2; // Default to 2 if not set
+      
+      const { data: ambassadorSignup } = await supabase
+        .from("ambassador_signups")
+        .select("ambassador_id")
+        .eq("signed_up_user_id", order.customer_id)
+        .single();
+
+      if (ambassadorSignup) {
+        const { data: ambassadorProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", ambassadorSignup.ambassador_id)
+          .single();
+
+        if (ambassadorProfile) {
+          let { data: ambassadorWallet } = await supabase
+            .from("wallets")
+            .select("*")
+            .eq("user_id", ambassadorProfile.id)
+            .maybeSingle();
+
+          if (!ambassadorWallet) {
+            const { data: newWallet } = await supabase
+              .from("wallets")
+              .insert({ user_id: ambassadorProfile.id, balance: 0 })
+              .select()
+              .single();
+            ambassadorWallet = newWallet;
+          }
+
+          if (ambassadorWallet) {
+            await supabase
+              .from("wallets")
+              .update({ balance: (ambassadorWallet.balance || 0) + serviceFee })
+              .eq("id", ambassadorWallet.id);
+
+            await supabase.from("transactions").insert({
+              wallet_id: ambassadorWallet.id,
+              amount: serviceFee,
+              type: "referral_bonus",
+              description: `Service fee (100%) from referred user order ${order.order_number}`,
+              order_id: order_id,
+            });
+
+            // Update ambassador stats  
+            const { data: currentStats } = await supabase
+              .from("ambassador_stats")
+              .select("total_earnings, total_orders_generated, current_month_earnings")
+              .eq("ambassador_id", ambassadorSignup.ambassador_id)
+              .single();
+
+            if (currentStats) {
+              await supabase
+                .from("ambassador_stats")
+                .update({
+                  total_earnings: (currentStats.total_earnings || 0) + serviceFee,
+                  total_orders_generated: (currentStats.total_orders_generated || 0) + 1,
+                  current_month_earnings: (currentStats.current_month_earnings || 0) + serviceFee,
+                  updated_at: new Date().toISOString()
+                })
+                .eq("ambassador_id", ambassadorSignup.ambassador_id);
+            }
+
+            console.log(`Service fee of GH₵${serviceFee} credited to ambassador`);
+          }
+        }
+      }
+
       // Credit admin with platform fee
       const { data: adminProfile } = await supabase
         .from("profiles")
