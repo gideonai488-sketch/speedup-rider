@@ -278,7 +278,7 @@ const StoreCheckout: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4">
         <Button 
           onClick={handlePlaceOrder}
-          disabled={isProcessing || !deliveryAddress}
+          disabled={isProcessing || !deliveryAddress || !customerPhone.trim()}
           className="w-full h-14 gradient-hero text-white shadow-glow text-lg"
         >
           {isProcessing ? (

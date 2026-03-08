@@ -193,7 +193,7 @@ const BookDelivery: React.FC = () => {
         pickup_address: formData.pickupAddress,
         pickup_lat: formData.pickupCoords?.lat,
         pickup_lng: formData.pickupCoords?.lng,
-        notes: notes.trim(),
+        notes: `📞 ${formData.contactPhone?.trim() || ''}${notes.trim() ? ' | ' + notes.trim() : ''}`,
         delivery_fee: 0, // Riders will bid their price
         distance_km: Math.round(distance * 10) / 10,
         base_fee: 0,
