@@ -369,7 +369,7 @@ const LandingPage: React.FC = () => {
           <div className="text-center mb-14">
             <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Global Presence</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Delivering Across <span className="text-gradient">5 Countries</span>
+              Delivering Across <span className="text-gradient">6 Countries</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               {t.global_network_subtitle}
