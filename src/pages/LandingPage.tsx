@@ -94,7 +94,7 @@ const LandingPage: React.FC = () => {
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed">
-              From food and groceries to packages and errands — SpeedRush connects you with reliable riders for 
+              From food and groceries to packages and errands — SpeedUp connects you with reliable riders for 
               fast, secure deliveries across Ghana and Finland.
             </p>
             
