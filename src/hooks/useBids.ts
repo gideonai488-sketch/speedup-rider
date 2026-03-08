@@ -147,8 +147,27 @@ export const useAcceptBid = () => {
   });
 };
 
-// Get rider's own bids
+// Get rider's own bids (all statuses)
 export const useMyBids = (riderId: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!riderId) return;
+    const channel = supabase
+      .channel(`my-bids-${riderId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'bids',
+        filter: `rider_id=eq.${riderId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['my-bids', riderId] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [riderId, queryClient]);
+
   return useQuery({
     queryKey: ['my-bids', riderId],
     queryFn: async () => {
@@ -156,11 +175,11 @@ export const useMyBids = (riderId: string) => {
         .from('bids')
         .select(`
           *,
-          orders(id, order_number, pickup_address, delivery_address, status)
+          orders(id, order_number, pickup_address, delivery_address, status, delivery_fee, stores(name, logo_url))
         `)
         .eq('rider_id', riderId)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       return data;
