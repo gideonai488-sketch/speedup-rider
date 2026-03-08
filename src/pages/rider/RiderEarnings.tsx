@@ -300,27 +300,7 @@ const RiderEarnings: React.FC = () => {
         </div>
       </main>
 
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border px-6 py-3 safe-area-pb">
-        <div className="flex items-center justify-around">
-          <Link to="/rider" className={cn("flex flex-col items-center gap-1", location.pathname === '/rider' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
-            <Zap className="w-5 h-5" />
-            <span className="text-xs font-medium">Home</span>
-          </Link>
-          <Link to="/rider/earnings" className={cn("flex flex-col items-center gap-1", location.pathname === '/rider/earnings' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
-            <Wallet className="w-5 h-5" />
-            <span className="text-xs">Earnings</span>
-          </Link>
-          <Link to="/rider/deliveries" className={cn("flex flex-col items-center gap-1", location.pathname === '/rider/deliveries' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
-            <Clock className="w-5 h-5" />
-            <span className="text-xs">History</span>
-          </Link>
-          <Link to="/rider/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/rider/profile' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
-            <User className="w-5 h-5" />
-            <span className="text-xs">Profile</span>
-          </Link>
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   );
 };
