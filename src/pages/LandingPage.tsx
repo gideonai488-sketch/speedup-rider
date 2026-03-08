@@ -346,11 +346,11 @@ const LandingPage: React.FC = () => {
               Join the Movement. Create Your Future.
             </h2>
             <p className="text-lg text-white/70 mb-4">
-              We're not just building a delivery app — we're creating <strong className="text-white">50,000 jobs</strong> for the people of Ghana by 2027. 
+              We're not just building a delivery app — we're creating <strong className="text-white">50,000 jobs</strong> across Ghana and Finland by 2027. 
               Whether you have a scooter, motorcycle, bicycle, or car, you can start earning today.
             </p>
             <p className="text-white/50 mb-8">
-              No experience needed. No vehicle restrictions. Just you, your ride, and unlimited earning potential.
+              No experience needed. No approval wait. No vehicle restrictions. Sign up and start delivering immediately.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/rider/auth">
