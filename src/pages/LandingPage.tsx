@@ -461,7 +461,8 @@ Up  Up
           </div>
 
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Want your business on SpeedRush?<Up    Up    Upk toUpecomUprtneUp    Up      <Button variant="outline" className="border-2 font-semibold">
+            <p className="text-muted-foreground mb-4">Want your business on SpeedUp?</p>
+            <Link to="/become-partner">
                 Become a Partner
                 <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
