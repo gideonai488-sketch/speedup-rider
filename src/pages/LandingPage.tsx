@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe } from 'lucide-react';
-import heroScooter from '@/assets/landing/hero-scooter-delivery.jpg';
+import heroRider from '@/assets/hero-rider.jpg';
 import deliveryFleet from '@/assets/landing/delivery-fleet.jpg';
 import riderMotorcycle from '@/assets/landing/rider-motorcycle.jpg';
 import riderCar from '@/assets/landing/rider-car.jpg';
@@ -67,8 +67,8 @@ const LandingPage: React.FC = () => {
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src={heroScooter} 
-            alt="SpeedRush delivery rider on scooter" 
+            src={heroRider} 
+            alt="SpeedRush Rider"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
