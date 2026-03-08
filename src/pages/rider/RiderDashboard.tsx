@@ -262,7 +262,7 @@ const RiderDashboard: React.FC = () => {
 
       <main className="px-4 py-5 space-y-5 -mt-2">
         {/* Stats Cards - Glass style */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           <Link to="/rider/earnings" className="bg-card rounded-2xl border border-border p-4 text-center hover:border-primary/30 transition-all group">
             <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
               <Wallet className="w-5 h-5 text-success" />
@@ -284,6 +284,13 @@ const RiderDashboard: React.FC = () => {
             <p className="font-bold text-foreground text-sm">{activeOrders.length}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">Active</p>
           </div>
+          <Link to="/rider/bids" className="bg-card rounded-2xl border border-border p-4 text-center hover:border-primary/30 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+              <Send className="w-5 h-5 text-accent-foreground" />
+            </div>
+            <p className="font-bold text-foreground text-sm">{myBids?.length || 0}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">My Bids</p>
+          </Link>
         </div>
 
         {/* Mini Earnings Chart */}
