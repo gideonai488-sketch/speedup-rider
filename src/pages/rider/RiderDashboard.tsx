@@ -219,6 +219,7 @@ const RiderDashboard: React.FC = () => {
   };
 
   const handleSelectOrder = (order: any) => {
+    hapticHeavy();
     setSelectedOrder(order);
     setOrderTimer(60);
     setBidAmount('');
