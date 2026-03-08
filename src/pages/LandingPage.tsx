@@ -92,7 +92,7 @@ const LandingPage: React.FC = () => {
             
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">
               Scooter, motorcycle, bicycle, or car — anyone can join SpeedRush and start earning. 
-              We're building Africa's largest delivery network, one rider at a time.
+              We're building the largest delivery network across Ghana and Finland, one rider at a time.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
