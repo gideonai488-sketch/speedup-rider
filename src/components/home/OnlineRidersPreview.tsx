@@ -46,8 +46,12 @@ const OnlineRidersPreview: React.FC = () => {
                 className="flex-shrink-0 w-36 bg-card rounded-xl border border-border p-3 hover:border-primary/50 transition-colors text-left"
               >
                 {/* Avatar */}
-                <div className="relative mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2">
-                  {rider.profile?.full_name?.charAt(0) || 'R'}
+                <div className="relative mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2 overflow-hidden">
+                  {rider.profile?.avatar_url ? (
+                    <img src={rider.profile.avatar_url} alt={rider.profile.full_name || 'Rider'} className="w-full h-full object-cover" />
+                  ) : (
+                    rider.profile?.full_name?.charAt(0) || 'R'
+                  )}
                   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success border-2 border-card" />
                 </div>
 
