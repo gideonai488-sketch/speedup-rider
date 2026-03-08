@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Lock, User, Phone, Bike, ArrowLeft, Car, BadgeCheck, MapPin } from 'lucide-react';
+import { Loader2, Lock, User, Phone, Bike, ArrowLeft, BadgeCheck, Camera } from 'lucide-react';
 import { z } from 'zod';
-import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 
 const phoneSchema = z.string().min(10, 'Please enter a valid phone number');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -29,12 +28,11 @@ const RiderAuth: React.FC = () => {
   // Signup form
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
-  const [signupCity, setSignupCity] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
-  const [vehicleType, setVehicleType] = useState('motorcycle');
-
-  const citiesByRegion = getCitiesByRegion();
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user && profile && !authLoading) {
@@ -49,9 +47,32 @@ const RiderAuth: React.FC = () => {
     }
   }, [user, profile, authLoading, navigate]);
 
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Photo must be under 5MB');
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const uploadAvatar = async (userId: string): Promise<string | null> => {
+    if (!avatarFile) return null;
+    const ext = avatarFile.name.split('.').pop();
+    const path = `${userId}/avatar.${ext}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, avatarFile, { upsert: true });
+    if (error) {
+      console.error('Avatar upload error:', error);
+      return null;
+    }
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       phoneSchema.parse(loginPhone);
       passwordSchema.parse(loginPassword);
@@ -61,19 +82,12 @@ const RiderAuth: React.FC = () => {
         return;
       }
     }
-
     setIsLoading(true);
-    // Use phone as email format for Supabase auth
     const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedrush.gh`;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
-
     if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        toast.error('Invalid phone number or password');
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message.includes('Invalid login credentials') ? 'Invalid phone number or password' : error.message);
     } else {
       toast.success('Welcome back, rider!');
     }
@@ -81,7 +95,6 @@ const RiderAuth: React.FC = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       phoneSchema.parse(signupPhone);
       passwordSchema.parse(signupPassword);
@@ -91,38 +104,40 @@ const RiderAuth: React.FC = () => {
         return;
       }
     }
-
     if (signupPassword !== signupConfirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
-
     if (!signupName.trim()) {
       toast.error('Please enter your full name');
       return;
     }
 
-    if (!signupCity) {
-      toast.error('Please select your city');
+    setIsLoading(true);
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedrush.gh`;
+    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone);
+    
+    if (error) {
+      setIsLoading(false);
+      toast.error(error.message.includes('already registered') ? 'This phone number is already registered. Please login instead.' : error.message);
       return;
     }
 
-    setIsLoading(true);
-    // Use phone as email format for Supabase auth
-    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedrush.gh`;
-    const cityLabel = ghanaianCities.find(c => c.value === signupCity)?.label || signupCity;
-    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone, cityLabel, vehicleType);
-    setIsLoading(false);
-
-    if (error) {
-      if (error.message.includes('already registered')) {
-        toast.error('This phone number is already registered. Please login instead.');
-      } else {
-        toast.error(error.message);
+    // Upload avatar if selected (after signup)
+    if (avatarFile) {
+      // Wait briefly for profile creation trigger
+      await new Promise(r => setTimeout(r, 2000));
+      const { data: { user: newUser } } = await supabase.auth.getUser();
+      if (newUser) {
+        const avatarUrl = await uploadAvatar(newUser.id);
+        if (avatarUrl) {
+          await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('user_id', newUser.id);
+        }
       }
-    } else {
-      toast.success('Rider account created! Welcome to SpeedRush.');
     }
+
+    setIsLoading(false);
+    toast.success('Rider account created! Welcome to SpeedRush.');
   };
 
   if (authLoading) {
@@ -135,7 +150,6 @@ const RiderAuth: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 to-gray-800 p-4">
-      {/* Back to home */}
       <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white mb-4">
         <ArrowLeft className="w-4 h-4" />
         Back to home
@@ -151,7 +165,6 @@ const RiderAuth: React.FC = () => {
             <CardDescription className="text-gray-400">Earn money delivering with SpeedRush</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Rider benefits */}
             <div className="mb-6 space-y-2">
               <div className="flex items-center gap-2 text-sm text-gray-300">
                 <BadgeCheck className="w-4 h-4 text-green-500" />
@@ -179,179 +192,83 @@ const RiderAuth: React.FC = () => {
                     <Label htmlFor="login-phone" className="text-gray-300">Phone Number</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="login-phone"
-                        type="tel"
-                        placeholder="0XX XXX XXXX"
-                        value={loginPhone}
-                        onChange={(e) => setLoginPhone(e.target.value)}
-                        className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                        required
-                      />
+                      <Input id="login-phone" type="tel" placeholder="0XX XXX XXXX" value={loginPhone} onChange={(e) => setLoginPhone(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password" className="text-gray-300">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="login-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                        required
-                      />
+                      <Input id="login-password" type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
                   <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Logging in...
-                      </>
-                    ) : (
-                      'Login as Rider'
-                    )}
+                    {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging in...</>) : 'Login as Rider'}
                   </Button>
                 </form>
               </TabsContent>
 
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {/* Photo Upload */}
+                  <div className="flex flex-col items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative w-20 h-20 rounded-full bg-gray-700/50 border-2 border-dashed border-gray-500 flex items-center justify-center overflow-hidden hover:border-green-500 transition-colors group"
+                    >
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera className="w-7 h-7 text-gray-400 group-hover:text-green-400 transition-colors" />
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Camera className="w-5 h-5 text-white" />
+                      </div>
+                    </button>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+                    <span className="text-xs text-gray-400">Upload your photo</span>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-name" className="text-gray-300">Full Name</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="signup-name"
-                        type="text"
-                        placeholder="John Doe"
-                        value={signupName}
-                        onChange={(e) => setSignupName(e.target.value)}
-                        className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                        required
-                      />
+                      <Input id="signup-name" type="text" placeholder="John Doe" value={signupName} onChange={(e) => setSignupName(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-phone" className="text-gray-300">Phone Number</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="signup-phone"
-                        type="tel"
-                        placeholder="0XX XXX XXXX"
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                        className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                        required
-                      />
+                      <Input id="signup-phone" type="tel" placeholder="0XX XXX XXXX" value={signupPhone} onChange={(e) => setSignupPhone(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">City</Label>
-                    <Select value={signupCity} onValueChange={setSignupCity}>
-                      <SelectTrigger className="w-full bg-gray-700/50 border-gray-600 text-white">
-                        <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                        <SelectValue placeholder="Select your city" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px]">
-                        {Object.entries(citiesByRegion).map(([region, cities]) => (
-                          <div key={region}>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted">
-                              {region} Region
-                            </div>
-                            {cities.map((city) => (
-                              <SelectItem key={city.value} value={city.value}>
-                                {city.label}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Vehicle Type</Label>
-                    <Select value={vehicleType} onValueChange={setVehicleType}>
-                      <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="motorcycle">
-                          <div className="flex items-center gap-2">
-                            <Bike className="h-4 w-4" />
-                            Motorcycle
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="bicycle">
-                          <div className="flex items-center gap-2">
-                            <Bike className="h-4 w-4" />
-                            Bicycle
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="car">
-                          <div className="flex items-center gap-2">
-                            <Car className="h-4 w-4" />
-                            Car
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                        required
-                      />
+                      <Input id="signup-password" type="password" placeholder="••••••••" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-confirm-password" className="text-gray-300">Confirm Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="signup-confirm-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={signupConfirmPassword}
-                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                        className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                        required
-                      />
+                      <Input id="signup-confirm-password" type="password" placeholder="••••••••" value={signupConfirmPassword} onChange={(e) => setSignupConfirmPassword(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
                   <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Applying...
-                      </>
-                    ) : (
-                      'Apply to Become a Rider'
-                    )}
+                    {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Applying...</>) : 'Apply to Become a Rider'}
                   </Button>
                 </form>
               </TabsContent>
             </Tabs>
 
-            {/* Link to customer auth */}
             <div className="mt-6 pt-6 border-t border-gray-700 text-center">
               <p className="text-sm text-gray-400">
                 Want to order deliveries?{' '}
-                <Link to="/auth" className="text-green-500 hover:underline font-medium">
-                  Use the customer app
-                </Link>
+                <Link to="/auth" className="text-green-500 hover:underline font-medium">Use the customer app</Link>
               </p>
             </div>
           </CardContent>

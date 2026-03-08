@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink } from 'lucide-react';
-import heroRider from '@/assets/hero-rider.jpg';
+import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe } from 'lucide-react';
+import heroScooter from '@/assets/landing/hero-scooter-delivery.jpg';
+import deliveryFleet from '@/assets/landing/delivery-fleet.jpg';
+import riderMotorcycle from '@/assets/landing/rider-motorcycle.jpg';
+import riderCar from '@/assets/landing/rider-car.jpg';
+import riderBicycle from '@/assets/landing/rider-bicycle.jpg';
 import { popularStores } from '@/data/deliveryData';
 
 const LandingPage: React.FC = () => {
@@ -16,7 +20,6 @@ const LandingPage: React.FC = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            {/* SpeedRush Owl Logo */}
             <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
               <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
                 <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
@@ -42,6 +45,7 @@ const LandingPage: React.FC = () => {
           
           <div className="hidden md:flex items-center gap-8">
             <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Services</a>
+            <a href="#vision" className="text-muted-foreground hover:text-foreground transition-colors">Our Vision</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How it Works</a>
             <a href="#riders" className="text-muted-foreground hover:text-foreground transition-colors">Become a Rider</a>
           </div>
@@ -61,11 +65,10 @@ const LandingPage: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-        {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src={heroRider} 
-            alt="SpeedRush Rider" 
+            src={heroScooter} 
+            alt="SpeedRush delivery rider on scooter" 
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
@@ -76,17 +79,20 @@ const LandingPage: React.FC = () => {
           <div className="max-w-2xl stagger-children">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-medium text-primary">Now available in Accra</span>
+              <span className="text-sm font-medium text-primary">Creating 50,000 jobs by 2027</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-tight mb-6">
-              Your Delivery,{' '}
-              <span className="text-gradient">Lightning Fast</span>
+              Deliver with{' '}
+              <span className="text-gradient">Any Vehicle.</span>
+              <br />
+              Earn on{' '}
+              <span className="text-gradient">Your Terms.</span>
             </h1>
             
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">
-              Get anything delivered in minutes. Food, groceries, pharmacy, packages — 
-              our riders are ready to rush to you.
+              Scooter, motorcycle, bicycle, or car — anyone can join SpeedRush and start earning. 
+              We're building Africa's largest delivery network, one rider at a time.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -116,11 +122,11 @@ const LandingPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-primary" />
+                  <Users className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">4.9★</p>
-                  <p className="text-sm text-muted-foreground">User rating</p>
+                  <p className="text-2xl font-bold text-foreground">50,000</p>
+                  <p className="text-sm text-muted-foreground">Jobs by 2027</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -128,15 +134,14 @@ const LandingPage: React.FC = () => {
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">50k+</p>
-                  <p className="text-sm text-muted-foreground">Deliveries</p>
+                  <p className="text-2xl font-bold text-foreground">16 Regions</p>
+                  <p className="text-sm text-muted-foreground">Across Ghana</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Scroll indicator */}
         <button 
           onClick={scrollToServices}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors animate-bounce"
@@ -146,8 +151,70 @@ const LandingPage: React.FC = () => {
         </button>
       </section>
 
+      {/* Vision Section */}
+      <section id="vision" className="py-20 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Our <span className="text-gradient">Vision</span>
+            </h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
+              We believe everyone deserves the opportunity to earn a living. SpeedRush is on a mission to create 
+              <strong className="text-foreground"> 50,000 jobs</strong> for Ghanaians by 2027 through our delivery platform.
+            </p>
+          </div>
+
+          {/* Fleet showcase */}
+          <div className="relative rounded-3xl overflow-hidden mb-16">
+            <img src={deliveryFleet} alt="SpeedRush delivery fleet - motorcycles, bicycles, and cars" className="w-full h-64 md:h-96 object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Any Vehicle. Any Person. One Platform.</h3>
+              <p className="text-white/70 max-w-2xl">Whether you ride a scooter, motorcycle, bicycle, or drive a car — there's a place for you at SpeedRush. No barriers, just opportunities.</p>
+            </div>
+          </div>
+
+          {/* Delivery methods */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            {[
+              { img: riderMotorcycle, title: 'Motorcycle & Scooter', desc: 'Navigate traffic easily and deliver fast. Perfect for food and small packages.' },
+              { img: riderBicycle, title: 'Bicycle Courier', desc: 'Eco-friendly and great for short distances. No fuel costs, all profit.' },
+              { img: riderCar, title: 'Car Delivery', desc: 'Handle larger orders, bulk deliveries, and premium packages with ease.' },
+            ].map((method) => (
+              <div key={method.title} className="group bg-card rounded-2xl overflow-hidden shadow-card border border-border hover:shadow-lg transition-all hover:-translate-y-1">
+                <div className="h-48 overflow-hidden">
+                  <img src={method.img} alt={method.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                </div>
+                <div className="p-5">
+                  <h3 className="font-semibold text-foreground text-lg mb-1">{method.title}</h3>
+                  <p className="text-sm text-muted-foreground">{method.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Vision pillars */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: <Target className="w-7 h-7" />, title: '50,000 Jobs', desc: 'Creating meaningful employment opportunities across all 16 regions of Ghana by 2027.' },
+              { icon: <Users className="w-7 h-7" />, title: 'Inclusive Platform', desc: 'Anyone with any vehicle can join — motorcycle, scooter, bicycle, or car. No discrimination.' },
+              { icon: <TrendingUp className="w-7 h-7" />, title: 'Daily Earnings', desc: 'Riders earn competitive pay with instant daily payouts. Be your own boss, set your own hours.' },
+              { icon: <Globe className="w-7 h-7" />, title: 'Pan-Africa Vision', desc: 'Starting in Ghana, expanding across West Africa. Building the continent\'s delivery backbone.' },
+            ].map((pillar) => (
+              <div key={pillar.title} className="bg-card rounded-2xl p-6 border border-border shadow-card">
+                <div className="w-14 h-14 rounded-2xl gradient-hero flex items-center justify-center text-white mb-4 shadow-glow">
+                  {pillar.icon}
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{pillar.title}</h3>
+                <p className="text-sm text-muted-foreground">{pillar.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
-      <section id="services" className="py-20 bg-secondary/30">
+      <section id="services" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -166,7 +233,7 @@ const LandingPage: React.FC = () => {
               { icon: '📋', name: 'Errands', desc: 'We handle it' },
               { icon: '📦', name: 'Packages', desc: 'Send & receive' },
               { icon: '📄', name: 'Documents', desc: 'Secure & fast' },
-            ].map((service, index) => (
+            ].map((service) => (
               <Link 
                 key={service.name}
                 to="/signup"
@@ -182,7 +249,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* How it Works */}
-      <section id="how-it-works" className="py-20">
+      <section id="how-it-works" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -195,24 +262,9 @@ const LandingPage: React.FC = () => {
           
           <div className="grid md:grid-cols-3 gap-8 stagger-children">
             {[
-              {
-                step: '01',
-                title: 'Choose Service',
-                desc: 'Select what you need delivered and enter pickup & dropoff locations',
-                icon: <MapPin className="w-8 h-8" />,
-              },
-              {
-                step: '02',
-                title: 'Get Matched',
-                desc: 'We instantly find the nearest available rider for your delivery',
-                icon: <Zap className="w-8 h-8" />,
-              },
-              {
-                step: '03',
-                title: 'Track & Receive',
-                desc: 'Watch your delivery in real-time and receive it at your doorstep',
-                icon: <Shield className="w-8 h-8" />,
-              },
+              { step: '01', title: 'Choose Service', desc: 'Select what you need delivered and enter pickup & dropoff locations', icon: <MapPin className="w-8 h-8" /> },
+              { step: '02', title: 'Get Matched', desc: 'We instantly find the nearest available rider for your delivery', icon: <Zap className="w-8 h-8" /> },
+              { step: '03', title: 'Track & Receive', desc: 'Watch your delivery in real-time and receive it at your doorstep', icon: <Shield className="w-8 h-8" /> },
             ].map((item) => (
               <div key={item.step} className="relative">
                 <div className="bg-card rounded-2xl p-8 shadow-card border border-border h-full">
@@ -230,7 +282,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Brand Partners Section */}
-      <section id="partners" className="py-20 bg-secondary/30">
+      <section id="partners" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -241,7 +293,6 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
           
-          {/* Logo Cloud */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-12">
             {popularStores.map((store) => (
               <div 
@@ -270,7 +321,6 @@ const LandingPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Partner CTA */}
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Want to partner with SpeedRush?</p>
             <Link to="/become-partner">
@@ -293,11 +343,14 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Earn on Your Schedule?
+              Join the Movement. Create Your Future.
             </h2>
-            <p className="text-lg text-white/70 mb-8">
-              Join thousands of SpeedRush riders earning competitive pay with flexible hours. 
-              Be your own boss and start delivering today.
+            <p className="text-lg text-white/70 mb-4">
+              We're not just building a delivery app — we're creating <strong className="text-white">50,000 jobs</strong> for the people of Ghana by 2027. 
+              Whether you have a scooter, motorcycle, bicycle, or car, you can start earning today.
+            </p>
+            <p className="text-white/50 mb-8">
+              No experience needed. No vehicle restrictions. Just you, your ride, and unlimited earning potential.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/rider/auth">
@@ -315,8 +368,13 @@ const LandingPage: React.FC = () => {
               </div>
               <div className="w-px h-12 bg-white/20 hidden sm:block" />
               <div className="text-center">
-                <p className="text-3xl font-bold">2,500+</p>
-                <p className="text-sm text-white/60">Active riders</p>
+                <p className="text-3xl font-bold">50,000</p>
+                <p className="text-sm text-white/60">Jobs target by 2027</p>
+              </div>
+              <div className="w-px h-12 bg-white/20 hidden sm:block" />
+              <div className="text-center">
+                <p className="text-3xl font-bold">Any Vehicle</p>
+                <p className="text-sm text-white/60">Scooter, bike, car</p>
               </div>
               <div className="w-px h-12 bg-white/20 hidden sm:block" />
               <div className="text-center">
@@ -333,7 +391,6 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              {/* Owl Logo */}
               <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
                 <svg viewBox="0 0 40 40" className="w-6 h-6" fill="none">
                   <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
