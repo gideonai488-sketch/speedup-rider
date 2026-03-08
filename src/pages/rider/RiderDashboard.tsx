@@ -261,11 +261,16 @@ const RiderDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     if (isOnline && profile) {
-      await updateLocation.mutateAsync({
-        latitude: 5.6037,
-        longitude: -0.1870,
-        is_online: false,
-      });
+      try {
+        const pos = lastKnownPosition.current || { lat: 0, lng: 0 };
+        await updateLocation.mutateAsync({
+          latitude: pos.lat,
+          longitude: pos.lng,
+          is_online: false,
+        });
+      } catch (err) {
+        console.error('Error setting offline on logout:', err);
+      }
     }
     await signOut();
     navigate('/');
