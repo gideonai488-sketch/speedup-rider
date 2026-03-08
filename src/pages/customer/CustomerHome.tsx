@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import StoreLogo from '@/components/ui/store-logo';
+import HeroCarousel from '@/components/home/HeroCarousel';
+import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
 import { 
   Zap, MapPin, Clock, Search, Bell, User,
   ChevronRight, Star, Navigation, UtensilsCrossed,
@@ -51,12 +53,10 @@ const CustomerHome: React.FC = () => {
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const { data: wallet } = useWallet();
 
-  // Extract stores from the hook data
   const stores = storeData?.stores || [];
   const isFilteredByCity = storeData?.isFiltered || false;
   const currentCity = storeData?.city || city;
 
-  // Redirect to auth if not logged in
   React.useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -64,27 +64,13 @@ const CustomerHome: React.FC = () => {
   }, [user, authLoading, navigate]);
 
   const featuredStores = stores.filter(s => s.is_featured) || [];
-  const recentOrders = orders?.slice(0, 2) || [];
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  const formatCurrency = (amount: number) => {
-    return `GH₵ ${amount.toFixed(0)}`;
-  };
-
-  const getOrderStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'bg-green-500/10 text-green-600';
-      case 'cancelled':
-        return 'bg-red-500/10 text-red-600';
-      default:
-        return 'bg-primary/10 text-primary';
-    }
-  };
+  const formatCurrency = (amount: number) => `GH₵ ${amount.toFixed(0)}`;
 
   if (authLoading) {
     return (
@@ -96,12 +82,11 @@ const CustomerHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header with SpeedRush branding */}
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              {/* SpeedRush Owl Logo */}
               <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
                 <span className="text-2xl">🦉</span>
               </div>
@@ -134,7 +119,7 @@ const CustomerHome: React.FC = () => {
                   {formatCurrency(wallet?.balance || 0)}
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/customer/notifications')}>
                 <Bell className="w-5 h-5" />
                 {orders && orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length > 0 && (
                   <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
@@ -146,14 +131,12 @@ const CustomerHome: React.FC = () => {
             </div>
           </div>
           
-          {/* Welcome message */}
           {profile && (
             <p className="text-sm text-muted-foreground mb-3">
               Welcome back, <span className="font-medium text-foreground">{profile.full_name}</span>!
             </p>
           )}
           
-          {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
@@ -164,27 +147,14 @@ const CustomerHome: React.FC = () => {
         </div>
       </header>
 
-      <main className="px-4 py-6 space-y-8">
-        {/* Quick Action Banner */}
-        <div className="gradient-hero rounded-2xl p-5 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <h2 className="text-xl font-bold mb-1">Need something delivered?</h2>
-            <p className="text-white/80 text-sm mb-4">Our riders are ready to rush to you</p>
-            <Link to="/customer/book">
-              <Button className="bg-white text-primary hover:bg-white/90 shadow-lg">
-                <Navigation className="w-4 h-4 mr-2" />
-                Request Pickup
-              </Button>
-            </Link>
-          </div>
-        </div>
+      <main className="px-4 py-5 space-y-7">
+        {/* 1. Hero Carousel with ads/videos/images */}
+        <HeroCarousel />
 
-        {/* Services Grid with Icons */}
+        {/* 2. Services Grid */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-foreground">Our Services</h2>
-            <button className="text-sm text-primary font-medium">See all</button>
           </div>
           
           <div className="grid grid-cols-3 gap-3">
@@ -192,14 +162,15 @@ const CustomerHome: React.FC = () => {
               <Link
                 key={service.id}
                 to={`/customer/book?service=${service.id}`}
-                className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all ${
+                className={cn(
+                  'flex flex-col items-center p-4 rounded-xl border-2 transition-all',
                   selectedService === service.id
                     ? 'border-primary bg-primary/5 shadow-glow'
                     : 'border-border bg-card hover:border-primary/50'
-                }`}
+                )}
                 onClick={() => setSelectedService(service.id)}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${serviceColors[service.id]}`}>
+                <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-2', serviceColors[service.id])}>
                   {serviceIcons[service.id]}
                 </div>
                 <span className="text-xs font-medium text-foreground text-center">{service.name}</span>
@@ -209,7 +180,10 @@ const CustomerHome: React.FC = () => {
           </div>
         </section>
 
-        {/* Featured Stores - Netflix Style */}
+        {/* 3. Online Riders */}
+        <OnlineRidersPreview />
+
+        {/* 4. Featured Stores */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -235,18 +209,9 @@ const CustomerHome: React.FC = () => {
                 ))
               ) : (
                 featuredStores.map((store) => (
-                  <Link
-                    key={store.id}
-                    to={`/customer/store/${store.id}`}
-                    className="group flex-shrink-0 w-40"
-                  >
+                  <Link key={store.id} to={`/customer/store/${store.id}`} className="group flex-shrink-0 w-40">
                     <div className={`h-24 rounded-xl ${store.cover_color || 'bg-primary'} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
-                      <StoreLogo 
-                        src={store.logo_url || ''} 
-                        name={store.name}
-                        className="max-h-16 max-w-28"
-                        textClassName="text-2xl"
-                      />
+                      <StoreLogo src={store.logo_url || ''} name={store.name} className="max-h-16 max-w-28" textClassName="text-2xl" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                     </div>
                     <h3 className="font-semibold text-foreground text-sm truncate">{store.name}</h3>
@@ -266,7 +231,7 @@ const CustomerHome: React.FC = () => {
           </ScrollArea>
         </section>
 
-        {/* Popular Stores Grid */}
+        {/* 5. Popular Stores Grid */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -292,19 +257,14 @@ const CustomerHome: React.FC = () => {
                 </div>
               ))
             ) : (
-              stores?.map((store) => (
+              stores.map((store) => (
                 <Link
                   key={store.id}
                   to={`/customer/store/${store.id}`}
                   className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
                 >
                   <div className={`h-20 ${store.cover_color || 'bg-primary'} flex items-center justify-center p-3 relative`}>
-                    <StoreLogo 
-                      src={store.logo_url || ''} 
-                      name={store.name}
-                      className="max-h-12 max-w-20"
-                      textClassName="text-xl"
-                    />
+                    <StoreLogo src={store.logo_url || ''} name={store.name} className="max-h-12 max-w-20" textClassName="text-xl" />
                     <div className="absolute top-2 right-2 bg-black/30 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <ExternalLink className="w-3 h-3 text-white" />
                     </div>
@@ -325,84 +285,6 @@ const CustomerHome: React.FC = () => {
                 </Link>
               ))
             )}
-          </div>
-        </section>
-
-        {/* Recent Orders */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Recent Orders</h2>
-            <Link to="/customer/orders" className="text-sm text-primary font-medium">View all</Link>
-          </div>
-          
-          <div className="space-y-3">
-            {ordersLoading ? (
-              Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
-                  <Skeleton className="w-10 h-10 rounded-full" />
-                  <div className="flex-1">
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
-                  <Skeleton className="h-6 w-16 rounded-full" />
-                </div>
-              ))
-            ) : recentOrders.length > 0 ? (
-              recentOrders.map((order) => (
-                <Link
-                  key={order.id}
-                  to={`/customer/track/${order.id}`}
-                  className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors"
-                >
-                  <div className="text-2xl">
-                    {order.stores?.category === 'food' ? '🍔' : 
-                     order.stores?.category === 'groceries' ? '🛒' : 
-                     order.stores?.category === 'pharmacy' ? '💊' : '📦'}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">{order.stores?.name || 'Order'}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${getOrderStatusColor(order.status)}`}>
-                    {order.status.replace('_', ' ')}
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No orders yet</p>
-                <Link to="/customer/book" className="text-primary text-sm">Place your first order</Link>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Nearby Riders */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Riders Near You</h2>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Online
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-secondary/50 to-secondary rounded-2xl p-6 text-center">
-            <div className="flex justify-center -space-x-3 mb-4">
-              {['K', 'A', 'Y', 'E'].map((letter, i) => (
-                <div
-                  key={i}
-                  className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold border-2 border-background"
-                >
-                  {letter}
-                </div>
-              ))}
-            </div>
-            <p className="text-foreground font-medium mb-1">Riders ready to deliver</p>
-            <p className="text-sm text-muted-foreground">Average wait time: 3-5 mins</p>
           </div>
         </section>
       </main>
