@@ -464,9 +464,11 @@ const LandingPage: React.FC = () => {
           <div className="text-center">
             <p className="text-muted-foreground mb-4">Want your business on SpeedUp?</p>
             <Link to="/become-partner">
+              <Button variant="outline" className="border-2 font-semibold">
                 Become a Partner
                 <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
+            </Link>
             </Link>
           </div>
         </div>
