@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { useAuth } from '@/context/AuthContext';
+import { watchPosition, requestPermissions } from '@/lib/nativeGeolocation';
 
 type RiderLocation = Database['public']['Tables']['rider_locations']['Row'];
 
