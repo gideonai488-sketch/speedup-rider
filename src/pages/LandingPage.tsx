@@ -361,7 +361,7 @@ const LandingPage: React.FC = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="relative rounded-3xl overflow-hidden">
-            <img src={deliveryFleet} alt="SpeedUp global delivery fleet" className="w-full h-64 md:h-[420px] object-cover" />
+            <img src={deliveryFleet} alt="SpeedUp global delivery fleet" className=leet" className="w-full h-64 md:h-[420px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
               <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">Our Global Delivery Network</h3>
