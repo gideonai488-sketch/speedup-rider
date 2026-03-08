@@ -11,6 +11,7 @@ import {
   Trophy, Bell, LogOut, Loader2, ChevronRight, Star, Target, BarChart3
 } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
+import { useCountry } from '@/context/CountryContext';
 
 interface AmbassadorStats {
   total_signups: number;
@@ -23,10 +24,12 @@ interface AmbassadorStats {
 const AmbassadorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile, signOut, loading: authLoading } = useAuth();
+  const { country, formatPrice } = useCountry();
   const [stats, setStats] = useState<AmbassadorStats | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const [recentSignups, setRecentSignups] = useState<any[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [earningRate, setEarningRate] = useState<number>(2);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -52,9 +55,7 @@ const AmbassadorDashboard: React.FC = () => {
         .limit(1)
         .single();
 
-      if (referralData) {
-        setReferralCode(referralData.referral_code);
-      }
+      if (referralData) setReferralCode(referralData.referral_code);
 
       // Get ambassador stats
       const { data: statsData } = await supabase
@@ -66,34 +67,33 @@ const AmbassadorDashboard: React.FC = () => {
       if (statsData) {
         setStats(statsData as any);
       } else {
-        // Create initial stats record
         await supabase.from('ambassador_stats' as any).insert([{
           ambassador_id: profile.id,
-          total_signups: 0,
-          total_earnings: 0,
-          current_month_signups: 0,
-          current_month_earnings: 0,
+          total_signups: 0, total_earnings: 0,
+          current_month_signups: 0, current_month_earnings: 0,
         }]);
-        setStats({
-          total_signups: 0,
-          total_earnings: 0,
-          current_month_signups: 0,
-          current_month_earnings: 0,
-          rank: null,
-        });
+        setStats({ total_signups: 0, total_earnings: 0, current_month_signups: 0, current_month_earnings: 0, rank: null });
       }
+
+      // Get country-specific earning rate
+      const profileCountry = (profile as any).country_code || country.code;
+      const { data: rateData } = await supabase
+        .from('ambassador_earning_rates' as any)
+        .select('first_order_bonus, currency_symbol')
+        .eq('country_code', profileCountry)
+        .eq('is_active', true)
+        .single();
+      if (rateData) setEarningRate((rateData as any).first_order_bonus);
 
       // Get recent signups
       const { data: signupsData } = await supabase
         .from('ambassador_signups' as any)
-        .select('*, signed_up_user_id(full_name, created_at)')
+        .select('*')
         .eq('ambassador_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (signupsData) {
-        setRecentSignups(signupsData);
-      }
+      if (signupsData) setRecentSignups(signupsData);
     } catch (err) {
       console.error('Error loading dashboard:', err);
     } finally {
@@ -193,7 +193,7 @@ const AmbassadorDashboard: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Total Signups', value: stats?.total_signups || 0, icon: <Users className="w-5 h-5" />, color: 'text-blue-500' },
-            { label: 'Total Earned', value: `$${(stats?.total_earnings || 0).toFixed(0)}`, icon: <DollarSign className="w-5 h-5" />, color: 'text-green-500' },
+            { label: 'Total Earned', value: formatPrice(stats?.total_earnings || 0), icon: <DollarSign className="w-5 h-5" />, color: 'text-green-500' },
             { label: 'This Month', value: stats?.current_month_signups || 0, icon: <TrendingUp className="w-5 h-5" />, color: 'text-primary' },
             { label: 'Rank', value: stats?.rank ? `#${stats.rank}` : '--', icon: <Trophy className="w-5 h-5" />, color: 'text-yellow-500' },
           ].map((stat, i) => (
@@ -264,7 +264,7 @@ const AmbassadorDashboard: React.FC = () => {
                       </p>
                     </div>
                     <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
-                      +${signup.bonus_earned || 5}
+                      +{formatPrice(signup.bonus_earned || 0)}
                     </Badge>
                   </CardContent>
                 </Card>
@@ -282,20 +282,20 @@ const AmbassadorDashboard: React.FC = () => {
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
-                <span>Per student signup</span>
-                <span className="font-medium text-foreground">$5.00</span>
+                <span>Per referred user's first order</span>
+                <span className="font-medium text-foreground">{formatPrice(earningRate)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
-                <span>Per order from your signups</span>
-                <span className="font-medium text-foreground">$0.50</span>
+                <span>100 students × 1 order each</span>
+                <span className="font-medium text-foreground">{formatPrice(earningRate * 100)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Monthly top ambassador bonus</span>
-                <span className="font-medium text-foreground">$200</span>
+                <span className="font-medium text-foreground">{formatPrice(200)}</span>
               </div>
               <div className="border-t border-border pt-2 flex justify-between font-semibold">
-                <span className="text-foreground">Potential monthly (100 signups)</span>
-                <span className="text-primary">$500+</span>
+                <span className="text-foreground">Potential monthly</span>
+                <span className="text-primary">{formatPrice((earningRate * 100) + 200)}+</span>
               </div>
             </div>
           </CardContent>

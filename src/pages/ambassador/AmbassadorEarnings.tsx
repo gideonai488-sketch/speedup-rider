@@ -7,10 +7,12 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, DollarSign, TrendingUp, Wallet, Loader2, Calendar } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
+import { useCountry } from '@/context/CountryContext';
 
 const AmbassadorEarnings: React.FC = () => {
   const navigate = useNavigate();
   const { profile, loading: authLoading, user } = useAuth();
+  const { formatPrice } = useCountry();
   const [stats, setStats] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,10 +84,10 @@ const AmbassadorEarnings: React.FC = () => {
           <CardContent className="p-6 text-center">
             <p className="text-sm text-muted-foreground mb-1">Total Earned</p>
             <p className="text-4xl font-bold text-foreground mb-1">
-              ${(stats?.total_earnings || 0).toFixed(2)}
+              {formatPrice(stats?.total_earnings || 0)}
             </p>
             <p className="text-sm text-muted-foreground">
-              This month: <span className="text-primary font-semibold">${(stats?.current_month_earnings || 0).toFixed(2)}</span>
+              This month: <span className="text-primary font-semibold">{formatPrice(stats?.current_month_earnings || 0)}</span>
             </p>
           </CardContent>
         </Card>
@@ -95,15 +97,15 @@ const AmbassadorEarnings: React.FC = () => {
           <Card className="border-border">
             <CardContent className="p-4">
               <TrendingUp className="w-5 h-5 text-green-500 mb-2" />
-              <p className="text-lg font-bold text-foreground">${((stats?.total_signups || 0) * 5).toFixed(0)}</p>
-              <p className="text-xs text-muted-foreground">From Signups</p>
+              <p className="text-lg font-bold text-foreground">{formatPrice(stats?.total_earnings || 0)}</p>
+              <p className="text-xs text-muted-foreground">From First Orders</p>
             </CardContent>
           </Card>
           <Card className="border-border">
             <CardContent className="p-4">
               <DollarSign className="w-5 h-5 text-blue-500 mb-2" />
-              <p className="text-lg font-bold text-foreground">${((stats?.total_orders_generated || 0) * 0.5).toFixed(0)}</p>
-              <p className="text-xs text-muted-foreground">From Orders</p>
+              <p className="text-lg font-bold text-foreground">{stats?.total_orders_generated || 0}</p>
+              <p className="text-xs text-muted-foreground">Orders Generated</p>
             </CardContent>
           </Card>
         </div>
@@ -118,14 +120,14 @@ const AmbassadorEarnings: React.FC = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Minimum withdrawal: $20. Payouts are processed weekly via mobile money or bank transfer.
+              Minimum withdrawal: {formatPrice(20)}. Payouts are processed weekly via mobile money or bank transfer.
             </p>
             <Button
               className="w-full bg-primary hover:bg-primary/90"
               disabled={(stats?.total_earnings || 0) < 20}
             >
               {(stats?.total_earnings || 0) < 20
-                ? `Need $${(20 - (stats?.total_earnings || 0)).toFixed(0)} more`
+                ? `Need ${formatPrice(20 - (stats?.total_earnings || 0))} more`
                 : 'Request Payout'
               }
             </Button>
@@ -154,7 +156,7 @@ const AmbassadorEarnings: React.FC = () => {
                       </p>
                     </div>
                     <span className={`font-semibold text-sm ${tx.amount >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                      {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(2)}
+                      {tx.amount >= 0 ? '+' : ''}{formatPrice(Math.abs(tx.amount))}
                     </span>
                   </CardContent>
                 </Card>
