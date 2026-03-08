@@ -110,7 +110,7 @@ const Profile: React.FC = () => {
     }
   };
 
-
+  const menuSections = [
     {
       title: 'My Account',
       items: [
