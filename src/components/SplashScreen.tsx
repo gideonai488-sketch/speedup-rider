@@ -135,7 +135,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, duration = 3000
         {/* Brand name with animation */}
         <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <h1 className="text-5xl font-bold text-white tracking-tight mb-2 drop-shadow-lg">
-            Speed<span className="text-accent">Rush</span>
+            Speed<span className="text-white/80">Up</span>
           </h1>
           <div className="flex items-center justify-center gap-2 mt-3">
             <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/50" />
