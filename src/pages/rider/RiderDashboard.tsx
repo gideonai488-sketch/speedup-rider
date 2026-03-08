@@ -29,7 +29,7 @@ const RiderDashboard: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const updateLocation = useUpdateRiderLocation();
-  const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders();
+  const { data: pendingOrders = [], refetch: refetchPending } = useRiderPendingOrders(profile?.city);
   const createBid = useCreateBid();
   const { data: myBids = [] } = useMyBids(profile?.id || '');
   const { data: activeOrders = [] } = useRiderActiveOrders(profile?.id || '');
