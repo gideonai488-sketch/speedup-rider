@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Clock, X, Star, CheckCircle2, MessageSquare, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, X, Star, CheckCircle2, MessageSquare, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,7 @@ interface BidViewProps {
   pickupAddress?: string;
   deliveryAddress: string;
   totalAmount: number;
+  distanceKm?: number;
   onBack: () => void;
   onCancel?: () => Promise<void>;
   onChat?: (riderId: string, riderName: string, riderPhone?: string) => void;
@@ -35,6 +36,7 @@ const BidView: React.FC<BidViewProps> = ({
   pickupAddress,
   deliveryAddress,
   totalAmount,
+  distanceKm,
   onBack,
   onCancel,
   onChat,
@@ -111,6 +113,13 @@ const BidView: React.FC<BidViewProps> = ({
               <p className="text-sm font-medium">{deliveryAddress}</p>
             </div>
           </div>
+          {distanceKm && distanceKm > 0 && (
+            <div className="flex items-center gap-2 pt-3 border-t border-border">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">{distanceKm.toFixed(1)} km</span>
+              <span className="text-xs text-muted-foreground">estimated distance</span>
+            </div>
+          )}
         </div>
 
         {/* Bids List */}

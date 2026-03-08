@@ -25,6 +25,7 @@ interface FindingRiderProps {
   orderNumber?: string;
   orderId?: string;
   totalAmount: number;
+  distanceKm?: number;
   onBack: () => void;
   onCancel?: () => Promise<void>;
 }
@@ -44,7 +45,7 @@ type Mode = 'choose' | 'auto' | 'browse' | 'bids' | 'chat';
 
 const FindingRider: React.FC<FindingRiderProps> = ({
   pickupLat, pickupLng, pickupAddress, deliveryAddress,
-  orderNumber, orderId, totalAmount, onBack, onCancel,
+  orderNumber, orderId, totalAmount, distanceKm, onBack, onCancel,
 }) => {
   const [mode, setMode] = useState<Mode>('bids');
   const [currentRadiusIndex, setCurrentRadiusIndex] = useState(0);
@@ -118,6 +119,7 @@ const FindingRider: React.FC<FindingRiderProps> = ({
         pickupAddress={pickupAddress}
         deliveryAddress={deliveryAddress}
         totalAmount={totalAmount}
+        distanceKm={distanceKm}
         onBack={() => setMode('choose')}
         onCancel={onCancel}
         onChat={(riderId, name, phone) => {
