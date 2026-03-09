@@ -29,19 +29,7 @@ const LandingPage: React.FC = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
-              <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none">
-                <ellipse cx="20" cy="23" rx="12" ry="14" fill="white" fillOpacity="0.95" />
-                <circle cx="20" cy="14" r="10" fill="white" />
-                <path d="M11 7 L14 14 L8 12 Z" fill="white" />
-                <path d="M29 7 L26 14 L32 12 Z" fill="white" />
-                <circle cx="16" cy="14" r="4" fill="#1e293b" />
-                <circle cx="24" cy="14" r="4" fill="#1e293b" />
-                <circle cx="17" cy="13" r="2" fill="white" />
-                <circle cx="25" cy="13" r="2" fill="white" />
-                <path d="M18 18 L20 22 L22 18 Z" fill="#f59e0b" />
-              </svg>
-            </div>
+            <img src={owlLogo} alt="SpeedUp Logo" className="w-11 h-11 object-contain" />
             <div className="flex flex-col">
               <span className="text-xl font-bold text-foreground tracking-tight">
                 Speed<span className="text-primary">Up</span>
