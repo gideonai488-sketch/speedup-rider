@@ -1,8 +1,9 @@
 import React from 'react';
-import { MapPin, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CountrySelector from '@/components/CountrySelector';
 import { useCountry } from '@/context/CountryContext';
+import owlLogo from '@/assets/speedup-owl-logo.png';
 
 const Header: React.FC = () => {
   const { country } = useCountry();
@@ -10,13 +11,14 @@ const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 gradient-glass border-b border-border/50">
       <div className="flex items-center justify-between px-4 h-16 max-w-lg mx-auto">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1">
-            <span className="text-lg font-bold text-foreground">Speed<span className="text-primary">Up</span></span>
+        <div className="flex items-center gap-2">
+          <img src={owlLogo} alt="SpeedUp Logo" className="w-9 h-9 object-contain" />
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-foreground leading-tight">Speed<span className="text-primary">Up</span></span>
+            <span className="text-[9px] text-muted-foreground font-medium leading-tight -mt-0.5">
+              by Genesis Holdings Inc. USA
+            </span>
           </div>
-          <span className="text-[9px] text-muted-foreground font-medium leading-tight -mt-0.5">
-            by Genesis Holdings Inc. USA
-          </span>
         </div>
 
         <div className="flex items-center gap-1">
