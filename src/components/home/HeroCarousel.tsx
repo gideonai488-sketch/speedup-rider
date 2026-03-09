@@ -8,6 +8,9 @@ import heroPackage from '@/assets/hero/hero-package.jpg';
 import heroIphoneGiveaway from '@/assets/hero/hero-iphone-giveaway.jpg';
 import heroDiscountSale from '@/assets/hero/hero-discount-sale.jpg';
 import heroReferralBonus from '@/assets/hero/hero-referral-bonus.jpg';
+import heroCampusRiders from '@/assets/hero/hero-campus-riders.jpg';
+import heroCampusCustomers from '@/assets/hero/hero-campus-customers.jpg';
+import heroCampusAmbassadors from '@/assets/hero/hero-campus-ambassadors.jpg';
 
 interface HeroSlide {
   id: string;
@@ -83,6 +86,33 @@ const defaultSlides: HeroSlide[] = [
     subtitle: 'Reliable same-day package delivery across Ghana',
     cta: { label: 'Send Package', link: '/customer/book?service=packages' },
     gradient: 'from-black/70 via-black/40 to-transparent',
+  },
+  {
+    id: '8',
+    type: 'image',
+    src: heroCampusRiders,
+    title: '🏍️ Ride & Earn GH₵500+/Week',
+    subtitle: 'Join as a campus rider — flexible hours, weekly payouts',
+    cta: { label: 'Start Earning', link: '/rider/auth' },
+    gradient: 'from-yellow-900/70 via-yellow-900/30 to-transparent',
+  },
+  {
+    id: '9',
+    type: 'image',
+    src: heroCampusCustomers,
+    title: '🎓 Free Delivery Week on Campus!',
+    subtitle: 'Order food, groceries & more — delivered in 30 mins',
+    cta: { label: 'Order Now', link: '/customer/auth' },
+    gradient: 'from-green-900/70 via-green-900/30 to-transparent',
+  },
+  {
+    id: '10',
+    type: 'image',
+    src: heroCampusAmbassadors,
+    title: '💰 Earn GH₵2000+/Month as Ambassador',
+    subtitle: 'Refer friends, build your network, get paid bi-weekly',
+    cta: { label: 'Join Program', link: '/ambassador/auth' },
+    gradient: 'from-red-900/70 via-red-900/30 to-transparent',
   },
 ];
 
