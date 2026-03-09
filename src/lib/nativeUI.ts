@@ -1,7 +1,4 @@
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { Keyboard } from '@capacitor/keyboard';
 
 const isNative = () => Capacitor.isNativePlatform();
 
@@ -12,7 +9,7 @@ export async function initNativeUI() {
   if (!isNative()) return;
 
   try {
-    // Status bar — dark content on light background
+    const { StatusBar, Style } = await import('@capacitor/status-bar');
     await StatusBar.setStyle({ style: Style.Light });
     await StatusBar.setBackgroundColor({ color: '#FFFFFF' });
     await StatusBar.setOverlaysWebView({ overlay: false });
@@ -21,14 +18,14 @@ export async function initNativeUI() {
   }
 
   try {
-    // Hide splash screen after app is ready
+    const { SplashScreen } = await import('@capacitor/splash-screen');
     await SplashScreen.hide({ fadeOutDuration: 300 });
   } catch (err) {
     console.warn('SplashScreen hide error:', err);
   }
 
   try {
-    // Keyboard — scroll content up when keyboard opens
+    const { Keyboard } = await import('@capacitor/keyboard');
     Keyboard.addListener('keyboardWillShow', (info) => {
       document.body.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
       document.body.classList.add('keyboard-open');
@@ -48,6 +45,7 @@ export async function initNativeUI() {
 export async function setDarkStatusBar() {
   if (!isNative()) return;
   try {
+    const { StatusBar, Style } = await import('@capacitor/status-bar');
     await StatusBar.setStyle({ style: Style.Dark });
     await StatusBar.setBackgroundColor({ color: '#0A0A0A' });
   } catch {}
@@ -59,6 +57,7 @@ export async function setDarkStatusBar() {
 export async function setLightStatusBar() {
   if (!isNative()) return;
   try {
+    const { StatusBar, Style } = await import('@capacitor/status-bar');
     await StatusBar.setStyle({ style: Style.Light });
     await StatusBar.setBackgroundColor({ color: '#FFFFFF' });
   } catch {}
