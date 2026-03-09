@@ -32,6 +32,7 @@ import Orders from "./pages/Orders";
 import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
 import CampusAmbassador from "./pages/CampusAmbassador";
+import CampusTour from "./pages/CampusTour";
 
 // Ambassador Pages
 import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
@@ -104,6 +105,7 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/become-partner" element={<BecomePartner />} />
                 <Route path="/campus-ambassador" element={<CampusAmbassador />} />
+                <Route path="/campus-tour" element={<CampusTour />} />
                 <Route path="/auth" element={<CustomerAuth />} />
                 <Route path="/login" element={<CustomerAuth />} />
                 <Route path="/signup" element={<CustomerAuth />} />
