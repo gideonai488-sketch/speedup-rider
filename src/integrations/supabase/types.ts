@@ -164,6 +164,8 @@ export type Database = {
       ambassador_signups: {
         Row: {
           ambassador_id: string
+          biweekly_last_paid_at: string | null
+          biweekly_next_due_at: string | null
           bonus_earned: number | null
           created_at: string
           first_order_id: string | null
@@ -176,6 +178,8 @@ export type Database = {
         }
         Insert: {
           ambassador_id: string
+          biweekly_last_paid_at?: string | null
+          biweekly_next_due_at?: string | null
           bonus_earned?: number | null
           created_at?: string
           first_order_id?: string | null
@@ -188,6 +192,8 @@ export type Database = {
         }
         Update: {
           ambassador_id?: string
+          biweekly_last_paid_at?: string | null
+          biweekly_next_due_at?: string | null
           bonus_earned?: number | null
           created_at?: string
           first_order_id?: string | null
@@ -1647,6 +1653,7 @@ export type Database = {
       is_admin: { Args: { check_user_id: string }; Returns: boolean }
       is_admin_no_rls: { Args: { check_user_id: string }; Returns: boolean }
       is_rider: { Args: { check_user_id: string }; Returns: boolean }
+      run_ambassador_biweekly_payouts: { Args: never; Returns: undefined }
       validate_order_payment: {
         Args: { p_order_id: string; p_user_id: string }
         Returns: {
