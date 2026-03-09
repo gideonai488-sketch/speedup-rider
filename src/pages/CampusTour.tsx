@@ -26,7 +26,7 @@ const CampusTour: React.FC = () => {
       id: 'ride' as const,
       title: 'Ride with Us',
       subtitle: 'Become a SpeedRush Rider',
-      icon: Motorcycle,
+      icon: Bike,
       color: 'from-blue-500/20 to-cyan-500/20',
       borderColor: 'border-blue-500/30',
       earning: 'GH₵500+ Weekly',
