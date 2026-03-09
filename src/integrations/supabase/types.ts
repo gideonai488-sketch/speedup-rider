@@ -128,6 +128,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ambassador_payout_cycles: {
+        Row: {
+          created_at: string | null
+          cycle_end_date: string
+          cycle_start_date: string
+          id: string
+          processed_at: string | null
+          status: string | null
+          total_ambassadors_paid: number | null
+          total_amount_paid: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          cycle_end_date: string
+          cycle_start_date: string
+          id?: string
+          processed_at?: string | null
+          status?: string | null
+          total_ambassadors_paid?: number | null
+          total_amount_paid?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          cycle_end_date?: string
+          cycle_start_date?: string
+          id?: string
+          processed_at?: string | null
+          status?: string | null
+          total_ambassadors_paid?: number | null
+          total_amount_paid?: number | null
+        }
+        Relationships: []
+      }
       ambassador_signups: {
         Row: {
           ambassador_id: string
