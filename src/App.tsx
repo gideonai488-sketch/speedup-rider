@@ -32,7 +32,9 @@ import Orders from "./pages/Orders";
 import BecomePartner from "./pages/BecomePartner";
 import NotFound from "./pages/NotFound";
 import CampusAmbassador from "./pages/CampusAmbassador";
-from "./pages/auth/AmbassadorAuth";
+
+// Ambassador Pages
+import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
 import AmbassadorDashboard from "./pages/ambassador/AmbassadorDashboard";
 import AmbassadorReferrals from "./pages/ambassador/AmbassadorReferrals";
 import AmbassadorEarnings from "./pages/ambassador/AmbassadorEarnings";
