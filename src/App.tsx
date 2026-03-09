@@ -104,7 +104,7 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/become-partner" element={<BecomePartner />} />
                 <Route path="/campus-ambassador" element={<CampusAmbassador />} />
-                <Route path="/campus-tour" element={<CampusT={<CustomerAuth />} />
+                <Route path="/auth" element={<CustomerAuth />} />
                 <Route path="/login" element={<CustomerAuth />} />
                 <Route path="/signup" element={<CustomerAuth />} />
                 
