@@ -8,6 +8,9 @@ import heroPackage from '@/assets/hero/hero-package.jpg';
 import heroIphoneGiveaway from '@/assets/hero/hero-iphone-giveaway.jpg';
 import heroDiscountSale from '@/assets/hero/hero-discount-sale.jpg';
 import heroReferralBonus from '@/assets/hero/hero-referral-bonus.jpg';
+import heroCampusRiders from '@/assets/hero/hero-campus-riders.jpg';
+import heroCampusCustomers from '@/assets/hero/hero-campus-customers.jpg';
+import heroCampusAmbassadors from '@/assets/hero/hero-campus-ambassadors.jpg';
 
 interface HeroSlide {
   id: string;
