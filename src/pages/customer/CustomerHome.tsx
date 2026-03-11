@@ -68,6 +68,7 @@ const CustomerHome: React.FC = () => {
   const [citySearch, setCitySearch] = useState('');
   
   const { user, profile, signOut, loading: authLoading } = useAuth();
+  const { country: countryConfig, countryCode, setCountry: setCountryFn } = useCountry();
   const { city, isLoading: locationLoading, refetch: refetchLocation, setManualCity, isManual } = useUserLocation();
   const { data: storeData, isLoading: storesLoading } = useStoresByCity(city);
   const { data: orders, isLoading: ordersLoading } = useOrders();
