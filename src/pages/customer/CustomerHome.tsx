@@ -117,9 +117,7 @@ const CustomerHome: React.FC = () => {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
-                <span className="text-2xl">🦉</span>
-              </div>
+              <img src={owlLogo} alt="SpeedUp" className="w-11 h-11 object-contain" />
               <div>
                 <h1 className="text-lg font-bold text-foreground">
                   Speed<span className="text-primary">Up</span>
