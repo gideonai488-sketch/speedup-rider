@@ -33,7 +33,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const [userLocation, setUserLocation] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get user's current location for proximity bias
   useEffect(() => {
