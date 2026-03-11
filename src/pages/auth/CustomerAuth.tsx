@@ -234,6 +234,22 @@ const CustomerAuth: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <Label>Country</Label>
+                    <Select value={signupCountry} onValueChange={(v) => { setSignupCountry(v as CountryCode); setSignupCity(''); }}>
+                      <SelectTrigger className="w-full">
+                        <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allCountries.filter(c => c.isActive || !c.comingSoon).map((c) => (
+                          <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
+                            {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label>City</Label>
                     <Select value={signupCity} onValueChange={setSignupCity}>
                       <SelectTrigger className="w-full">
@@ -241,17 +257,10 @@ const CustomerAuth: React.FC = () => {
                         <SelectValue placeholder="Select your city" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
-                        {Object.entries(citiesByRegion).map(([region, cities]) => (
-                          <div key={region}>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted">
-                              {region} Region
-                            </div>
-                            {cities.map((city) => (
-                              <SelectItem key={city.value} value={city.value}>
-                                {city.label}
-                              </SelectItem>
-                            ))}
-                          </div>
+                        {availableCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
