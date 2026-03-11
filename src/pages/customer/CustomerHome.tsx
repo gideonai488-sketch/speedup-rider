@@ -10,10 +10,13 @@ import HeroCarousel from '@/components/home/HeroCarousel';
 import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
-  Zap, MapPin, Clock, Search, Bell, User,
+  Zap, MapPin, Clock, Search, Bell, User, Globe,
   ChevronRight, Star, Navigation, UtensilsCrossed,
   ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel, Check, LocateFixed
 } from 'lucide-react';
+import owlLogo from '@/assets/speedup-owl-logo.png';
+import { useCountry } from '@/context/CountryContext';
+import { allCountries } from '@/config/countries';
 import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
