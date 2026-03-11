@@ -30,11 +30,13 @@ const CustomerAuth: React.FC = () => {
   // Signup form
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [signupCountry, setSignupCountry] = useState<CountryCode>('GH');
   const [signupCity, setSignupCity] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
 
-  const citiesByRegion = getCitiesByRegion();
+  const selectedCountryConfig = allCountries.find(c => c.code === signupCountry);
+  const availableCities = selectedCountryConfig?.cities || [];
 
   useEffect(() => {
     if (user && profile && !authLoading) {
