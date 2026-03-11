@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
-import { Loader2, Lock, User, Phone, ShoppingBag, ArrowLeft, MapPin } from 'lucide-react';
+import { Loader2, Lock, User, Phone, ShoppingBag, ArrowLeft, MapPin, Globe } from 'lucide-react';
 import { z } from 'zod';
-import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
+import { allCountries, CountryCode } from '@/config/countries';
+import owlLogo from '@/assets/speedup-owl-logo.png';
 
 const phoneSchema = z.string().min(10, 'Please enter a valid phone number');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
