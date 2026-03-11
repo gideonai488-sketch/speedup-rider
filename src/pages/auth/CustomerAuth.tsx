@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
-import { Loader2, Lock, User, Phone, ShoppingBag, ArrowLeft, MapPin } from 'lucide-react';
+import { Loader2, Lock, User, Phone, ShoppingBag, ArrowLeft, MapPin, Globe } from 'lucide-react';
 import { z } from 'zod';
-import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
+import { allCountries, CountryCode } from '@/config/countries';
+import owlLogo from '@/assets/speedup-owl-logo.png';
 
 const phoneSchema = z.string().min(10, 'Please enter a valid phone number');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -29,11 +30,13 @@ const CustomerAuth: React.FC = () => {
   // Signup form
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [signupCountry, setSignupCountry] = useState<CountryCode>('GH');
   const [signupCity, setSignupCity] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
 
-  const citiesByRegion = getCitiesByRegion();
+  const selectedCountryConfig = allCountries.find(c => c.code === signupCountry);
+  const availableCities = selectedCountryConfig?.cities || [];
 
   useEffect(() => {
     if (user && profile && !authLoading) {
@@ -105,10 +108,9 @@ const CustomerAuth: React.FC = () => {
     }
 
     setIsLoading(true);
-    // Use phone as email format for Supabase auth
     const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speup.guph`;
-    const cityLabel = ghanaianCities.find(c => c.value === signupCity)?.label || signupCity;
-    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, cityLabel);
+    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, signupCity, undefined);
+    setIsLoading(false);
     setIsLoading(false);
 
     if (error) {
@@ -141,10 +143,10 @@ const CustomerAuth: React.FC = () => {
       <div className="flex-1 flex items-center justify-center">
         <Card className="w-full max-w-md shadow-2xl border-0">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-2">
-              <ShoppingBag className="w-8 h-8 text-primary-foreground" />
+            <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-2">
+              <img src={owlLogo} alt="SpeedUp" className="w-16 h-16 object-contain" />
             </div>
-            <CardTitle className="text-2xl font-bold">SpeedUp</CardTitle>
+            <CardTitle className="text-2xl font-bold">Speed<span className="text-primary">Up</span></CardTitle>
             <CardDescription>Order deliveries at your fingertips</CardDescription>
           </CardHeader>
           <CardContent>
@@ -232,6 +234,22 @@ const CustomerAuth: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <Label>Country</Label>
+                    <Select value={signupCountry} onValueChange={(v) => { setSignupCountry(v as CountryCode); setSignupCity(''); }}>
+                      <SelectTrigger className="w-full">
+                        <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allCountries.filter(c => c.isActive || !c.comingSoon).map((c) => (
+                          <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
+                            {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label>City</Label>
                     <Select value={signupCity} onValueChange={setSignupCity}>
                       <SelectTrigger className="w-full">
@@ -239,17 +257,10 @@ const CustomerAuth: React.FC = () => {
                         <SelectValue placeholder="Select your city" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
-                        {Object.entries(citiesByRegion).map(([region, cities]) => (
-                          <div key={region}>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted">
-                              {region} Region
-                            </div>
-                            {cities.map((city) => (
-                              <SelectItem key={city.value} value={city.value}>
-                                {city.label}
-                              </SelectItem>
-                            ))}
-                          </div>
+                        {availableCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

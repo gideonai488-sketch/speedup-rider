@@ -10,10 +10,13 @@ import HeroCarousel from '@/components/home/HeroCarousel';
 import OnlineRidersPreview from '@/components/home/OnlineRidersPreview';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
-  Zap, MapPin, Clock, Search, Bell, User,
+  Zap, MapPin, Clock, Search, Bell, User, Globe,
   ChevronRight, Star, Navigation, UtensilsCrossed,
   ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel, Check, LocateFixed
 } from 'lucide-react';
+import owlLogo from '@/assets/speedup-owl-logo.png';
+import { useCountry } from '@/context/CountryContext';
+import { allCountries } from '@/config/countries';
 import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
@@ -65,6 +68,7 @@ const CustomerHome: React.FC = () => {
   const [citySearch, setCitySearch] = useState('');
   
   const { user, profile, signOut, loading: authLoading } = useAuth();
+  const { country: countryConfig, countryCode, setCountry: setCountryFn } = useCountry();
   const { city, isLoading: locationLoading, refetch: refetchLocation, setManualCity, isManual } = useUserLocation();
   const { data: storeData, isLoading: storesLoading } = useStoresByCity(city);
   const { data: orders, isLoading: ordersLoading } = useOrders();
@@ -117,9 +121,7 @@ const CustomerHome: React.FC = () => {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl gradient-hero flex items-center justify-center shadow-lg relative overflow-hidden">
-                <span className="text-2xl">🦉</span>
-              </div>
+              <img src={owlLogo} alt="SpeedUp" className="w-11 h-11 object-contain" />
               <div>
                 <h1 className="text-lg font-bold text-foreground">
                   Speed<span className="text-primary">Up</span>
@@ -397,10 +399,17 @@ const CustomerHome: React.FC = () => {
               <Navigation className="w-6 h-6 text-white" />
             </div>
           </Link>
-          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
-            <Bell className="w-5 h-5" />
-            <span className="text-xs">Alerts</span>
-          </Link>
+          <button 
+            onClick={() => {
+              const nextIdx = (allCountries.findIndex(c => c.code === countryCode) + 1) % allCountries.length;
+              const next = allCountries[nextIdx];
+              if (!next.comingSoon) setCountryFn(next.code);
+            }}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
+            <span className="text-lg">{countryConfig.flag}</span>
+            <span className="text-[10px]">{countryConfig.currencySymbol}</span>
+          </button>
           <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <User className="w-5 h-5" />
             <span className="text-xs">Profile</span>
