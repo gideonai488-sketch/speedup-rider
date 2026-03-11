@@ -1,22 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import heroFastDelivery from '@/assets/hero/hero-fast-delivery.jpg';
-import heroFoodDelivery from '@/assets/hero/hero-food-delivery.jpg';
-import heroGroceries from '@/assets/hero/hero-groceries.jpg';
-import heroPackage from '@/assets/hero/hero-package.jpg';
-import heroIphoneGiveaway from '@/assets/hero/hero-iphone-giveaway.jpg';
-import heroDiscountSale from '@/assets/hero/hero-discount-sale.jpg';
-import heroReferralBonus from '@/assets/hero/hero-referral-bonus.jpg';
-import heroCampusRiders from '@/assets/hero/hero-campus-riders.jpg';
-import heroCampusCustomers from '@/assets/hero/hero-campus-customers.jpg';
-import heroCampusAmbassadors from '@/assets/hero/hero-campus-ambassadors.jpg';
+import heroFastDelivery from '@/assets/hero/hero-fast-delivery-v2.jpg';
+import heroFood from '@/assets/hero/hero-food-v2.jpg';
+import heroGroceries from '@/assets/hero/hero-groceries-v2.jpg';
+import heroPackage from '@/assets/hero/hero-package-v2.jpg';
+import heroCampus from '@/assets/hero/hero-campus-v2.jpg';
+import heroFleet from '@/assets/hero/hero-fleet-v2.jpg';
+import heroTracking from '@/assets/hero/hero-tracking-v2.jpg';
 
 interface HeroSlide {
   id: string;
-  type: 'image' | 'video';
   src: string;
-  poster?: string;
   title: string;
   subtitle?: string;
   cta?: { label: string; link: string };
@@ -26,93 +21,59 @@ interface HeroSlide {
 const defaultSlides: HeroSlide[] = [
   {
     id: '1',
-    type: 'image',
-    src: heroIphoneGiveaway,
-    title: '🎉 Win an iPhone This Week!',
-    subtitle: 'Place 5 orders to stand a chance to win',
-    cta: { label: 'Order Now', link: '/customer/book' },
-    gradient: 'from-black/60 via-black/30 to-transparent',
-  },
-  {
-    id: '2',
-    type: 'image',
-    src: heroDiscountSale,
-    title: '50% Off Delivery Fee',
-    subtitle: 'Use code SPEED50 on your next 3 orders',
-    cta: { label: 'Shop Now', link: '/customer/book?service=food' },
-    gradient: 'from-orange-900/70 via-orange-900/30 to-transparent',
-  },
-  {
-    id: '3',
-    type: 'image',
-    src: heroReferralBonus,
-    title: 'Refer & Earn GH₵20',
-    subtitle: 'Share your code and earn when friends order',
-    cta: { label: 'Refer Now', link: '/customer/referral' },
-    gradient: 'from-emerald-900/70 via-emerald-900/30 to-transparent',
-  },
-  {
-    id: '4',
-    type: 'image',
     src: heroFastDelivery,
     title: 'Lightning Fast Delivery',
     subtitle: 'From any store to your door in minutes',
     cta: { label: 'Order Now', link: '/customer/book' },
-    gradient: 'from-black/70 via-black/40 to-transparent',
+    gradient: 'from-black/70 via-black/30 to-transparent',
+  },
+  {
+    id: '2',
+    src: heroFood,
+    title: 'Delicious Food Delivered Hot',
+    subtitle: 'Your favourite meals, fresh to your door',
+    cta: { label: 'Order Food', link: '/customer/book?service=food' },
+    gradient: 'from-black/70 via-black/30 to-transparent',
+  },
+  {
+    id: '3',
+    src: heroGroceries,
+    title: 'Fresh Groceries Delivered',
+    subtitle: 'Get fresh produce from top stores',
+    cta: { label: 'Browse Stores', link: '/customer/book?service=groceries' },
+    gradient: 'from-black/60 via-black/20 to-transparent',
+  },
+  {
+    id: '4',
+    src: heroPackage,
+    title: 'Send Packages Anywhere',
+    subtitle: 'Reliable same-day package delivery',
+    cta: { label: 'Send Package', link: '/customer/book?service=packages' },
+    gradient: 'from-black/70 via-black/30 to-transparent',
   },
   {
     id: '5',
-    type: 'image',
-    src: heroFoodDelivery,
-    title: 'Delicious Food Delivered',
-    subtitle: 'Your favourite meals, hot & fresh to your door',
-    cta: { label: 'Order Food', link: '/customer/book?service=food' },
-    gradient: 'from-primary/80 via-primary/40 to-transparent',
+    src: heroCampus,
+    title: 'Campus Delivery Made Easy',
+    subtitle: 'Food, groceries & more — delivered in 30 mins',
+    cta: { label: 'Order Now', link: '/customer/book' },
+    gradient: 'from-black/60 via-black/20 to-transparent',
   },
   {
     id: '6',
-    type: 'image',
-    src: heroGroceries,
-    title: 'Fresh Groceries',
-    subtitle: 'Get fresh produce delivered from top stores',
-    cta: { label: 'Browse Stores', link: '/customer/book?service=groceries' },
-    gradient: 'from-accent/80 via-accent/40 to-transparent',
+    src: heroFleet,
+    title: 'Ride & Earn With Us',
+    subtitle: 'Join our fleet — flexible hours, weekly payouts',
+    cta: { label: 'Start Earning', link: '/rider/auth' },
+    gradient: 'from-black/70 via-black/30 to-transparent',
   },
   {
     id: '7',
-    type: 'image',
-    src: heroPackage,
-    title: 'Send Packages Anywhere',
-    subtitle: 'Reliable same-day package delivery across Ghana',
-    cta: { label: 'Send Package', link: '/customer/book?service=packages' },
-    gradient: 'from-black/70 via-black/40 to-transparent',
-  },
-  {
-    id: '8',
-    type: 'image',
-    src: heroCampusRiders,
-    title: '🏍️ Ride & Earn GH₵500+/Week',
-    subtitle: 'Join as a campus rider — flexible hours, weekly payouts',
-    cta: { label: 'Start Earning', link: '/rider/auth' },
-    gradient: 'from-yellow-900/70 via-yellow-900/30 to-transparent',
-  },
-  {
-    id: '9',
-    type: 'image',
-    src: heroCampusCustomers,
-    title: '🎓 Free Delivery Week on Campus!',
-    subtitle: 'Order food, groceries & more — delivered in 30 mins',
-    cta: { label: 'Order Now', link: '/customer/auth' },
-    gradient: 'from-green-900/70 via-green-900/30 to-transparent',
-  },
-  {
-    id: '10',
-    type: 'image',
-    src: heroCampusAmbassadors,
-    title: '💰 Earn GH₵2000+/Month as Ambassador',
-    subtitle: 'Refer friends, build your network, get paid bi-weekly',
-    cta: { label: 'Join Program', link: '/ambassador/auth' },
-    gradient: 'from-red-900/70 via-red-900/30 to-transparent',
+    src: heroTracking,
+    title: 'Track Every Delivery Live',
+    subtitle: 'Real-time GPS tracking on every order',
+    cta: { label: 'Learn More', link: '/customer/book' },
+    gradient: 'from-black/60 via-black/20 to-transparent',
   },
 ];
 
@@ -123,7 +84,6 @@ interface HeroCarouselProps {
 const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides = defaultSlides }) => {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [videoPlaying, setVideoPlaying] = useState(true);
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % slides.length);
@@ -142,27 +102,17 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides = defaultSlides }) =
   const slide = slides[current];
 
   return (
-    <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden group">
-      {/* Slide content */}
-      {slide.type === 'video' ? (
-        <video
-          key={slide.id}
-          className="absolute inset-0 w-full h-full object-cover"
-          src={slide.src}
-          poster={slide.poster}
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
-      ) : (
-        <img
-          key={slide.id}
-          src={slide.src}
-          alt={slide.title}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
-        />
-      )}
+    <div
+      className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden group"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <img
+        key={slide.id}
+        src={slide.src}
+        alt={slide.title}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+      />
 
       {/* Gradient overlay */}
       <div className={cn('absolute inset-0 bg-gradient-to-t', slide.gradient || 'from-black/60 to-transparent')} />
@@ -213,16 +163,6 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides = defaultSlides }) =
           />
         ))}
       </div>
-
-      {/* Pause/Play for video */}
-      {slide.type === 'video' && (
-        <button
-          onClick={() => setIsPaused(!isPaused)}
-          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          {isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
-        </button>
-      )}
     </div>
   );
 };

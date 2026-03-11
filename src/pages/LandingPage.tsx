@@ -49,7 +49,6 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <CountrySelector variant="compact" />
             <Link to="/login">
               <Button variant="ghost" className="hidden sm:flex font-medium">{t.nav_sign_in}</Button>
             </Link>
