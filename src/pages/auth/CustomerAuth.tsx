@@ -108,10 +108,9 @@ const CustomerAuth: React.FC = () => {
     }
 
     setIsLoading(true);
-    // Use phone as email format for Supabase auth
     const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speup.guph`;
-    const cityLabel = ghanaianCities.find(c => c.value === signupCity)?.label || signupCity;
-    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, cityLabel);
+    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, signupCity, undefined);
+    setIsLoading(false);
     setIsLoading(false);
 
     if (error) {
