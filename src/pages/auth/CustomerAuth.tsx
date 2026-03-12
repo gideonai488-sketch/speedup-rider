@@ -26,6 +26,8 @@ const CustomerAuth: React.FC = () => {
   // Login form
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [loginCountry, setLoginCountry] = useState<CountryCode>('GH');
+  const loginCountryConfig = allCountries.find(c => c.code === loginCountry);
   
   // Signup form
   const [signupName, setSignupName] = useState('');
@@ -159,16 +161,34 @@ const CustomerAuth: React.FC = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
+                    <Label>Country</Label>
+                    <Select value={loginCountry} onValueChange={(v) => setLoginCountry(v as CountryCode)}>
+                      <SelectTrigger className="w-full">
+                        <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allCountries.map((c) => (
+                          <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
+                            {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="login-phone">Phone Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+                        {loginCountryConfig?.phonePrefix || '+233'}
+                      </span>
                       <Input
                         id="login-phone"
                         type="tel"
-                        placeholder="0XX XXX XXXX"
+                        placeholder="XX XXX XXXX"
                         value={loginPhone}
                         onChange={(e) => setLoginPhone(e.target.value)}
-                        className="pl-10"
+                        className="rounded-l-none"
                         required
                       />
                     </div>
@@ -220,15 +240,17 @@ const CustomerAuth: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-phone">Phone Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <div className="relative flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+                        {selectedCountryConfig?.phonePrefix || '+233'}
+                      </span>
                       <Input
                         id="signup-phone"
                         type="tel"
-                        placeholder="0XX XXX XXXX"
+                        placeholder="XX XXX XXXX"
                         value={signupPhone}
                         onChange={(e) => setSignupPhone(e.target.value)}
-                        className="pl-10"
+                        className="rounded-l-none"
                         required
                       />
                     </div>
@@ -241,7 +263,7 @@ const CustomerAuth: React.FC = () => {
                         <SelectValue placeholder="Select country" />
                       </SelectTrigger>
                       <SelectContent>
-                        {allCountries.filter(c => c.isActive || !c.comingSoon).map((c) => (
+                        {allCountries.map((c) => (
                           <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
                             {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
                           </SelectItem>

@@ -5,13 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Lock, User, Phone, Bike, ArrowLeft, BadgeCheck, Camera } from 'lucide-react';
+import { Loader2, Lock, User, Phone, Bike, ArrowLeft, BadgeCheck, Camera, Globe, MapPin } from 'lucide-react';
 import { z } from 'zod';
+import { allCountries, CountryCode } from '@/config/countries';
 
-const phoneSchema = z.string().min(10, 'Please enter a valid phone number');
+const phoneSchema = z.string().min(7, 'Please enter a valid phone number');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 const RiderAuth: React.FC = () => {
@@ -24,15 +26,22 @@ const RiderAuth: React.FC = () => {
   // Login form
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [loginCountry, setLoginCountry] = useState<CountryCode>('GH');
+  const loginCountryConfig = allCountries.find(c => c.code === loginCountry);
   
   // Signup form
   const [signupName, setSignupName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [signupCountry, setSignupCountry] = useState<CountryCode>('GH');
+  const [signupCity, setSignupCity] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const selectedCountryConfig = allCountries.find(c => c.code === signupCountry);
+  const availableCities = selectedCountryConfig?.cities || [];
 
   useEffect(() => {
     if (user && profile && !authLoading) {
@@ -110,10 +119,14 @@ const RiderAuth: React.FC = () => {
       toast.error('Please enter your full name');
       return;
     }
+    if (!signupCity) {
+      toast.error('Please select your city');
+      return;
+    }
 
     setIsLoading(true);
     const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speedup.gh`;
-    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone);
+    const { error } = await signUp(phoneEmail, signupPassword, signupName, 'rider', signupPhone, signupCity);
     
     if (error) {
       setIsLoading(false);
@@ -123,7 +136,6 @@ const RiderAuth: React.FC = () => {
 
     // Upload avatar if selected (after signup)
     if (avatarFile) {
-      // Wait briefly for profile creation trigger
       await new Promise(r => setTimeout(r, 2000));
       const { data: { user: newUser } } = await supabase.auth.getUser();
       if (newUser) {
@@ -170,7 +182,7 @@ const RiderAuth: React.FC = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-300">
                 <BadgeCheck className="w-4 h-4 text-green-500" />
-                <span>Keep most of your earnings (only GH₵ 5 per order)</span>
+                <span>Keep most of your earnings</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-300">
                 <BadgeCheck className="w-4 h-4 text-green-500" />
@@ -187,10 +199,28 @@ const RiderAuth: React.FC = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
+                    <Label className="text-gray-300">Country</Label>
+                    <Select value={loginCountry} onValueChange={(v) => setLoginCountry(v as CountryCode)}>
+                      <SelectTrigger className="w-full bg-gray-700/50 border-gray-600 text-white">
+                        <Globe className="h-4 w-4 mr-2 text-gray-500" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allCountries.map((c) => (
+                          <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
+                            {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="login-phone" className="text-gray-300">Phone Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input id="login-phone" type="tel" placeholder="0XX XXX XXXX" value={loginPhone} onChange={(e) => setLoginPhone(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-600 bg-gray-700 text-gray-300 text-sm">
+                        {loginCountryConfig?.phonePrefix || '+233'}
+                      </span>
+                      <Input id="login-phone" type="tel" placeholder="XX XXX XXXX" value={loginPhone} onChange={(e) => setLoginPhone(e.target.value)} className="rounded-l-none bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -235,13 +265,51 @@ const RiderAuth: React.FC = () => {
                       <Input id="signup-name" type="text" placeholder="John Doe" value={signupName} onChange={(e) => setSignupName(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Country</Label>
+                    <Select value={signupCountry} onValueChange={(v) => { setSignupCountry(v as CountryCode); setSignupCity(''); }}>
+                      <SelectTrigger className="w-full bg-gray-700/50 border-gray-600 text-white">
+                        <Globe className="h-4 w-4 mr-2 text-gray-500" />
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allCountries.map((c) => (
+                          <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
+                            {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">City</Label>
+                    <Select value={signupCity} onValueChange={setSignupCity}>
+                      <SelectTrigger className="w-full bg-gray-700/50 border-gray-600 text-white">
+                        <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                        <SelectValue placeholder="Select your city" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {availableCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-phone" className="text-gray-300">Phone Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input id="signup-phone" type="tel" placeholder="0XX XXX XXXX" value={signupPhone} onChange={(e) => setSignupPhone(e.target.value)} className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-600 bg-gray-700 text-gray-300 text-sm">
+                        {selectedCountryConfig?.phonePrefix || '+233'}
+                      </span>
+                      <Input id="signup-phone" type="tel" placeholder="XX XXX XXXX" value={signupPhone} onChange={(e) => setSignupPhone(e.target.value)} className="rounded-l-none bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500" required />
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-password" className="text-gray-300">Password</Label>
                     <div className="relative">
