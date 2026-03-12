@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import owlLogo from '@/assets/speedup-owl-logo.png';
 import { useCountry } from '@/context/CountryContext';
-import { allCountries } from '@/config/countries';
 import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
