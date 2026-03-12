@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import owlLogo from '@/assets/speedup-owl-logo.png';
 import { useCountry } from '@/context/CountryContext';
-import { allCountries } from '@/config/countries';
 import { ghanaianCities, getCitiesByRegion } from '@/data/ghanaianCities';
 import { serviceCategories } from '@/data/deliveryData';
 import { ServiceType } from '@/types/delivery';
@@ -399,17 +398,10 @@ const CustomerHome: React.FC = () => {
               <Navigation className="w-6 h-6 text-white" />
             </div>
           </Link>
-          <button 
-            onClick={() => {
-              const nextIdx = (allCountries.findIndex(c => c.code === countryCode) + 1) % allCountries.length;
-              const next = allCountries[nextIdx];
-              if (!next.comingSoon) setCountryFn(next.code);
-            }}
-            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"
-          >
-            <span className="text-lg">{countryConfig.flag}</span>
-            <span className="text-[10px]">{countryConfig.currencySymbol}</span>
-          </button>
+          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+            <Bell className="w-5 h-5" />
+            <span className="text-xs">Alerts</span>
+          </Link>
           <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <User className="w-5 h-5" />
             <span className="text-xs">Profile</span>
