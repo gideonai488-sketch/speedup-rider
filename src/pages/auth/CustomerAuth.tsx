@@ -26,6 +26,8 @@ const CustomerAuth: React.FC = () => {
   // Login form
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [loginCountry, setLoginCountry] = useState<CountryCode>('GH');
+  const loginCountryConfig = allCountries.find(c => c.code === loginCountry);
   
   // Signup form
   const [signupName, setSignupName] = useState('');
