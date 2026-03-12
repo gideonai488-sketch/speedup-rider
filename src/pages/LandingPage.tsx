@@ -594,19 +594,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Select Your Country CTA */}
-      <section className="py-16 bg-secondary/20">
-        <div className="container mx-auto px-4 text-center">
-          <Globe className="w-10 h-10 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-            Select Your Country
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Choose your location to see local prices, payment options, and available services.
-          </p>
-          <CountrySelector variant="full" className="max-w-3xl mx-auto" />
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="py-16 bg-secondary/30 border-t border-border">
