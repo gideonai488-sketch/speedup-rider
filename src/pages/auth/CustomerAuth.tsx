@@ -161,10 +161,26 @@ const CustomerAuth: React.FC = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
+                    <Label>Country</Label>
+                    <Select value={loginCountry} onValueChange={(v) => setLoginCountry(v as CountryCode)}>
+                      <SelectTrigger className="w-full">
+                        <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allCountries.map((c) => (
+                          <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
+                            {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="login-phone">Phone Number</Label>
-                    <div className="relative flex">
+                    <div className="flex">
                       <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
-                        {selectedCountryConfig?.phonePrefix || '+233'}
+                        {loginCountryConfig?.phonePrefix || '+233'}
                       </span>
                       <Input
                         id="login-phone"
