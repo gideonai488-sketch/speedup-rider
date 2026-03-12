@@ -245,7 +245,7 @@ const CustomerAuth: React.FC = () => {
                         <SelectValue placeholder="Select country" />
                       </SelectTrigger>
                       <SelectContent>
-                        {allCountries.filter(c => c.isActive || !c.comingSoon).map((c) => (
+                        {allCountries.map((c) => (
                           <SelectItem key={c.code} value={c.code} disabled={c.comingSoon}>
                             {c.flag} {c.name} {c.comingSoon ? '(Coming Soon)' : ''}
                           </SelectItem>
