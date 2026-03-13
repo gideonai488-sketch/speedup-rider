@@ -151,7 +151,7 @@ const CampusAmbassador: React.FC = () => {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-full border border-border">
-                <Globe className="w-4 h-4 text-primary" /> 6 Countries
+                <Globe className="w-4 h-4 text-primary" /> 10 Countries
               </span>
               <span className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-full border border-border">
                 <Users className="w-4 h-4 text-primary" /> 50+ Campuses
