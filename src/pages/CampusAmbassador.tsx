@@ -36,7 +36,7 @@ const BENEFITS = [
   { icon: <DollarSign className="w-6 h-6" />, title: 'Earn Per Signup', desc: 'Get $5 (or GH₵50) for every student who joins through your link.' },
   { icon: <Trophy className="w-6 h-6" />, title: 'Monthly Bonuses', desc: 'Top ambassadors earn up to $500/month in performance bonuses.' },
   { icon: <Megaphone className="w-6 h-6" />, title: 'Marketing Support', desc: 'We provide flyers, social media kits, and promo codes for your campus.' },
-  { icon: <Users className="w-6 h-6" />, title: 'Build Your Network', desc: 'Join a community of student leaders across 6 countries.' },
+  { icon: <Users className="w-6 h-6" />, title: 'Build Your Network', desc: 'Join a community of student leaders across 10 countries.' },
   { icon: <Star className="w-6 h-6" />, title: 'Resume Builder', desc: 'Official title, recommendation letters, and real startup experience.' },
   { icon: <Rocket className="w-6 h-6" />, title: 'Launch Ownership', desc: 'You become the face of SpeedUp on your campus. Your territory.' },
 ];
