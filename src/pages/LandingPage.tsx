@@ -365,7 +365,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* Country Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-4 mb-12">
             {allCountries.map((c) => (
               <div
                 key={c.code}
