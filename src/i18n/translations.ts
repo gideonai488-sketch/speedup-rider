@@ -312,11 +312,13 @@ const fr: Translations = {
   footer_product_of: 'Genesis Holdings Inc. — États-Unis 🇺🇸',
 };
 
-export const translations: Record<LanguageCode, Translations> = { en, fi, am, fr };
+export const translations: Record<LanguageCode, Translations> = { en, fi, am, fr, ar: en, es: en };
 
 export const languageNames: Record<LanguageCode, string> = {
   en: 'English',
   fi: 'Suomi',
   am: 'አማርኛ',
   fr: 'Français',
+  ar: 'العربية',
+  es: 'Español',
 };
