@@ -37,15 +37,24 @@ const ambassadorNavItems = [
   { path: '/ambassador/profile', icon: User, label: 'Profile' },
 ];
 
+const merchantNavItems = [
+  { path: '/merchant', icon: Home, label: 'Home' },
+  { path: '/merchant/orders', icon: ClipboardList, label: 'Orders' },
+  { path: '/merchant/products', icon: Zap, label: 'Products' },
+  { path: '/merchant/finance', icon: Wallet, label: 'Finance' },
+  { path: '/merchant/profile', icon: User, label: 'Profile' },
+];
+
 type BottomNavProps = React.ComponentPropsWithoutRef<'nav'>;
 
 const BottomNav = React.forwardRef<HTMLElement, BottomNavProps>(({ className, ...props }, ref) => {
   const location = useLocation();
   const { profile } = useAuth();
 
+  const isMerchant = profile?.role === 'merchant' || location.pathname.startsWith('/merchant');
   const isAmbassador = profile?.role === 'ambassador' || location.pathname.startsWith('/ambassador');
   const isRider = profile?.role === 'rider' || location.pathname.startsWith('/rider');
-  const navItems = isAmbassador ? ambassadorNavItems : isRider ? riderNavItems : customerNavItems;
+  const navItems = isMerchant ? merchantNavItems : isAmbassador ? ambassadorNavItems : isRider ? riderNavItems : customerNavItems;
 
   return (
     <nav

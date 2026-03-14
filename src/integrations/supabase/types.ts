@@ -1681,7 +1681,7 @@ export type Database = {
         | "order_refund"
         | "rider_earning"
         | "referral_bonus"
-      user_role: "customer" | "rider" | "admin" | "ambassador"
+      user_role: "customer" | "rider" | "admin" | "ambassador" | "merchant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1828,7 +1828,7 @@ export const Constants = {
         "rider_earning",
         "referral_bonus",
       ],
-      user_role: ["customer", "rider", "admin", "ambassador"],
+      user_role: ["customer", "rider", "admin", "ambassador", "merchant"],
     },
   },
 } as const

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2, GraduationCap, ChevronRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import heroRider from '@/assets/hero-rider.jpg';
 import owlLogo from '@/assets/speedup-owl-logo.png';
 import heroDelivery from '@/assets/landing/hero-scooter-delivery.jpg';
@@ -595,7 +596,78 @@ const LandingPage: React.FC = () => {
       </section>
 
 
-      {/* Footer */}
+      {/* Merchant & Ambassador CTA */}
+      <section className="py-16 bg-secondary/30 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Grow With <span className="text-gradient">SpeedUp</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Whether you're a business owner or campus leader, we've got a place for you.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Merchant Card */}
+            <Card className="border-2 hover:border-primary/50 transition-all hover:shadow-xl group">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Building2 className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Merchant Portal</h3>
+                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                  List your business on SpeedUp. Manage products, orders, and finances with AI-powered tools. Reach thousands of customers instantly.
+                </p>
+                <div className="space-y-2 mb-6">
+                  {['Self-serve store setup', 'Real-time order management', 'AI-powered business tools', 'Revenue analytics dashboard'].map((f) => (
+                    <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <Link to="/merchant/auth">
+                  <Button className="w-full" size="lg">
+                    <Building2 className="w-4 h-4 mr-2" />
+                    Start Selling
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Ambassador Card */}
+            <Card className="border-2 hover:border-primary/50 transition-all hover:shadow-xl group">
+              <CardContent className="p-8">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <GraduationCap className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Campus Ambassador</h3>
+                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                  Represent SpeedUp on your campus. Earn passive income from every order your referrals make. Bi-weekly payouts guaranteed.
+                </p>
+                <div className="space-y-2 mb-6">
+                  {['Earn from every referral order', 'Bi-weekly guaranteed payouts', 'Campus leaderboard & ranks', 'Marketing resources provided'].map((f) => (
+                    <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <Link to="/campus-ambassador">
+                  <Button variant="outline" className="w-full border-2" size="lg">
+                    <GraduationCap className="w-4 h-4 mr-2" />
+                    Become Ambassador
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <footer className="py-16 bg-secondary/30 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
@@ -628,6 +700,8 @@ const LandingPage: React.FC = () => {
               <div className="space-y-3">
                 <Link to="/signup" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Order Delivery</Link>
                 <Link to="/rider/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Become a Rider</Link>
+                <Link to="/merchant/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Merchant Portal</Link>
+                <Link to="/campus-ambassador" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Campus Ambassador</Link>
                 <Link to="/become-partner" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Partner with Us</Link>
               </div>
             </div>

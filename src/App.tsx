@@ -36,6 +36,17 @@ import CampusAmbassador from "./pages/CampusAmbassador";
 // Ambassador Pages
 import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
 import AmbassadorDashboard from "./pages/ambassador/AmbassadorDashboard";
+
+// Merchant Pages
+import MerchantAuth from "./pages/auth/MerchantAuth";
+import MerchantDashboard from "./pages/merchant/MerchantDashboard";
+import MerchantStore from "./pages/merchant/MerchantStore";
+import MerchantProducts from "./pages/merchant/MerchantProducts";
+import MerchantOrders from "./pages/merchant/MerchantOrders";
+import MerchantFinance from "./pages/merchant/MerchantFinance";
+import MerchantCustomers from "./pages/merchant/MerchantCustomers";
+import MerchantAI from "./pages/merchant/MerchantAI";
+import MerchantProfile from "./pages/merchant/MerchantProfile";
 import AmbassadorReferrals from "./pages/ambassador/AmbassadorReferrals";
 import AmbassadorEarnings from "./pages/ambassador/AmbassadorEarnings";
 import AmbassadorLeaderboard from "./pages/ambassador/AmbassadorLeaderboard";
@@ -143,6 +154,21 @@ const App = () => {
                 <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                 
+                {/* Merchant Routes */}
+                <Route path="/merchant/auth" element={<MerchantAuth />} />
+                <Route path="/merchant/login" element={<MerchantAuth />} />
+                <Route path="/merchant/signup" element={<MerchantAuth />} />
+                <Route path="/merchant" element={<MerchantDashboard />} />
+                <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
+                <Route path="/merchant/store" element={<MerchantStore />} />
+                <Route path="/merchant/products" element={<MerchantProducts />} />
+                <Route path="/merchant/orders" element={<MerchantOrders />} />
+                <Route path="/merchant/finance" element={<MerchantFinance />} />
+                <Route path="/merchant/customers" element={<MerchantCustomers />} />
+                <Route path="/merchant/ai" element={<MerchantAI />} />
+                <Route path="/merchant/profile" element={<MerchantProfile />} />
+                <Route path="/merchant/notifications" element={<Notifications />} />
+
                 {/* Ambassador Routes */}
                 <Route path="/ambassador/auth" element={<AmbassadorAuth />} />
                 <Route path="/ambassador" element={<AmbassadorDashboard />} />
