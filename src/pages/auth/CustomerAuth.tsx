@@ -45,6 +45,9 @@ const CustomerAuth: React.FC = () => {
       if (profile.role === 'rider') {
         toast.error('Please use the rider app to login');
         navigate('/rider/auth');
+      } else if (profile.role === 'merchant') {
+        toast.error('Please use the merchant portal to login');
+        navigate('/merchant/auth');
       } else {
         navigate('/customer');
       }
