@@ -628,6 +628,8 @@ const LandingPage: React.FC = () => {
               <div className="space-y-3">
                 <Link to="/signup" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Order Delivery</Link>
                 <Link to="/rider/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Become a Rider</Link>
+                <Link to="/merchant/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Merchant Portal</Link>
+                <Link to="/campus-ambassador" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Campus Ambassador</Link>
                 <Link to="/become-partner" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Partner with Us</Link>
               </div>
             </div>
