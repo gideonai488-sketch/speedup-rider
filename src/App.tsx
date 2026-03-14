@@ -154,6 +154,21 @@ const App = () => {
                 <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
                 
+                {/* Merchant Routes */}
+                <Route path="/merchant/auth" element={<MerchantAuth />} />
+                <Route path="/merchant/login" element={<MerchantAuth />} />
+                <Route path="/merchant/signup" element={<MerchantAuth />} />
+                <Route path="/merchant" element={<MerchantDashboard />} />
+                <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
+                <Route path="/merchant/store" element={<MerchantStore />} />
+                <Route path="/merchant/products" element={<MerchantProducts />} />
+                <Route path="/merchant/orders" element={<MerchantOrders />} />
+                <Route path="/merchant/finance" element={<MerchantFinance />} />
+                <Route path="/merchant/customers" element={<MerchantCustomers />} />
+                <Route path="/merchant/ai" element={<MerchantAI />} />
+                <Route path="/merchant/profile" element={<MerchantProfile />} />
+                <Route path="/merchant/notifications" element={<Notifications />} />
+
                 {/* Ambassador Routes */}
                 <Route path="/ambassador/auth" element={<AmbassadorAuth />} />
                 <Route path="/ambassador" element={<AmbassadorDashboard />} />
