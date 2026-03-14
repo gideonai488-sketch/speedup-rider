@@ -36,6 +36,17 @@ import CampusAmbassador from "./pages/CampusAmbassador";
 // Ambassador Pages
 import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
 import AmbassadorDashboard from "./pages/ambassador/AmbassadorDashboard";
+
+// Merchant Pages
+import MerchantAuth from "./pages/auth/MerchantAuth";
+import MerchantDashboard from "./pages/merchant/MerchantDashboard";
+import MerchantStore from "./pages/merchant/MerchantStore";
+import MerchantProducts from "./pages/merchant/MerchantProducts";
+import MerchantOrders from "./pages/merchant/MerchantOrders";
+import MerchantFinance from "./pages/merchant/MerchantFinance";
+import MerchantCustomers from "./pages/merchant/MerchantCustomers";
+import MerchantAI from "./pages/merchant/MerchantAI";
+import MerchantProfile from "./pages/merchant/MerchantProfile";
 import AmbassadorReferrals from "./pages/ambassador/AmbassadorReferrals";
 import AmbassadorEarnings from "./pages/ambassador/AmbassadorEarnings";
 import AmbassadorLeaderboard from "./pages/ambassador/AmbassadorLeaderboard";
