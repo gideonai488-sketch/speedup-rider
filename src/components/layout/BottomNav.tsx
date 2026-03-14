@@ -37,6 +37,14 @@ const ambassadorNavItems = [
   { path: '/ambassador/profile', icon: User, label: 'Profile' },
 ];
 
+const merchantNavItems = [
+  { path: '/merchant', icon: Home, label: 'Home' },
+  { path: '/merchant/orders', icon: ClipboardList, label: 'Orders' },
+  { path: '/merchant/products', icon: Zap, label: 'Products' },
+  { path: '/merchant/finance', icon: Wallet, label: 'Finance' },
+  { path: '/merchant/profile', icon: User, label: 'Profile' },
+];
+
 type BottomNavProps = React.ComponentPropsWithoutRef<'nav'>;
 
 const BottomNav = React.forwardRef<HTMLElement, BottomNavProps>(({ className, ...props }, ref) => {
