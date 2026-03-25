@@ -63,7 +63,7 @@ const MerchantAuth: React.FC = () => {
       }
     }
     setIsLoading(true);
-    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speedup.g.gh`;
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@merchant.speedup.app`;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
     if (error) {
@@ -101,7 +101,7 @@ const MerchantAuth: React.FC = () => {
       return;
     }
     setIsLoading(true);
-    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speup.guph`;
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@merchant.speedup.app`;
     const { error } = await signUp(phoneEmail, signupPassword, signupName, 'merchant', signupPhone, signupCity, signupBusinessName);
     setIsLoading(false);
     if (error) {
