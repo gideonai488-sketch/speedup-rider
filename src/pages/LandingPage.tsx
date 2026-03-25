@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2, GraduationCap, ChevronRight } from 'lucide-react';
+import { ArrowRight, Zap, MapPin, Clock, Shield, Star, ChevronDown, ExternalLink, Target, Users, TrendingUp, Globe, Package, Building2, Bike, Car, CheckCircle2, GraduationCap, ChevronRight, Plane } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import heroRider from '@/assets/hero-rider.jpg';
 import owlLogo from '@/assets/speedup-owl-logo.png';
@@ -203,7 +203,7 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 stagger-children">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 stagger-children">
             {[
               { icon: '🍔', name: t.service_food, desc: 'Hot meals from top restaurants' },
               { icon: '🛒', name: t.service_groceries, desc: 'Fresh produce to your door' },
@@ -211,15 +211,22 @@ const LandingPage: React.FC = () => {
               { icon: '📋', name: t.service_errands, desc: 'We handle your tasks' },
               { icon: '📦', name: t.service_packages, desc: 'Send & receive parcels' },
               { icon: '📄', name: t.service_documents, desc: 'Secure document delivery' },
+              { icon: '🌍', name: 'Global Shipping', desc: 'Ship worldwide via FedEx & DHL', highlight: true },
+              { icon: '🏪', name: 'Store Orders', desc: 'Shop from partner stores' },
             ].map((service) => (
               <Link 
                 key={service.name}
                 to="/signup"
-                className="group bg-card rounded-2xl p-6 md:p-8 shadow-card hover:shadow-xl transition-all hover:-translate-y-1 border border-border"
+                className={`group bg-card rounded-2xl p-6 md:p-8 shadow-card hover:shadow-xl transition-all hover:-translate-y-1 border ${
+                  (service as any).highlight ? 'border-primary/50 ring-2 ring-primary/20' : 'border-border'
+                }`}
               >
                 <div className="text-4xl md:text-5xl mb-4 group-hover:scale-110 transition-transform">{service.icon}</div>
                 <h3 className="font-semibold text-foreground mb-1 text-lg">{service.name}</h3>
                 <p className="text-sm text-muted-foreground">{service.desc}</p>
+                {(service as any).highlight && (
+                  <span className="inline-block mt-2 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>
+                )}
               </Link>
             ))}
           </div>
