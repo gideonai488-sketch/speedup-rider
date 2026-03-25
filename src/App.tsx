@@ -132,6 +132,7 @@ const App = () => {
                 <Route path="/customer/store/:storeId" element={<StorePage />} />
                 <Route path="/customer/store-checkout" element={<StoreCheckout />} />
                 <Route path="/customer/book" element={<BookDelivery />} />
+                <Route path="/customer/shipping" element={<ShippingFlow />} />
                 <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
                 <Route path="/track/:orderId" element={<TrackDelivery />} />
                 <Route path="/customer/wallet" element={<Wallet />} />
