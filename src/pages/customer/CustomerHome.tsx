@@ -37,6 +37,7 @@ const serviceIcons: Record<string, React.ReactNode> = {
   errands: <ClipboardList className="w-6 h-6" />,
   packages: <Package className="w-6 h-6" />,
   documents: <FileText className="w-6 h-6" />,
+  shipping: <Globe className="w-6 h-6" />,
 };
 
 const serviceColors: Record<string, string> = {
@@ -46,6 +47,7 @@ const serviceColors: Record<string, string> = {
   errands: 'bg-purple-500/10 text-purple-500',
   packages: 'bg-blue-500/10 text-blue-500',
   documents: 'bg-cyan-500/10 text-cyan-500',
+  shipping: 'bg-indigo-600/10 text-indigo-600',
 };
 
 // Inline bid count for a single order
