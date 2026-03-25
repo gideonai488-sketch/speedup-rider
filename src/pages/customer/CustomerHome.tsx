@@ -12,7 +12,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { 
   Zap, MapPin, Clock, Search, Bell, User, Globe,
   ChevronRight, Star, Navigation, UtensilsCrossed,
-  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel, Check, LocateFixed
+  ShoppingCart, Pill, ClipboardList, Package, FileText, ExternalLink, LogOut, RefreshCw, Gavel, Check, LocateFixed,
+  ArrowRight, Sparkles
 } from 'lucide-react';
 import owlLogo from '@/assets/speedup-owl-logo.png';
 import { useCountry } from '@/context/CountryContext';
@@ -31,23 +32,43 @@ import { Database } from '@/integrations/supabase/types';
 type StoreCategory = Database['public']['Enums']['store_category'];
 
 const serviceIcons: Record<string, React.ReactNode> = {
-  food: <UtensilsCrossed className="w-6 h-6" />,
-  groceries: <ShoppingCart className="w-6 h-6" />,
-  pharmacy: <Pill className="w-6 h-6" />,
-  errands: <ClipboardList className="w-6 h-6" />,
-  packages: <Package className="w-6 h-6" />,
-  documents: <FileText className="w-6 h-6" />,
-  shipping: <Globe className="w-6 h-6" />,
+  food: <UtensilsCrossed className="w-5 h-5" />,
+  groceries: <ShoppingCart className="w-5 h-5" />,
+  pharmacy: <Pill className="w-5 h-5" />,
+  errands: <ClipboardList className="w-5 h-5" />,
+  packages: <Package className="w-5 h-5" />,
+  documents: <FileText className="w-5 h-5" />,
+  shipping: <Globe className="w-5 h-5" />,
 };
 
-const serviceColors: Record<string, string> = {
-  food: 'bg-orange-500/10 text-orange-500',
-  groceries: 'bg-green-500/10 text-green-500',
-  pharmacy: 'bg-red-500/10 text-red-500',
-  errands: 'bg-purple-500/10 text-purple-500',
-  packages: 'bg-blue-500/10 text-blue-500',
-  documents: 'bg-cyan-500/10 text-cyan-500',
-  shipping: 'bg-indigo-600/10 text-indigo-600',
+const serviceGradients: Record<string, string> = {
+  food: 'from-orange-500/20 to-orange-600/5',
+  groceries: 'from-emerald-500/20 to-emerald-600/5',
+  pharmacy: 'from-primary/20 to-primary/5',
+  errands: 'from-violet-500/20 to-violet-600/5',
+  packages: 'from-sky-500/20 to-sky-600/5',
+  documents: 'from-cyan-500/20 to-cyan-600/5',
+  shipping: 'from-indigo-500/20 to-indigo-600/5',
+};
+
+const serviceIconColors: Record<string, string> = {
+  food: 'text-orange-500',
+  groceries: 'text-emerald-500',
+  pharmacy: 'text-primary',
+  errands: 'text-violet-500',
+  packages: 'text-sky-500',
+  documents: 'text-cyan-500',
+  shipping: 'text-indigo-400',
+};
+
+const serviceBorderColors: Record<string, string> = {
+  food: 'border-orange-500/20 hover:border-orange-500/50',
+  groceries: 'border-emerald-500/20 hover:border-emerald-500/50',
+  pharmacy: 'border-primary/20 hover:border-primary/50',
+  errands: 'border-violet-500/20 hover:border-violet-500/50',
+  packages: 'border-sky-500/20 hover:border-sky-500/50',
+  documents: 'border-cyan-500/20 hover:border-cyan-500/50',
+  shipping: 'border-indigo-500/20 hover:border-indigo-500/50',
 };
 
 // Inline bid count for a single order
@@ -95,7 +116,6 @@ const CustomerHome: React.FC = () => {
 
   const featuredStores = stores.filter(s => s.is_featured) || [];
 
-  // Orders waiting for rider (pending, no rider assigned) — these can have bids
   const pendingBidOrders = (orders || []).filter(
     (o: any) => o.status === 'pending' && !o.rider_id
   );
@@ -109,27 +129,27 @@ const CustomerHome: React.FC = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
+    <div className="min-h-screen bg-[hsl(0,0%,4%)] pb-24">
+      {/* Header - Sleek dark glass */}
+      <header className="sticky top-0 z-50 bg-[hsl(0,0%,6%)]/95 backdrop-blur-xl border-b border-[hsl(0,0%,12%)]">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <img src={owlLogo} alt="SpeedUp" className="w-11 h-11 object-contain" />
               <div>
-                <h1 className="text-lg font-bold text-foreground">
+                <h1 className="text-lg font-bold text-[hsl(0,0%,95%)]">
                   Speed<span className="text-primary">Up</span>
                 </h1>
                 <button 
                   onClick={() => setCityPickerOpen(true)}
-                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center gap-1 text-sm text-[hsl(0,0%,55%)] hover:text-[hsl(0,0%,80%)] transition-colors"
                 >
                   <MapPin className="w-3 h-3 text-primary" />
                   {locationLoading ? (
@@ -147,55 +167,57 @@ const CustomerHome: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Link to="/customer/wallet">
-                <Button variant="ghost" size="sm" className="text-primary font-semibold">
+                <Button variant="ghost" size="sm" className="text-primary font-bold text-sm hover:bg-primary/10">
                   {formatCurrency(wallet?.balance || 0)}
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/customer/notifications')}>
+              <Button variant="ghost" size="icon" className="relative text-[hsl(0,0%,70%)] hover:text-[hsl(0,0%,95%)] hover:bg-[hsl(0,0%,12%)]" onClick={() => navigate('/customer/notifications')}>
                 <Bell className="w-5 h-5" />
                 {orders && orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse ring-2 ring-[hsl(0,0%,6%)]" />
                 )}
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <Button variant="ghost" size="icon" className="text-[hsl(0,0%,70%)] hover:text-[hsl(0,0%,95%)] hover:bg-[hsl(0,0%,12%)]" onClick={handleSignOut}>
                 <LogOut className="w-5 h-5" />
               </Button>
             </div>
           </div>
           
           {profile && (
-            <p className="text-sm text-muted-foreground mb-3">
-              Welcome back, <span className="font-medium text-foreground">{profile.full_name}</span>!
+            <p className="text-sm text-[hsl(0,0%,50%)] mb-3">
+              Welcome back, <span className="font-semibold text-[hsl(0,0%,90%)]">{profile.full_name}</span> 👋
             </p>
           )}
           
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(0,0%,40%)]" />
             <Input 
-              placeholder="Search for services, restaurants, stores..."
-              className="pl-10 bg-secondary/50 rounded-xl"
+              placeholder="Search services, restaurants, stores..."
+              className="pl-10 bg-[hsl(0,0%,10%)] border-[hsl(0,0%,15%)] rounded-xl text-[hsl(0,0%,90%)] placeholder:text-[hsl(0,0%,35%)] focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-5 space-y-7">
-        {/* 1. Hero Carousel with ads/videos/images */}
+      <main className="px-4 py-5 space-y-8">
+        {/* 1. Hero Carousel */}
         <HeroCarousel />
 
         {/* Active Deliveries Awaiting Bids */}
         {pendingBidOrders.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Gavel className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-bold text-foreground">Incoming Bids</h2>
+                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <Gavel className="w-4 h-4 text-primary" />
+                </div>
+                <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Incoming Bids</h2>
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-success bg-success/10 px-2.5 py-1 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                Live
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                LIVE
               </div>
             </div>
 
@@ -204,7 +226,7 @@ const CustomerHome: React.FC = () => {
                 <button
                   key={order.id}
                   onClick={() => navigate(`/track/${order.id}`)}
-                  className="w-full text-left bg-card rounded-2xl border-2 border-primary/30 p-4 hover:border-primary/60 transition-all shadow-[0_0_15px_rgba(var(--primary),0.08)] active:scale-[0.98]"
+                  className="w-full text-left bg-[hsl(0,0%,8%)] rounded-2xl border border-primary/20 p-4 hover:border-primary/50 transition-all active:scale-[0.98] group"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -216,8 +238,8 @@ const CustomerHome: React.FC = () => {
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground text-sm">{order.order_number || order.id.slice(0, 8)}</p>
-                        <p className="text-xs text-muted-foreground">{order.stores?.name || 'Delivery'}</p>
+                        <p className="font-semibold text-[hsl(0,0%,95%)] text-sm">{order.order_number || order.id.slice(0, 8)}</p>
+                        <p className="text-xs text-[hsl(0,0%,50%)]">{order.stores?.name || 'Delivery'}</p>
                       </div>
                     </div>
                     <OrderBidCount orderId={order.id} />
@@ -227,18 +249,18 @@ const CustomerHome: React.FC = () => {
                     {order.pickup_address && (
                       <div className="flex items-start gap-2">
                         <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
-                        <span className="text-muted-foreground truncate">{order.pickup_address}</span>
+                        <span className="text-[hsl(0,0%,50%)] truncate">{order.pickup_address}</span>
                       </div>
                     )}
                     <div className="flex items-start gap-2">
-                      <div className="w-2 h-2 rounded-full bg-success mt-1 flex-shrink-0" />
-                      <span className="text-foreground font-medium truncate">{order.delivery_address}</span>
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1 flex-shrink-0" />
+                      <span className="text-[hsl(0,0%,80%)] font-medium truncate">{order.delivery_address}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-border">
-                    <span className="text-xs text-muted-foreground">Tap to view & accept bids</span>
-                    <ChevronRight className="w-4 h-4 text-primary" />
+                  <div className="flex items-center justify-between pt-2 border-t border-[hsl(0,0%,15%)]">
+                    <span className="text-xs text-[hsl(0,0%,45%)]">Tap to view & accept bids</span>
+                    <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </button>
               ))}
@@ -246,10 +268,15 @@ const CustomerHome: React.FC = () => {
           </section>
         )}
 
-        {/* 2. Services Grid */}
+        {/* 2. Services Grid - Premium dark cards */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Our Services</h2>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Zap className="w-4 h-4 text-primary" />
+              </div>
+              <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Our Services</h2>
+            </div>
           </div>
           
           <div className="grid grid-cols-3 gap-3">
@@ -258,46 +285,59 @@ const CustomerHome: React.FC = () => {
                 key={service.id}
                 to={`/customer/book?service=${service.id}`}
                 className={cn(
-                  'flex flex-col items-center p-4 rounded-xl border-2 transition-all',
-                  selectedService === service.id
-                    ? 'border-primary bg-primary/5 shadow-glow'
-                    : 'border-border bg-card hover:border-primary/50'
+                  'group relative flex flex-col items-center p-4 rounded-2xl border transition-all duration-300 overflow-hidden',
+                  'bg-gradient-to-b',
+                  serviceGradients[service.id],
+                  serviceBorderColors[service.id],
+                  selectedService === service.id && 'ring-1 ring-primary/50 scale-[0.97]'
                 )}
                 onClick={() => setSelectedService(service.id)}
               >
-                <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-2', serviceColors[service.id])}>
-                  {serviceIcons[service.id]}
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className={cn(
+                  'w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 relative',
+                  'bg-[hsl(0,0%,8%)] border border-[hsl(0,0%,15%)]',
+                  'group-hover:scale-110 transition-transform duration-300'
+                )}>
+                  <span className={serviceIconColors[service.id]}>{serviceIcons[service.id]}</span>
                 </div>
-                <span className="text-xs font-medium text-foreground text-center">{service.name}</span>
-                <span className="text-[10px] text-muted-foreground mt-0.5">From GH₵{service.basePrice}</span>
+                <span className="text-xs font-semibold text-[hsl(0,0%,90%)] text-center leading-tight">{service.name}</span>
+                <span className="text-[10px] text-[hsl(0,0%,45%)] mt-1 font-medium">From GH₵{service.basePrice}</span>
               </Link>
             ))}
           </div>
 
-          {/* Full-width Global Shipping button */}
+          {/* Global Shipping - Premium banner */}
           {serviceCategories.filter(s => s.id === 'shipping').map((service) => (
             <Link
               key={service.id}
               to="/customer/shipping"
               className={cn(
-                'flex items-center gap-4 w-full p-4 rounded-xl border-2 transition-all mt-3',
-                selectedService === service.id
-                  ? 'border-primary bg-primary/5 shadow-glow'
-                  : 'border-border bg-card hover:border-primary/50'
+                'group flex items-center gap-4 w-full p-4 rounded-2xl border transition-all mt-4 relative overflow-hidden',
+                'bg-gradient-to-r from-indigo-500/10 via-[hsl(0,0%,8%)] to-primary/10',
+                'border-indigo-500/20 hover:border-indigo-400/40',
               )}
               onClick={() => setSelectedService(service.id)}
             >
-              <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0', serviceColors[service.id])}>
-                {serviceIcons[service.id]}
+              {/* Animated shimmer */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <Globe className="w-5 h-5 text-indigo-400" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">{service.name}</span>
-                  <span className="text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">NEW</span>
+                  <span className="text-sm font-bold text-[hsl(0,0%,95%)]">{service.name}</span>
+                  <span className="text-[9px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{service.description}</span>
+                <span className="text-xs text-[hsl(0,0%,50%)]">{service.description}</span>
               </div>
-              <span className="text-xs text-primary font-medium whitespace-nowrap">From GH₵{service.basePrice}</span>
+              <div className="flex flex-col items-end flex-shrink-0">
+                <span className="text-xs text-primary font-bold">GH₵{service.basePrice}+</span>
+                <ArrowRight className="w-4 h-4 text-[hsl(0,0%,40%)] mt-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+              </div>
             </Link>
           ))}
         </section>
@@ -309,40 +349,45 @@ const CustomerHome: React.FC = () => {
         <section>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-foreground">Featured Stores</h2>
-              {isFilteredByCity && currentCity && (
-                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                  in {currentCity}
-                </span>
-              )}
+              <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
+                <Star className="w-4 h-4 text-amber-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Featured Stores</h2>
+                {isFilteredByCity && currentCity && (
+                  <span className="text-[10px] text-[hsl(0,0%,50%)]">in {currentCity}</span>
+                )}
+              </div>
             </div>
-            <button className="text-sm text-primary font-medium">See all</button>
+            <button className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-1.5 transition-all">
+              See all <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
           
           <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex gap-4 pb-4">
+            <div className="flex gap-3 pb-4">
               {storesLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex-shrink-0 w-40">
-                    <Skeleton className="h-24 rounded-xl mb-3" />
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-3 w-20" />
+                  <div key={i} className="flex-shrink-0 w-44">
+                    <Skeleton className="h-28 rounded-2xl mb-3 bg-[hsl(0,0%,10%)]" />
+                    <Skeleton className="h-4 w-24 mb-2 bg-[hsl(0,0%,10%)]" />
+                    <Skeleton className="h-3 w-20 bg-[hsl(0,0%,10%)]" />
                   </div>
                 ))
               ) : (
                 featuredStores.map((store) => (
-                  <Link key={store.id} to={`/customer/store/${store.id}`} className="group flex-shrink-0 w-40">
-                    <div className={`h-24 rounded-xl ${store.cover_color || 'bg-primary'} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
+                  <Link key={store.id} to={`/customer/store/${store.id}`} className="group flex-shrink-0 w-44">
+                    <div className={`h-28 rounded-2xl ${store.cover_color || 'bg-primary'} mb-3 overflow-hidden relative flex items-center justify-center p-4`}>
                       <StoreLogo src={store.logo_url || ''} name={store.name} className="max-h-16 max-w-28" textClassName="text-2xl" />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm truncate">{store.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <h3 className="font-semibold text-[hsl(0,0%,90%)] text-sm truncate">{store.name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-[hsl(0,0%,50%)] mt-1">
                       <div className="flex items-center gap-0.5">
-                        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                        {store.rating?.toFixed(1) || '0.0'}
+                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                        <span className="text-[hsl(0,0%,75%)]">{store.rating?.toFixed(1) || '0.0'}</span>
                       </div>
-                      <span>•</span>
+                      <span className="text-[hsl(0,0%,25%)]">•</span>
                       <span>{store.delivery_time}</span>
                     </div>
                   </Link>
@@ -357,24 +402,29 @@ const CustomerHome: React.FC = () => {
         <section>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-foreground">Popular Near You</h2>
-              {isFilteredByCity && currentCity && (
-                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                  {currentCity}
-                </span>
-              )}
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Popular Near You</h2>
+                {isFilteredByCity && currentCity && (
+                  <span className="text-[10px] text-[hsl(0,0%,50%)]">{currentCity}</span>
+                )}
+              </div>
             </div>
-            <button className="text-sm text-primary font-medium">See all</button>
+            <button className="text-xs text-primary font-semibold flex items-center gap-1 hover:gap-1.5 transition-all">
+              See all <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
           
           <div className="grid grid-cols-2 gap-3">
             {storesLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
-                  <Skeleton className="h-20" />
+                <div key={i} className="bg-[hsl(0,0%,8%)] rounded-2xl border border-[hsl(0,0%,12%)] overflow-hidden">
+                  <Skeleton className="h-24 bg-[hsl(0,0%,10%)]" />
                   <div className="p-3">
-                    <Skeleton className="h-4 w-20 mb-2" />
-                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-4 w-20 mb-2 bg-[hsl(0,0%,12%)]" />
+                    <Skeleton className="h-3 w-24 bg-[hsl(0,0%,12%)]" />
                   </div>
                 </div>
               ))
@@ -383,24 +433,25 @@ const CustomerHome: React.FC = () => {
                 <Link
                   key={store.id}
                   to={`/customer/store/${store.id}`}
-                  className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-colors group"
+                  className="bg-[hsl(0,0%,8%)] rounded-2xl border border-[hsl(0,0%,12%)] overflow-hidden hover:border-primary/30 transition-all group"
                 >
-                  <div className={`h-20 ${store.cover_color || 'bg-primary'} flex items-center justify-center p-3 relative`}>
+                  <div className={`h-24 ${store.cover_color || 'bg-primary'} flex items-center justify-center p-3 relative`}>
                     <StoreLogo src={store.logo_url || ''} name={store.name} className="max-h-12 max-w-20" textClassName="text-xl" />
-                    <div className="absolute top-2 right-2 bg-black/30 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-2 right-2 bg-black/40 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <ExternalLink className="w-3 h-3 text-white" />
                     </div>
                   </div>
                   <div className="p-3">
-                    <h3 className="font-semibold text-foreground text-sm">{store.name}</h3>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                      <span>{store.rating?.toFixed(1) || '0.0'}</span>
-                      <span className="mx-1">•</span>
+                    <h3 className="font-semibold text-[hsl(0,0%,90%)] text-sm">{store.name}</h3>
+                    <div className="flex items-center gap-1 text-xs text-[hsl(0,0%,50%)] mt-1">
+                      <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                      <span className="text-[hsl(0,0%,75%)]">{store.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="mx-0.5 text-[hsl(0,0%,25%)]">•</span>
                       <Clock className="w-3 h-3" />
                       <span>{store.delivery_time}</span>
                     </div>
-                    <div className="text-xs text-primary mt-1.5 font-medium">
+                    <div className="text-[10px] text-primary mt-1.5 font-semibold flex items-center gap-1">
+                      <Gavel className="w-3 h-3" />
                       Rider bids for delivery
                     </div>
                   </div>
@@ -411,45 +462,44 @@ const CustomerHome: React.FC = () => {
         </section>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border px-6 py-3 safe-area-pb">
+      {/* Bottom Navigation - Dark glass */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-[hsl(0,0%,6%)]/95 backdrop-blur-xl border-t border-[hsl(0,0%,12%)] px-6 py-3 safe-area-pb">
         <div className="flex items-center justify-around">
-          <Link to="/customer" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+          <Link to="/customer" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
             <Zap className="w-5 h-5" />
-            <span className="text-xs font-medium">Home</span>
+            <span className="text-[10px] font-semibold">Home</span>
           </Link>
-          <Link to="/customer/orders" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/orders' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+          <Link to="/customer/orders" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/orders' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
             <Clock className="w-5 h-5" />
-            <span className="text-xs">Orders</span>
+            <span className="text-[10px]">Orders</span>
           </Link>
           <Link to="/customer/book" className="relative -top-4">
-            <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center shadow-glow">
+            <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center shadow-glow ring-4 ring-[hsl(0,0%,6%)]">
               <Navigation className="w-6 h-6 text-white" />
             </div>
           </Link>
-          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
             <Bell className="w-5 h-5" />
-            <span className="text-xs">Alerts</span>
+            <span className="text-[10px]">Alerts</span>
           </Link>
-          <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+          <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
             <User className="w-5 h-5" />
-            <span className="text-xs">Profile</span>
+            <span className="text-[10px]">Profile</span>
           </Link>
         </div>
       </nav>
 
       {/* City Picker Sheet */}
       <Sheet open={cityPickerOpen} onOpenChange={setCityPickerOpen}>
-        <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
+        <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl bg-[hsl(0,0%,6%)] border-[hsl(0,0%,15%)]">
           <SheetHeader className="pb-2">
-            <SheetTitle>Choose Your City</SheetTitle>
+            <SheetTitle className="text-[hsl(0,0%,95%)]">Choose Your City</SheetTitle>
           </SheetHeader>
           
           <div className="space-y-3">
-            {/* Auto-detect button */}
             <Button
               variant="outline"
-              className="w-full justify-start gap-2"
+              className="w-full justify-start gap-2 bg-[hsl(0,0%,10%)] border-[hsl(0,0%,15%)] text-[hsl(0,0%,90%)] hover:bg-[hsl(0,0%,14%)]"
               onClick={() => {
                 refetchLocation();
                 setCityPickerOpen(false);
@@ -462,18 +512,16 @@ const CustomerHome: React.FC = () => {
               )}
             </Button>
 
-            {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(0,0%,40%)]" />
               <Input
                 placeholder="Search city..."
                 value={citySearch}
                 onChange={(e) => setCitySearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-[hsl(0,0%,10%)] border-[hsl(0,0%,15%)] text-[hsl(0,0%,90%)]"
               />
             </div>
 
-            {/* City list */}
             <ScrollArea className="h-[calc(80vh-200px)]">
               <div className="space-y-1 pr-3">
                 {citySearch ? (
@@ -488,13 +536,13 @@ const CustomerHome: React.FC = () => {
                       className={cn(
                         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
                         currentCity?.toLowerCase() === c.label.toLowerCase()
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "hover:bg-secondary text-foreground"
+                          ? "bg-primary/15 text-primary font-medium"
+                          : "hover:bg-[hsl(0,0%,12%)] text-[hsl(0,0%,80%)]"
                       )}
                     >
                       <div>
                         <span>{c.label}</span>
-                        <span className="text-xs text-muted-foreground ml-2">{c.region}</span>
+                        <span className="text-xs text-[hsl(0,0%,45%)] ml-2">{c.region}</span>
                       </div>
                       {currentCity?.toLowerCase() === c.label.toLowerCase() && (
                         <Check className="w-4 h-4 text-primary" />
@@ -504,7 +552,7 @@ const CustomerHome: React.FC = () => {
                 ) : (
                   Object.entries(citiesByRegion).map(([region, cities]) => (
                     <div key={region} className="mb-3">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-1.5">
+                      <p className="text-[10px] font-bold text-[hsl(0,0%,40%)] uppercase tracking-widest px-3 py-1.5">
                         {region}
                       </p>
                       {cities.map((c) => (
@@ -517,8 +565,8 @@ const CustomerHome: React.FC = () => {
                           className={cn(
                             "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
                             currentCity?.toLowerCase() === c.label.toLowerCase()
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "hover:bg-secondary text-foreground"
+                              ? "bg-primary/15 text-primary font-medium"
+                              : "hover:bg-[hsl(0,0%,12%)] text-[hsl(0,0%,80%)]"
                           )}
                         >
                           <span>{c.label}</span>
