@@ -594,12 +594,13 @@ const ShippingFlow: React.FC = () => {
             </div>
 
             <div className="bg-primary/5 rounded-xl border border-primary/20 p-4 text-left">
-              <p className="text-sm font-semibold text-foreground mb-2">📋 Next Steps</p>
+              <p className="text-sm font-semibold text-foreground mb-2">📋 What Happens Next</p>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>1. A SpeedUp rider will come pick up your package</p>
                 <p>2. Rider takes it to the nearest DHL Service Point</p>
-                <p>3. Rider scans the QR code — label is printed automatically</p>
-                <p>4. Track your shipment worldwide right here in the app</p>
+                <p>3. DHL staff scans the QR code to <strong className="text-foreground">verify payment</strong></p>
+                <p>4. Shipping label is printed on-site — no printer needed</p>
+                <p>5. DHL ships your package & you track it here in real-time</p>
               </div>
             </div>
           </div>
