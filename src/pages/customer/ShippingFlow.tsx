@@ -60,7 +60,6 @@ const ShippingFlow: React.FC = () => {
   const [shippingOrderId, setShippingOrderId] = useState('');
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [paymentReference, setPaymentReference] = useState('');
-  const [paymentReference, setPaymentReference] = useState('');
 
   const trackingQuery = useShipmentTracking(step === 'tracking' && trackingNumber ? trackingNumber : null);
 
@@ -219,9 +218,51 @@ const ShippingFlow: React.FC = () => {
             paidAt: new Date().toISOString(),
           });
           setQrData(qrPayload);
-          
-          setStep('qrcode');
-          toast.success('Payment confirmed! Your QR code is ready.');
+
+          // Create a delivery order so riders can bid to pick up the package and deliver to DHL office
+          if (profile) {
+            try {
+              const { data: orderData, error: orderError } = await supabase
+                .from('orders')
+                .insert({
+                  customer_id: profile.id,
+                  pickup_address: pickupAddress || 'Pickup location',
+                  delivery_address: 'DHL Service Point (Drop-off)',
+                  pickup_lat: pickupCoords?.lat || null,
+                  pickup_lng: pickupCoords?.lng || null,
+                  subtotal: 0,
+                  delivery_fee: 0,
+                  total: 0,
+                  status: 'pending' as any,
+                  payment_status: 'paid',
+                  notes: `DHL Shipping pickup — Tracking: ${result.trackingNumber}, Shipment: ${shipmentId}`,
+                })
+                .select()
+                .single();
+
+              if (!orderError && orderData) {
+                setShippingOrderId(orderData.id);
+                // Link order to shipment
+                await supabase
+                  .from('shipments')
+                  .update({ order_id: orderData.id } as any)
+                  .eq('id', shipmentId);
+                
+                setStep('bids');
+                toast.success('Payment confirmed! Now find a rider to deliver your package to DHL.');
+              } else {
+                // Fallback to QR code if order creation fails
+                setStep('qrcode');
+                toast.success('Payment confirmed! Your QR code is ready.');
+              }
+            } catch {
+              setStep('qrcode');
+              toast.success('Payment confirmed! Your QR code is ready.');
+            }
+          } else {
+            setStep('qrcode');
+            toast.success('Payment confirmed! Your QR code is ready.');
+          }
         }
       } else {
         toast.error('Payment verification failed. Please try again.');
@@ -256,6 +297,7 @@ const ShippingFlow: React.FC = () => {
     confirm: 'Review Shipment',
     payment: 'Payment',
     qrcode: 'Your QR Code',
+    bids: 'Find a Rider',
     'service-points': 'DHL Drop-off Points',
     tracking: 'Track Shipment',
     'my-shipments': 'My Shipments',
@@ -268,6 +310,7 @@ const ShippingFlow: React.FC = () => {
       confirm: 'rates',
       payment: 'confirm',
       qrcode: null,
+      bids: 'qrcode',
       'service-points': 'details',
       tracking: 'my-shipments',
       'my-shipments': 'details',
