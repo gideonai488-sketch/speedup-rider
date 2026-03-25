@@ -119,6 +119,10 @@ const BookDelivery: React.FC = () => {
   const selectedService = serviceCategories.find(s => s.id === formData.serviceType);
 
   const handleServiceSelect = (serviceId: ServiceType) => {
+    if (serviceId === 'shipping') {
+      navigate('/customer/shipping');
+      return;
+    }
     setFormData({ ...formData, serviceType: serviceId });
     setStep(2);
   };
