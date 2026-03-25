@@ -88,15 +88,17 @@ const ShippingFlow: React.FC = () => {
     }
   };
 
-  const handleConfirmShipment = async () => {
+  // Step 1: Create shipment in DB and go to payment
+  const handleProceedToPayment = async () => {
     if (!profile || !selectedRate) return;
     if (!form.recipientName || !form.recipientPhone || !form.destinationAddress) {
       toast.error('Please fill in all recipient details');
       return;
     }
 
+    setIsPaymentProcessing(true);
     try {
-      // Create shipment record in DB first
+      // Create shipment record in DB
       const { data: shipment, error } = await supabase
         .from('shipments')
         .insert({
@@ -121,31 +123,113 @@ const ShippingFlow: React.FC = () => {
           quoted_rate: selectedRate.totalPrice,
           currency: selectedRate.currency,
           estimated_delivery_date: selectedRate.estimatedDeliveryDate,
-          status: 'pending',
+          status: 'awaiting_payment',
         } as any)
         .select()
         .single();
 
       if (error) throw error;
+      setCreatedShipmentId((shipment as any).id);
 
-      // Create DHL shipment via edge function
-      const result = await createShipmentMutation.mutateAsync({
-        shipmentId: (shipment as any).id,
-        shippingDetails: form,
-        selectedRate,
-        pickupAddress,
+      // Initialize Paystack payment
+      const amountInPesewas = Math.round(selectedRate.totalPrice * 100);
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('process-payment', {
+        body: {
+          email: form.recipientEmail || `${profile.id}@speedup.gh`,
+          amount: amountInPesewas,
+          currency: 'GHS',
+          reference: `SHIP-${(shipment as any).id}-${Date.now()}`,
+          callback_url: `${window.location.origin}/customer/shipping?step=payment&shipment_id=${(shipment as any).id}`,
+          metadata: {
+            shipment_id: (shipment as any).id,
+            type: 'shipping_payment',
+            destination: `${form.destinationCity}, ${form.destinationCountry}`,
+            carrier: 'DHL',
+          },
+        },
       });
 
-      if (result.success) {
-        setTrackingNumber(result.trackingNumber);
-        setQrData(result.qrCodeData || result.trackingNumber);
-        setCreatedShipmentId((shipment as any).id);
-        setStep('qrcode');
-        toast.success('Shipment created! Show the QR code at the DHL drop-off point.');
+      if (paymentError) throw paymentError;
+
+      if (paymentData?.authorization_url) {
+        // Redirect to Paystack
+        window.location.href = paymentData.authorization_url;
+      } else {
+        throw new Error('No payment URL received');
       }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to create shipment');
+      toast.error('Failed to initialize payment');
+      setIsPaymentProcessing(false);
+    }
+  };
+
+  // Step 2: Handle payment callback — verify & create DHL shipment
+  useEffect(() => {
+    const shipmentId = searchParams.get('shipment_id');
+    const reference = searchParams.get('reference') || searchParams.get('trxref');
+    
+    if (shipmentId && reference && step === 'payment') {
+      handlePaymentVerification(shipmentId, reference);
+    }
+  }, [searchParams, step]);
+
+  const handlePaymentVerification = async (shipmentId: string, reference: string) => {
+    setIsPaymentProcessing(true);
+    try {
+      // Verify payment with Paystack
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-payment', {
+        body: { reference },
+      });
+
+      if (verifyError) throw verifyError;
+
+      if (verifyData?.status === 'success' || verifyData?.data?.status === 'success') {
+        setPaymentReference(reference);
+
+        // Update shipment status to paid
+        await supabase
+          .from('shipments')
+          .update({ status: 'paid' } as any)
+          .eq('id', shipmentId);
+
+        // Now create the DHL shipment & get QR code
+        const result = await createShipmentMutation.mutateAsync({
+          shipmentId,
+          shippingDetails: form,
+          selectedRate: selectedRate!,
+          pickupAddress,
+        });
+
+        if (result.success) {
+          setTrackingNumber(result.trackingNumber);
+          setCreatedShipmentId(shipmentId);
+          
+          // QR code data includes payment proof
+          const qrPayload = JSON.stringify({
+            trackingNumber: result.trackingNumber,
+            shipmentId,
+            carrier: 'DHL',
+            paymentRef: reference,
+            status: 'PAID',
+            type: 'LABEL_FREE_DROP_OFF',
+            paidAt: new Date().toISOString(),
+          });
+          setQrData(qrPayload);
+          
+          setStep('qrcode');
+          toast.success('Payment confirmed! Your QR code is ready.');
+        }
+      } else {
+        toast.error('Payment verification failed. Please try again.');
+        setStep('confirm');
+      }
+    } catch (err) {
+      console.error('Payment verification error:', err);
+      toast.error('Payment verification failed');
+      setStep('confirm');
+    } finally {
+      setIsPaymentProcessing(false);
     }
   };
 
