@@ -16,6 +16,7 @@ import CustomerAuth from "./pages/auth/CustomerAuth";
 import RiderAuth from "./pages/auth/RiderAuth";
 import CustomerHome from "./pages/customer/CustomerHome";
 import BookDelivery from "./pages/customer/BookDelivery";
+import ShippingFlow from "./pages/customer/ShippingFlow";
 import StoreCheckout from "./pages/customer/StoreCheckout";
 import TrackDelivery from "./pages/customer/TrackDelivery";
 import StorePage from "./pages/customer/StorePage";
