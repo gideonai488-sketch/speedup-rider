@@ -1,6 +1,6 @@
 export type UserRole = 'customer' | 'rider';
 
-export type ServiceType = 'food' | 'groceries' | 'pharmacy' | 'errands' | 'packages' | 'documents';
+export type ServiceType = 'food' | 'groceries' | 'pharmacy' | 'errands' | 'packages' | 'documents' | 'shipping';
 
 export interface User {
   id: string;
