@@ -12,6 +12,7 @@ import {
   PackageDetails, 
   FoodDetails, 
   ErrandDetails,
+  ShippingDetails,
 } from '@/types/booking';
 import { toast } from 'sonner';
 import { useCreateOrder } from '@/hooks/useOrders';
@@ -26,6 +27,7 @@ import ErrandDetailsForm from '@/components/booking/ErrandDetailsForm';
 import MultiStopInput from '@/components/booking/MultiStopInput';
 import ScheduleSelector from '@/components/booking/ScheduleSelector';
 import SavedAddresses from '@/components/booking/SavedAddresses';
+import ShippingDetailsForm from '@/components/booking/ShippingDetailsForm';
 
 const DEFAULT_PACKAGE_DETAILS: PackageDetails = {
   size: 'medium',
@@ -46,6 +48,23 @@ const DEFAULT_ERRAND_DETAILS: ErrandDetails = {
   timing: 'asap',
   requireReceipt: true,
   taskDescription: '',
+};
+
+const DEFAULT_SHIPPING_DETAILS: ShippingDetails = {
+  carrier: 'auto',
+  packageWeight: 0,
+  packageLength: 0,
+  packageWidth: 0,
+  packageHeight: 0,
+  destinationCountry: '',
+  destinationCity: '',
+  destinationAddress: '',
+  recipientName: '',
+  recipientPhone: '',
+  isFragile: false,
+  requiresInsurance: false,
+  declaredValue: 0,
+  customsDescription: '',
 };
 
 const calculateDistance = (
@@ -91,6 +110,7 @@ const BookDelivery: React.FC = () => {
     packageDetails: DEFAULT_PACKAGE_DETAILS,
     foodDetails: DEFAULT_FOOD_DETAILS,
     errandDetails: DEFAULT_ERRAND_DETAILS,
+    shippingDetails: DEFAULT_SHIPPING_DETAILS,
     description: '',
     contactName: '',
     contactPhone: '',
@@ -125,6 +145,13 @@ const BookDelivery: React.FC = () => {
           <ErrandDetailsForm
             details={formData.errandDetails || DEFAULT_ERRAND_DETAILS}
             onChange={(details) => setFormData({ ...formData, errandDetails: details })}
+          />
+        );
+      case 'shipping':
+        return (
+          <ShippingDetailsForm
+            details={formData.shippingDetails || DEFAULT_SHIPPING_DETAILS}
+            onChange={(details) => setFormData({ ...formData, shippingDetails: details })}
           />
         );
       default:
