@@ -437,10 +437,11 @@ const ShippingFlow: React.FC = () => {
               <p className="text-sm font-semibold text-foreground mb-3">📦 How Label-Free Shipping Works</p>
               <div className="space-y-2 text-xs text-muted-foreground">
                 <p>1. <strong className="text-foreground">Fill details & get a quote</strong></p>
-                <p>2. <strong className="text-foreground">Confirm & get a QR code</strong></p>
-                <p>3. <strong className="text-foreground">Rider picks up your package</strong></p>
-                <p>4. <strong className="text-foreground">Rider scans QR at DHL point</strong> — label printed on-site</p>
-                <p>5. <strong className="text-foreground">DHL ships worldwide</strong> — track in real-time</p>
+                <p>2. <strong className="text-foreground">Pay securely</strong> via Mobile Money or Card</p>
+                <p>3. <strong className="text-foreground">Get your QR code</strong> — proof of payment</p>
+                <p>4. <strong className="text-foreground">Rider picks up & drops at DHL</strong></p>
+                <p>5. <strong className="text-foreground">DHL scans QR to verify</strong> — label printed on-site</p>
+                <p>6. <strong className="text-foreground">Track worldwide</strong> in real-time</p>
               </div>
             </div>
           </div>
