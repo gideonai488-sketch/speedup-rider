@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Package, Globe, MapPin, QrCode, Truck, ChevronRight, Loader2, Star, Clock, Shield, CheckCircle2, Navigation } from 'lucide-react';
+import { ArrowLeft, Package, Globe, MapPin, QrCode, Truck, ChevronRight, Loader2, Star, Clock, Shield, CheckCircle2, Navigation, CreditCard, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,7 @@ import QRCodeDisplay from '@/components/shipping/QRCodeDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import AddressAutocomplete from '@/components/location/AddressAutocomplete';
 
-type ShippingStep = 'details' | 'rates' | 'confirm' | 'qrcode' | 'service-points' | 'tracking' | 'my-shipments';
+type ShippingStep = 'details' | 'rates' | 'confirm' | 'payment' | 'qrcode' | 'service-points' | 'tracking' | 'my-shipments';
 
 const ShippingFlow: React.FC = () => {
   const navigate = useNavigate();
