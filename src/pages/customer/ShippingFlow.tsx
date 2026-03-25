@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Package, Globe, MapPin, QrCode, Truck, ChevronRight, Loader2, Star, Clock, Shield, CheckCircle2, Navigation } from 'lucide-react';
+import { ArrowLeft, Package, Globe, MapPin, QrCode, Truck, ChevronRight, Loader2, Star, Clock, Shield, CheckCircle2, Navigation, CreditCard, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,7 @@ import QRCodeDisplay from '@/components/shipping/QRCodeDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import AddressAutocomplete from '@/components/location/AddressAutocomplete';
 
-type ShippingStep = 'details' | 'rates' | 'confirm' | 'qrcode' | 'service-points' | 'tracking' | 'my-shipments';
+type ShippingStep = 'details' | 'rates' | 'confirm' | 'payment' | 'qrcode' | 'service-points' | 'tracking' | 'my-shipments';
 
 const ShippingFlow: React.FC = () => {
   const navigate = useNavigate();
@@ -56,6 +56,8 @@ const ShippingFlow: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState(trackParam || '');
   const [qrData, setQrData] = useState('');
   const [createdShipmentId, setCreatedShipmentId] = useState('');
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  const [paymentReference, setPaymentReference] = useState('');
 
   const trackingQuery = useShipmentTracking(step === 'tracking' && trackingNumber ? trackingNumber : null);
 
@@ -86,15 +88,17 @@ const ShippingFlow: React.FC = () => {
     }
   };
 
-  const handleConfirmShipment = async () => {
+  // Step 1: Create shipment in DB and go to payment
+  const handleProceedToPayment = async () => {
     if (!profile || !selectedRate) return;
     if (!form.recipientName || !form.recipientPhone || !form.destinationAddress) {
       toast.error('Please fill in all recipient details');
       return;
     }
 
+    setIsPaymentProcessing(true);
     try {
-      // Create shipment record in DB first
+      // Create shipment record in DB
       const { data: shipment, error } = await supabase
         .from('shipments')
         .insert({
@@ -119,31 +123,113 @@ const ShippingFlow: React.FC = () => {
           quoted_rate: selectedRate.totalPrice,
           currency: selectedRate.currency,
           estimated_delivery_date: selectedRate.estimatedDeliveryDate,
-          status: 'pending',
+          status: 'awaiting_payment',
         } as any)
         .select()
         .single();
 
       if (error) throw error;
+      setCreatedShipmentId((shipment as any).id);
 
-      // Create DHL shipment via edge function
-      const result = await createShipmentMutation.mutateAsync({
-        shipmentId: (shipment as any).id,
-        shippingDetails: form,
-        selectedRate,
-        pickupAddress,
+      // Initialize Paystack payment
+      const amountInPesewas = Math.round(selectedRate.totalPrice * 100);
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('process-payment', {
+        body: {
+          email: form.recipientEmail || `${profile.id}@speedup.gh`,
+          amount: amountInPesewas,
+          currency: 'GHS',
+          reference: `SHIP-${(shipment as any).id}-${Date.now()}`,
+          callback_url: `${window.location.origin}/customer/shipping?step=payment&shipment_id=${(shipment as any).id}`,
+          metadata: {
+            shipment_id: (shipment as any).id,
+            type: 'shipping_payment',
+            destination: `${form.destinationCity}, ${form.destinationCountry}`,
+            carrier: 'DHL',
+          },
+        },
       });
 
-      if (result.success) {
-        setTrackingNumber(result.trackingNumber);
-        setQrData(result.qrCodeData || result.trackingNumber);
-        setCreatedShipmentId((shipment as any).id);
-        setStep('qrcode');
-        toast.success('Shipment created! Show the QR code at the DHL drop-off point.');
+      if (paymentError) throw paymentError;
+
+      if (paymentData?.authorization_url) {
+        // Redirect to Paystack
+        window.location.href = paymentData.authorization_url;
+      } else {
+        throw new Error('No payment URL received');
       }
     } catch (err) {
       console.error(err);
-      toast.error('Failed to create shipment');
+      toast.error('Failed to initialize payment');
+      setIsPaymentProcessing(false);
+    }
+  };
+
+  // Step 2: Handle payment callback — verify & create DHL shipment
+  useEffect(() => {
+    const shipmentId = searchParams.get('shipment_id');
+    const reference = searchParams.get('reference') || searchParams.get('trxref');
+    
+    if (shipmentId && reference && step === 'payment') {
+      handlePaymentVerification(shipmentId, reference);
+    }
+  }, [searchParams, step]);
+
+  const handlePaymentVerification = async (shipmentId: string, reference: string) => {
+    setIsPaymentProcessing(true);
+    try {
+      // Verify payment with Paystack
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-payment', {
+        body: { reference },
+      });
+
+      if (verifyError) throw verifyError;
+
+      if (verifyData?.status === 'success' || verifyData?.data?.status === 'success') {
+        setPaymentReference(reference);
+
+        // Update shipment status to paid
+        await supabase
+          .from('shipments')
+          .update({ status: 'paid' } as any)
+          .eq('id', shipmentId);
+
+        // Now create the DHL shipment & get QR code
+        const result = await createShipmentMutation.mutateAsync({
+          shipmentId,
+          shippingDetails: form,
+          selectedRate: selectedRate!,
+          pickupAddress,
+        });
+
+        if (result.success) {
+          setTrackingNumber(result.trackingNumber);
+          setCreatedShipmentId(shipmentId);
+          
+          // QR code data includes payment proof
+          const qrPayload = JSON.stringify({
+            trackingNumber: result.trackingNumber,
+            shipmentId,
+            carrier: 'DHL',
+            paymentRef: reference,
+            status: 'PAID',
+            type: 'LABEL_FREE_DROP_OFF',
+            paidAt: new Date().toISOString(),
+          });
+          setQrData(qrPayload);
+          
+          setStep('qrcode');
+          toast.success('Payment confirmed! Your QR code is ready.');
+        }
+      } else {
+        toast.error('Payment verification failed. Please try again.');
+        setStep('confirm');
+      }
+    } catch (err) {
+      console.error('Payment verification error:', err);
+      toast.error('Payment verification failed');
+      setStep('confirm');
+    } finally {
+      setIsPaymentProcessing(false);
     }
   };
 
@@ -165,6 +251,7 @@ const ShippingFlow: React.FC = () => {
     details: 'Ship Internationally',
     rates: 'Choose Rate',
     confirm: 'Review Shipment',
+    payment: 'Payment',
     qrcode: 'Your QR Code',
     'service-points': 'DHL Drop-off Points',
     tracking: 'Track Shipment',
@@ -176,6 +263,7 @@ const ShippingFlow: React.FC = () => {
       details: null,
       rates: 'details',
       confirm: 'rates',
+      payment: 'confirm',
       qrcode: null,
       'service-points': 'details',
       tracking: 'my-shipments',
@@ -349,10 +437,11 @@ const ShippingFlow: React.FC = () => {
               <p className="text-sm font-semibold text-foreground mb-3">📦 How Label-Free Shipping Works</p>
               <div className="space-y-2 text-xs text-muted-foreground">
                 <p>1. <strong className="text-foreground">Fill details & get a quote</strong></p>
-                <p>2. <strong className="text-foreground">Confirm & get a QR code</strong></p>
-                <p>3. <strong className="text-foreground">Rider picks up your package</strong></p>
-                <p>4. <strong className="text-foreground">Rider scans QR at DHL point</strong> — label printed on-site</p>
-                <p>5. <strong className="text-foreground">DHL ships worldwide</strong> — track in real-time</p>
+                <p>2. <strong className="text-foreground">Pay securely</strong> via Mobile Money or Card</p>
+                <p>3. <strong className="text-foreground">Get your QR code</strong> — proof of payment</p>
+                <p>4. <strong className="text-foreground">Rider picks up & drops at DHL</strong></p>
+                <p>5. <strong className="text-foreground">DHL scans QR to verify</strong> — label printed on-site</p>
+                <p>6. <strong className="text-foreground">Track worldwide</strong> in real-time</p>
               </div>
             </div>
           </div>
@@ -431,13 +520,32 @@ const ShippingFlow: React.FC = () => {
               )}
             </div>
 
-            <Button onClick={handleConfirmShipment} disabled={createShipmentMutation.isPending} className="w-full h-14 gradient-hero text-primary-foreground shadow-glow text-lg">
-              {createShipmentMutation.isPending ? (
-                <><Loader2 className="w-5 h-5 animate-spin mr-2" />Creating shipment...</>
+            <Button onClick={handleProceedToPayment} disabled={isPaymentProcessing} className="w-full h-14 gradient-hero text-primary-foreground shadow-glow text-lg">
+              {isPaymentProcessing ? (
+                <><Loader2 className="w-5 h-5 animate-spin mr-2" />Processing...</>
               ) : (
-                <><QrCode className="w-5 h-5 mr-2" />Confirm & Get QR Code</>
+                <><CreditCard className="w-5 h-5 mr-2" />Pay ${selectedRate.totalPrice} & Get QR Code</>
               )}
             </Button>
+
+            <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Lock className="w-3 h-3" />
+              Secure payment via Paystack • Mobile Money & Cards accepted
+            </p>
+          </div>
+        )}
+
+        {/* STEP: Payment Processing (callback landing) */}
+        {step === 'payment' && (
+          <div className="flex flex-col items-center justify-center py-16 space-y-6">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+              <CreditCard className="w-10 h-10 text-primary" />
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-bold text-foreground">Verifying Payment...</h2>
+              <p className="text-sm text-muted-foreground">Please wait while we confirm your payment and generate your QR code.</p>
+            </div>
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         )}
 
@@ -445,17 +553,29 @@ const ShippingFlow: React.FC = () => {
         {step === 'qrcode' && (
           <div className="space-y-6 text-center">
             <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-8 h-8 text-green-500" />
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-xl font-bold text-foreground">Shipment Created!</h2>
-              <p className="text-sm text-muted-foreground">Show this QR code at any DHL Service Point. The label will be printed on-site — no printer needed!</p>
+              <h2 className="text-xl font-bold text-foreground">Payment Confirmed!</h2>
+              <p className="text-sm text-muted-foreground">Show this QR code at any DHL Service Point. Staff will scan it to verify payment and print the shipping label on-site.</p>
               
               <QRCodeDisplay data={qrData || trackingNumber} size={220} label={trackingNumber} />
 
-              <div className="bg-muted rounded-lg p-3 text-left">
-                <p className="text-xs text-muted-foreground">Tracking Number</p>
-                <p className="font-mono font-semibold text-foreground">{trackingNumber}</p>
+              <div className="bg-muted rounded-lg p-3 text-left space-y-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Tracking Number</p>
+                  <p className="font-mono font-semibold text-foreground">{trackingNumber}</p>
+                </div>
+                {paymentReference && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Payment Reference</p>
+                    <p className="font-mono text-sm text-foreground">{paymentReference}</p>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 pt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-medium text-primary">Fully Paid</span>
+                </div>
               </div>
             </div>
 
@@ -474,12 +594,13 @@ const ShippingFlow: React.FC = () => {
             </div>
 
             <div className="bg-primary/5 rounded-xl border border-primary/20 p-4 text-left">
-              <p className="text-sm font-semibold text-foreground mb-2">📋 Next Steps</p>
+              <p className="text-sm font-semibold text-foreground mb-2">📋 What Happens Next</p>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>1. A SpeedUp rider will come pick up your package</p>
                 <p>2. Rider takes it to the nearest DHL Service Point</p>
-                <p>3. Rider scans the QR code — label is printed automatically</p>
-                <p>4. Track your shipment worldwide right here in the app</p>
+                <p>3. DHL staff scans the QR code to <strong className="text-foreground">verify payment</strong></p>
+                <p>4. Shipping label is printed on-site — no printer needed</p>
+                <p>5. DHL ships your package & you track it here in real-time</p>
               </div>
             </div>
           </div>
