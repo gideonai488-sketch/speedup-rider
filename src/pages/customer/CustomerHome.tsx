@@ -129,27 +129,27 @@ const CustomerHome: React.FC = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(0,0%,4%)] pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header - Sleek dark glass */}
-      <header className="sticky top-0 z-50 bg-[hsl(0,0%,6%)]/95 backdrop-blur-xl border-b border-[hsl(0,0%,12%)]">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <img src={owlLogo} alt="SpeedUp" className="w-11 h-11 object-contain" />
               <div>
-                <h1 className="text-lg font-bold text-[hsl(0,0%,95%)]">
+                <h1 className="text-lg font-bold text-foreground">
                   Speed<span className="text-primary">Up</span>
                 </h1>
                 <button 
                   onClick={() => setCityPickerOpen(true)}
-                  className="flex items-center gap-1 text-sm text-[hsl(0,0%,55%)] hover:text-[hsl(0,0%,80%)] transition-colors"
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <MapPin className="w-3 h-3 text-primary" />
                   {locationLoading ? (
@@ -173,29 +173,29 @@ const CustomerHome: React.FC = () => {
                   {formatCurrency(wallet?.balance || 0)}
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" className="relative text-[hsl(0,0%,70%)] hover:text-[hsl(0,0%,95%)] hover:bg-[hsl(0,0%,12%)]" onClick={() => navigate('/customer/notifications')}>
+              <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => navigate('/customer/notifications')}>
                 <Bell className="w-5 h-5" />
                 {orders && orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse ring-2 ring-[hsl(0,0%,6%)]" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse ring-2 ring-background" />
                 )}
               </Button>
-              <Button variant="ghost" size="icon" className="text-[hsl(0,0%,70%)] hover:text-[hsl(0,0%,95%)] hover:bg-[hsl(0,0%,12%)]" onClick={handleSignOut}>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-muted" onClick={handleSignOut}>
                 <LogOut className="w-5 h-5" />
               </Button>
             </div>
           </div>
           
           {profile && (
-            <p className="text-sm text-[hsl(0,0%,50%)] mb-3">
-              Welcome back, <span className="font-semibold text-[hsl(0,0%,90%)]">{profile.full_name}</span> 👋
+            <p className="text-sm text-muted-foreground mb-3">
+              Welcome back, <span className="font-semibold text-foreground">{profile.full_name}</span> 👋
             </p>
           )}
           
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(0,0%,40%)]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               placeholder="Search services, restaurants, stores..."
-              className="pl-10 bg-[hsl(0,0%,10%)] border-[hsl(0,0%,15%)] rounded-xl text-[hsl(0,0%,90%)] placeholder:text-[hsl(0,0%,35%)] focus:border-primary/50 focus:ring-primary/20"
+              className="pl-10 bg-secondary/50 border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
         </div>
@@ -213,7 +213,7 @@ const CustomerHome: React.FC = () => {
                 <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
                   <Gavel className="w-4 h-4 text-primary" />
                 </div>
-                <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Incoming Bids</h2>
+                <h2 className="text-base font-bold text-foreground">Incoming Bids</h2>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -226,7 +226,7 @@ const CustomerHome: React.FC = () => {
                 <button
                   key={order.id}
                   onClick={() => navigate(`/track/${order.id}`)}
-                  className="w-full text-left bg-[hsl(0,0%,8%)] rounded-2xl border border-primary/20 p-4 hover:border-primary/50 transition-all active:scale-[0.98] group"
+                  className="w-full text-left bg-card rounded-2xl border border-primary/20 p-4 hover:border-primary/50 transition-all active:scale-[0.98] group"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -238,8 +238,8 @@ const CustomerHome: React.FC = () => {
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-[hsl(0,0%,95%)] text-sm">{order.order_number || order.id.slice(0, 8)}</p>
-                        <p className="text-xs text-[hsl(0,0%,50%)]">{order.stores?.name || 'Delivery'}</p>
+                        <p className="font-semibold text-foreground text-sm">{order.order_number || order.id.slice(0, 8)}</p>
+                        <p className="text-xs text-muted-foreground">{order.stores?.name || 'Delivery'}</p>
                       </div>
                     </div>
                     <OrderBidCount orderId={order.id} />
@@ -249,17 +249,17 @@ const CustomerHome: React.FC = () => {
                     {order.pickup_address && (
                       <div className="flex items-start gap-2">
                         <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
-                        <span className="text-[hsl(0,0%,50%)] truncate">{order.pickup_address}</span>
+                        <span className="text-muted-foreground truncate">{order.pickup_address}</span>
                       </div>
                     )}
                     <div className="flex items-start gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1 flex-shrink-0" />
-                      <span className="text-[hsl(0,0%,80%)] font-medium truncate">{order.delivery_address}</span>
+                      <span className="text-foreground font-medium truncate">{order.delivery_address}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[hsl(0,0%,15%)]">
-                    <span className="text-xs text-[hsl(0,0%,45%)]">Tap to view & accept bids</span>
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Tap to view & accept bids</span>
                     <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </button>
@@ -275,7 +275,7 @@ const CustomerHome: React.FC = () => {
               <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
                 <Zap className="w-4 h-4 text-primary" />
               </div>
-              <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Our Services</h2>
+              <h2 className="text-base font-bold text-foreground">Our Services</h2>
             </div>
           </div>
           
@@ -298,13 +298,13 @@ const CustomerHome: React.FC = () => {
                 
                 <div className={cn(
                   'w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 relative',
-                  'bg-[hsl(0,0%,8%)] border border-[hsl(0,0%,15%)]',
+                  'bg-card border border-border',
                   'group-hover:scale-110 transition-transform duration-300'
                 )}>
                   <span className={serviceIconColors[service.id]}>{serviceIcons[service.id]}</span>
                 </div>
-                <span className="text-xs font-semibold text-[hsl(0,0%,90%)] text-center leading-tight">{service.name}</span>
-                <span className="text-[10px] text-[hsl(0,0%,45%)] mt-1 font-medium">From GH₵{service.basePrice}</span>
+                <span className="text-xs font-semibold text-foreground text-center leading-tight">{service.name}</span>
+                <span className="text-[10px] text-muted-foreground mt-1 font-medium">From GH₵{service.basePrice}</span>
               </Link>
             ))}
           </div>
@@ -316,7 +316,7 @@ const CustomerHome: React.FC = () => {
               to="/customer/shipping"
               className={cn(
                 'group flex items-center gap-4 w-full p-4 rounded-2xl border transition-all mt-4 relative overflow-hidden',
-                'bg-gradient-to-r from-indigo-500/10 via-[hsl(0,0%,8%)] to-primary/10',
+                'bg-gradient-to-r from-indigo-500/10 via-card to-primary/10',
                 'border-indigo-500/20 hover:border-indigo-400/40',
               )}
               onClick={() => setSelectedService(service.id)}
@@ -329,14 +329,14 @@ const CustomerHome: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-[hsl(0,0%,95%)]">{service.name}</span>
+                  <span className="text-sm font-bold text-foreground">{service.name}</span>
                   <span className="text-[9px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">New</span>
                 </div>
-                <span className="text-xs text-[hsl(0,0%,50%)]">{service.description}</span>
+                <span className="text-xs text-muted-foreground">{service.description}</span>
               </div>
               <div className="flex flex-col items-end flex-shrink-0">
                 <span className="text-xs text-primary font-bold">GH₵{service.basePrice}+</span>
-                <ArrowRight className="w-4 h-4 text-[hsl(0,0%,40%)] mt-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground mt-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
               </div>
             </Link>
           ))}
@@ -353,9 +353,9 @@ const CustomerHome: React.FC = () => {
                 <Star className="w-4 h-4 text-amber-400" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Featured Stores</h2>
+                <h2 className="text-base font-bold text-foreground">Featured Stores</h2>
                 {isFilteredByCity && currentCity && (
-                  <span className="text-[10px] text-[hsl(0,0%,50%)]">in {currentCity}</span>
+                  <span className="text-[10px] text-muted-foreground">in {currentCity}</span>
                 )}
               </div>
             </div>
@@ -369,9 +369,9 @@ const CustomerHome: React.FC = () => {
               {storesLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="flex-shrink-0 w-44">
-                    <Skeleton className="h-28 rounded-2xl mb-3 bg-[hsl(0,0%,10%)]" />
-                    <Skeleton className="h-4 w-24 mb-2 bg-[hsl(0,0%,10%)]" />
-                    <Skeleton className="h-3 w-20 bg-[hsl(0,0%,10%)]" />
+                    <Skeleton className="h-28 rounded-2xl mb-3 bg-secondary/50" />
+                    <Skeleton className="h-4 w-24 mb-2 bg-secondary/50" />
+                    <Skeleton className="h-3 w-20 bg-secondary/50" />
                   </div>
                 ))
               ) : (
@@ -381,13 +381,13 @@ const CustomerHome: React.FC = () => {
                       <StoreLogo src={store.logo_url || ''} name={store.name} className="max-h-16 max-w-28" textClassName="text-2xl" />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
                     </div>
-                    <h3 className="font-semibold text-[hsl(0,0%,90%)] text-sm truncate">{store.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-[hsl(0,0%,50%)] mt-1">
+                    <h3 className="font-semibold text-foreground text-sm truncate">{store.name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                       <div className="flex items-center gap-0.5">
                         <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                        <span className="text-[hsl(0,0%,75%)]">{store.rating?.toFixed(1) || '0.0'}</span>
+                        <span className="text-foreground">{store.rating?.toFixed(1) || '0.0'}</span>
                       </div>
-                      <span className="text-[hsl(0,0%,25%)]">•</span>
+                      <span className="text-muted-foreground">•</span>
                       <span>{store.delivery_time}</span>
                     </div>
                   </Link>
@@ -406,9 +406,9 @@ const CustomerHome: React.FC = () => {
                 <Sparkles className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-[hsl(0,0%,95%)]">Popular Near You</h2>
+                <h2 className="text-base font-bold text-foreground">Popular Near You</h2>
                 {isFilteredByCity && currentCity && (
-                  <span className="text-[10px] text-[hsl(0,0%,50%)]">{currentCity}</span>
+                  <span className="text-[10px] text-muted-foreground">{currentCity}</span>
                 )}
               </div>
             </div>
@@ -420,11 +420,11 @@ const CustomerHome: React.FC = () => {
           <div className="grid grid-cols-2 gap-3">
             {storesLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-[hsl(0,0%,8%)] rounded-2xl border border-[hsl(0,0%,12%)] overflow-hidden">
-                  <Skeleton className="h-24 bg-[hsl(0,0%,10%)]" />
+                <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <Skeleton className="h-24 bg-secondary/50" />
                   <div className="p-3">
-                    <Skeleton className="h-4 w-20 mb-2 bg-[hsl(0,0%,12%)]" />
-                    <Skeleton className="h-3 w-24 bg-[hsl(0,0%,12%)]" />
+                    <Skeleton className="h-4 w-20 mb-2 bg-muted" />
+                    <Skeleton className="h-3 w-24 bg-muted" />
                   </div>
                 </div>
               ))
@@ -433,7 +433,7 @@ const CustomerHome: React.FC = () => {
                 <Link
                   key={store.id}
                   to={`/customer/store/${store.id}`}
-                  className="bg-[hsl(0,0%,8%)] rounded-2xl border border-[hsl(0,0%,12%)] overflow-hidden hover:border-primary/30 transition-all group"
+                  className="bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/30 transition-all group"
                 >
                   <div className={`h-24 ${store.cover_color || 'bg-primary'} flex items-center justify-center p-3 relative`}>
                     <StoreLogo src={store.logo_url || ''} name={store.name} className="max-h-12 max-w-20" textClassName="text-xl" />
@@ -442,11 +442,11 @@ const CustomerHome: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3">
-                    <h3 className="font-semibold text-[hsl(0,0%,90%)] text-sm">{store.name}</h3>
-                    <div className="flex items-center gap-1 text-xs text-[hsl(0,0%,50%)] mt-1">
+                    <h3 className="font-semibold text-foreground text-sm">{store.name}</h3>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                       <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                      <span className="text-[hsl(0,0%,75%)]">{store.rating?.toFixed(1) || '0.0'}</span>
-                      <span className="mx-0.5 text-[hsl(0,0%,25%)]">•</span>
+                      <span className="text-foreground">{store.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="mx-0.5 text-muted-foreground">•</span>
                       <Clock className="w-3 h-3" />
                       <span>{store.delivery_time}</span>
                     </div>
@@ -463,26 +463,26 @@ const CustomerHome: React.FC = () => {
       </main>
 
       {/* Bottom Navigation - Dark glass */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[hsl(0,0%,6%)]/95 backdrop-blur-xl border-t border-[hsl(0,0%,12%)] px-6 py-3 safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border px-6 py-3 safe-area-pb">
         <div className="flex items-center justify-around">
-          <Link to="/customer" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
+          <Link to="/customer" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <Zap className="w-5 h-5" />
             <span className="text-[10px] font-semibold">Home</span>
           </Link>
-          <Link to="/customer/orders" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/orders' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
+          <Link to="/customer/orders" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/orders' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <Clock className="w-5 h-5" />
             <span className="text-[10px]">Orders</span>
           </Link>
           <Link to="/customer/book" className="relative -top-4">
-            <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center shadow-glow ring-4 ring-[hsl(0,0%,6%)]">
+            <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center shadow-glow ring-4 ring-background">
               <Navigation className="w-6 h-6 text-white" />
             </div>
           </Link>
-          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
+          <Link to="/customer/notifications" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/notifications' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <Bell className="w-5 h-5" />
             <span className="text-[10px]">Alerts</span>
           </Link>
-          <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-[hsl(0,0%,45%)] hover:text-[hsl(0,0%,75%)]")}>
+          <Link to="/customer/profile" className={cn("flex flex-col items-center gap-1", location.pathname === '/customer/profile' ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
             <User className="w-5 h-5" />
             <span className="text-[10px]">Profile</span>
           </Link>
@@ -491,15 +491,15 @@ const CustomerHome: React.FC = () => {
 
       {/* City Picker Sheet */}
       <Sheet open={cityPickerOpen} onOpenChange={setCityPickerOpen}>
-        <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl bg-[hsl(0,0%,6%)] border-[hsl(0,0%,15%)]">
+        <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl bg-background border-border">
           <SheetHeader className="pb-2">
-            <SheetTitle className="text-[hsl(0,0%,95%)]">Choose Your City</SheetTitle>
+            <SheetTitle className="text-foreground">Choose Your City</SheetTitle>
           </SheetHeader>
           
           <div className="space-y-3">
             <Button
               variant="outline"
-              className="w-full justify-start gap-2 bg-[hsl(0,0%,10%)] border-[hsl(0,0%,15%)] text-[hsl(0,0%,90%)] hover:bg-[hsl(0,0%,14%)]"
+              className="w-full justify-start gap-2 bg-secondary/50 border-border text-foreground hover:bg-muted"
               onClick={() => {
                 refetchLocation();
                 setCityPickerOpen(false);
@@ -513,12 +513,12 @@ const CustomerHome: React.FC = () => {
             </Button>
 
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(0,0%,40%)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search city..."
                 value={citySearch}
                 onChange={(e) => setCitySearch(e.target.value)}
-                className="pl-10 bg-[hsl(0,0%,10%)] border-[hsl(0,0%,15%)] text-[hsl(0,0%,90%)]"
+                className="pl-10 bg-secondary/50 border-border text-foreground"
               />
             </div>
 
@@ -537,12 +537,12 @@ const CustomerHome: React.FC = () => {
                         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
                         currentCity?.toLowerCase() === c.label.toLowerCase()
                           ? "bg-primary/15 text-primary font-medium"
-                          : "hover:bg-[hsl(0,0%,12%)] text-[hsl(0,0%,80%)]"
+                          : "hover:bg-muted text-foreground"
                       )}
                     >
                       <div>
                         <span>{c.label}</span>
-                        <span className="text-xs text-[hsl(0,0%,45%)] ml-2">{c.region}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{c.region}</span>
                       </div>
                       {currentCity?.toLowerCase() === c.label.toLowerCase() && (
                         <Check className="w-4 h-4 text-primary" />
@@ -552,7 +552,7 @@ const CustomerHome: React.FC = () => {
                 ) : (
                   Object.entries(citiesByRegion).map(([region, cities]) => (
                     <div key={region} className="mb-3">
-                      <p className="text-[10px] font-bold text-[hsl(0,0%,40%)] uppercase tracking-widest px-3 py-1.5">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 py-1.5">
                         {region}
                       </p>
                       {cities.map((c) => (
@@ -566,7 +566,7 @@ const CustomerHome: React.FC = () => {
                             "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors",
                             currentCity?.toLowerCase() === c.label.toLowerCase()
                               ? "bg-primary/15 text-primary font-medium"
-                              : "hover:bg-[hsl(0,0%,12%)] text-[hsl(0,0%,80%)]"
+                              : "hover:bg-muted text-foreground"
                           )}
                         >
                           <span>{c.label}</span>
