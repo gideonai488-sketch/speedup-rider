@@ -519,13 +519,32 @@ const ShippingFlow: React.FC = () => {
               )}
             </div>
 
-            <Button onClick={handleConfirmShipment} disabled={createShipmentMutation.isPending} className="w-full h-14 gradient-hero text-primary-foreground shadow-glow text-lg">
-              {createShipmentMutation.isPending ? (
-                <><Loader2 className="w-5 h-5 animate-spin mr-2" />Creating shipment...</>
+            <Button onClick={handleProceedToPayment} disabled={isPaymentProcessing} className="w-full h-14 gradient-hero text-primary-foreground shadow-glow text-lg">
+              {isPaymentProcessing ? (
+                <><Loader2 className="w-5 h-5 animate-spin mr-2" />Processing...</>
               ) : (
-                <><QrCode className="w-5 h-5 mr-2" />Confirm & Get QR Code</>
+                <><CreditCard className="w-5 h-5 mr-2" />Pay ${selectedRate.totalPrice} & Get QR Code</>
               )}
             </Button>
+
+            <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
+              <Lock className="w-3 h-3" />
+              Secure payment via Paystack • Mobile Money & Cards accepted
+            </p>
+          </div>
+        )}
+
+        {/* STEP: Payment Processing (callback landing) */}
+        {step === 'payment' && (
+          <div className="flex flex-col items-center justify-center py-16 space-y-6">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+              <CreditCard className="w-10 h-10 text-primary" />
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-bold text-foreground">Verifying Payment...</h2>
+              <p className="text-sm text-muted-foreground">Please wait while we confirm your payment and generate your QR code.</p>
+            </div>
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         )}
 
