@@ -13,8 +13,9 @@ import type { ShipmentRate, ServicePoint } from '@/hooks/useShipments';
 import QRCodeDisplay from '@/components/shipping/QRCodeDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import AddressAutocomplete from '@/components/location/AddressAutocomplete';
+import BidView from '@/components/tracking/BidView';
 
-type ShippingStep = 'details' | 'rates' | 'confirm' | 'payment' | 'qrcode' | 'service-points' | 'tracking' | 'my-shipments';
+type ShippingStep = 'details' | 'rates' | 'confirm' | 'payment' | 'qrcode' | 'bids' | 'service-points' | 'tracking' | 'my-shipments';
 
 const ShippingFlow: React.FC = () => {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ const ShippingFlow: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState(trackParam || '');
   const [qrData, setQrData] = useState('');
   const [createdShipmentId, setCreatedShipmentId] = useState('');
+  const [shippingOrderId, setShippingOrderId] = useState('');
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [paymentReference, setPaymentReference] = useState('');
 
@@ -216,9 +218,51 @@ const ShippingFlow: React.FC = () => {
             paidAt: new Date().toISOString(),
           });
           setQrData(qrPayload);
-          
-          setStep('qrcode');
-          toast.success('Payment confirmed! Your QR code is ready.');
+
+          // Create a delivery order so riders can bid to pick up the package and deliver to DHL office
+          if (profile) {
+            try {
+              const { data: orderData, error: orderError } = await supabase
+                .from('orders')
+                .insert({
+                  customer_id: profile.id,
+                  pickup_address: pickupAddress || 'Pickup location',
+                  delivery_address: 'DHL Service Point (Drop-off)',
+                  pickup_lat: pickupCoords?.lat || null,
+                  pickup_lng: pickupCoords?.lng || null,
+                  subtotal: 0,
+                  delivery_fee: 0,
+                  total: 0,
+                  status: 'pending' as any,
+                  payment_status: 'paid',
+                  notes: `DHL Shipping pickup — Tracking: ${result.trackingNumber}, Shipment: ${shipmentId}`,
+                })
+                .select()
+                .single();
+
+              if (!orderError && orderData) {
+                setShippingOrderId(orderData.id);
+                // Link order to shipment
+                await supabase
+                  .from('shipments')
+                  .update({ order_id: orderData.id } as any)
+                  .eq('id', shipmentId);
+                
+                setStep('bids');
+                toast.success('Payment confirmed! Now find a rider to deliver your package to DHL.');
+              } else {
+                // Fallback to QR code if order creation fails
+                setStep('qrcode');
+                toast.success('Payment confirmed! Your QR code is ready.');
+              }
+            } catch {
+              setStep('qrcode');
+              toast.success('Payment confirmed! Your QR code is ready.');
+            }
+          } else {
+            setStep('qrcode');
+            toast.success('Payment confirmed! Your QR code is ready.');
+          }
         }
       } else {
         toast.error('Payment verification failed. Please try again.');
@@ -253,6 +297,7 @@ const ShippingFlow: React.FC = () => {
     confirm: 'Review Shipment',
     payment: 'Payment',
     qrcode: 'Your QR Code',
+    bids: 'Find a Rider',
     'service-points': 'DHL Drop-off Points',
     tracking: 'Track Shipment',
     'my-shipments': 'My Shipments',
@@ -265,6 +310,7 @@ const ShippingFlow: React.FC = () => {
       confirm: 'rates',
       payment: 'confirm',
       qrcode: null,
+      bids: 'qrcode',
       'service-points': 'details',
       tracking: 'my-shipments',
       'my-shipments': 'details',
@@ -580,6 +626,12 @@ const ShippingFlow: React.FC = () => {
             </div>
 
             <div className="space-y-3">
+              {shippingOrderId && (
+                <Button onClick={() => setStep('bids')} className="w-full gradient-hero text-primary-foreground">
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Find a Rider for Pickup
+                </Button>
+              )}
               <Button onClick={() => { setStep('tracking'); }} variant="outline" className="w-full">
                 <Truck className="w-4 h-4 mr-2" />
                 Track This Shipment
@@ -588,7 +640,7 @@ const ShippingFlow: React.FC = () => {
                 <MapPin className="w-4 h-4 mr-2" />
                 Find Nearest DHL Drop-off
               </Button>
-              <Button onClick={() => navigate('/customer')} className="w-full gradient-hero text-primary-foreground">
+              <Button onClick={() => navigate('/customer')} variant="outline" className="w-full">
                 Back to Home
               </Button>
             </div>
@@ -596,8 +648,8 @@ const ShippingFlow: React.FC = () => {
             <div className="bg-primary/5 rounded-xl border border-primary/20 p-4 text-left">
               <p className="text-sm font-semibold text-foreground mb-2">📋 What Happens Next</p>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>1. A SpeedUp rider will come pick up your package</p>
-                <p>2. Rider takes it to the nearest DHL Service Point</p>
+                <p>1. Accept a rider's bid to pick up your package</p>
+                <p>2. Rider collects it and takes it to the nearest DHL Service Point</p>
                 <p>3. DHL staff scans the QR code to <strong className="text-foreground">verify payment</strong></p>
                 <p>4. Shipping label is printed on-site — no printer needed</p>
                 <p>5. DHL ships your package & you track it here in real-time</p>
@@ -606,7 +658,26 @@ const ShippingFlow: React.FC = () => {
           </div>
         )}
 
-        {/* STEP: Service Points */}
+        {/* STEP: Bids — Riders bid to deliver package to DHL */}
+        {step === 'bids' && shippingOrderId && (
+          <BidView
+            orderId={shippingOrderId}
+            pickupAddress={pickupAddress}
+            deliveryAddress="DHL Service Point (Drop-off)"
+            totalAmount={0}
+            onBack={() => setStep('qrcode')}
+            onCancel={async () => {
+              await supabase
+                .from('orders')
+                .update({ status: 'cancelled' as any })
+                .eq('id', shippingOrderId);
+              setStep('qrcode');
+              toast.info('Rider request cancelled. You can still drop off manually.');
+            }}
+          />
+        )}
+
+
         {step === 'service-points' && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Nearest DHL drop-off locations where your rider can scan the QR code</p>
