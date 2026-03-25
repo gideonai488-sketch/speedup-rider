@@ -205,6 +205,14 @@ const BookDelivery: React.FC = () => {
         notes += ` | Task: ${formData.errandDetails.taskType} - ${formData.errandDetails.taskDescription}`;
         if (formData.errandDetails.budgetAmount) notes += ` | Budget: GH₵${formData.errandDetails.budgetAmount}`;
       }
+      if (formData.serviceType === 'shipping' && formData.shippingDetails) {
+        const s = formData.shippingDetails;
+        notes += ` | 🌍 GLOBAL SHIPPING: ${s.carrier.toUpperCase()} | To: ${s.destinationCountry}, ${s.destinationCity} | ${s.packageWeight}kg (${s.packageLength}x${s.packageWidth}x${s.packageHeight}cm)`;
+        if (s.recipientName) notes += ` | Recipient: ${s.recipientName} (${s.recipientPhone})`;
+        if (s.isFragile) notes += ' | FRAGILE';
+        if (s.requiresInsurance) notes += ` | INSURED ($${s.declaredValue})`;
+        if (s.customsDescription) notes += ` | Customs: ${s.customsDescription}`;
+      }
 
       // Post order with NO fixed delivery fee — riders will bid
       const orderData = {
@@ -389,7 +397,7 @@ const BookDelivery: React.FC = () => {
             
             {renderServiceDetails()}
             
-            {!['packages', 'documents', 'food', 'errands'].includes(formData.serviceType) && (
+            {!['packages', 'documents', 'food', 'errands', 'shipping'].includes(formData.serviceType) && (
               <div className="p-4 bg-card rounded-xl border border-border">
                 <Label>Additional Notes</Label>
                 <Textarea
