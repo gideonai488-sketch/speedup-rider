@@ -466,7 +466,97 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Delivery Methods */}
+      {/* Global Shipping Partners */}
+      <section className="py-20 bg-secondary/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="text-sm font-bold text-primary uppercase tracking-widest mb-3 block">Shipping Partners</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Ship Anywhere with <span className="text-gradient">Global Partners</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              We've partnered with FedEx and DHL to offer seamless international shipping. 
+              Our riders pick up locally, our partners deliver globally.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+            {/* FedEx Card */}
+            <div className="bg-card rounded-3xl border border-border p-8 hover:shadow-xl transition-all hover:-translate-y-1 group">
+              <div className="h-20 bg-[#4D148C] rounded-2xl flex items-center justify-center mb-6">
+                <span className="text-white text-3xl font-extrabold tracking-tight">FedEx</span>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">FedEx Express</h3>
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                Fast, reliable international shipping. Express delivery to 220+ countries with real-time tracking and guaranteed delivery dates.
+              </p>
+              <div className="space-y-2">
+                {['Express 1-3 day delivery', 'Real-time package tracking', '220+ countries covered', 'Customs clearance included'].map((f) => (
+                  <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* DHL Card */}
+            <div className="bg-card rounded-3xl border border-border p-8 hover:shadow-xl transition-all hover:-translate-y-1 group">
+              <div className="h-20 bg-[#FFCC00] rounded-2xl flex items-center justify-center mb-6">
+                <span className="text-[#D40511] text-3xl font-extrabold tracking-tight">DHL</span>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">DHL Express</h3>
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                The world's leading logistics company. Reliable worldwide delivery with door-to-door service and full insurance options.
+              </p>
+              <div className="space-y-2">
+                {['Door-to-door worldwide', 'Full insurance options', 'Eco-friendly shipping', 'Priority handling available'].map((f) => (
+                  <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* How it works flow */}
+          <div className="bg-card rounded-3xl border border-border p-8 max-w-4xl mx-auto">
+            <h3 className="text-lg font-bold text-foreground text-center mb-8">
+              <Plane className="w-5 h-5 inline mr-2 text-primary" />
+              How Global Shipping Works
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { step: '1', icon: '📱', title: 'Book Online', desc: 'Enter package details & destination' },
+                { step: '2', icon: '🏍️', title: 'Rider Picks Up', desc: 'SpeedUp rider collects your package' },
+                { step: '3', icon: '✈️', title: 'Partner Ships', desc: 'FedEx or DHL handles international transit' },
+                { step: '4', icon: '📬', title: 'Delivered', desc: 'Package arrives at destination worldwide' },
+              ].map((s) => (
+                <div key={s.step} className="text-center">
+                  <div className="w-12 h-12 rounded-full gradient-hero text-white flex items-center justify-center text-lg font-bold mx-auto mb-3 shadow-glow">
+                    {s.step}
+                  </div>
+                  <span className="text-2xl block mb-2">{s.icon}</span>
+                  <p className="font-semibold text-foreground text-sm">{s.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link to="/signup">
+              <Button size="lg" className="gradient-hero text-white shadow-glow hover:opacity-90 font-semibold px-10">
+                <Plane className="w-5 h-5 mr-2" />
+                Ship a Package Globally
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 bg-secondary/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
