@@ -251,7 +251,7 @@ const CustomerHome: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-3 gap-3">
-            {serviceCategories.map((service) => (
+            {serviceCategories.filter(s => s.id !== 'shipping').map((service) => (
               <Link
                 key={service.id}
                 to={`/customer/book?service=${service.id}`}
@@ -271,6 +271,33 @@ const CustomerHome: React.FC = () => {
               </Link>
             ))}
           </div>
+
+          {/* Full-width Global Shipping button */}
+          {serviceCategories.filter(s => s.id === 'shipping').map((service) => (
+            <Link
+              key={service.id}
+              to={`/customer/book?service=${service.id}`}
+              className={cn(
+                'flex items-center gap-4 w-full p-4 rounded-xl border-2 transition-all mt-3',
+                selectedService === service.id
+                  ? 'border-primary bg-primary/5 shadow-glow'
+                  : 'border-border bg-card hover:border-primary/50'
+              )}
+              onClick={() => setSelectedService(service.id)}
+            >
+              <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0', serviceColors[service.id])}>
+                {serviceIcons[service.id]}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">{service.name}</span>
+                  <span className="text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">NEW</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{service.description}</span>
+              </div>
+              <span className="text-xs text-primary font-medium whitespace-nowrap">From GH₵{service.basePrice}</span>
+            </Link>
+          ))}
         </section>
 
         {/* 3. Online Riders */}
