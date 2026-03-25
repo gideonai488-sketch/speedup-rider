@@ -278,7 +278,7 @@ const CustomerHome: React.FC = () => {
           {serviceCategories.filter(s => s.id === 'shipping').map((service) => (
             <Link
               key={service.id}
-              to={`/customer/book?service=${service.id}`}
+              to="/customer/shipping"
               className={cn(
                 'flex items-center gap-4 w-full p-4 rounded-xl border-2 transition-all mt-3',
                 selectedService === service.id
