@@ -652,7 +652,26 @@ const ShippingFlow: React.FC = () => {
           </div>
         )}
 
-        {/* STEP: Service Points */}
+        {/* STEP: Bids — Riders bid to deliver package to DHL */}
+        {step === 'bids' && shippingOrderId && (
+          <BidView
+            orderId={shippingOrderId}
+            pickupAddress={pickupAddress}
+            deliveryAddress="DHL Service Point (Drop-off)"
+            totalAmount={0}
+            onBack={() => setStep('qrcode')}
+            onCancel={async () => {
+              await supabase
+                .from('orders')
+                .update({ status: 'cancelled' as any })
+                .eq('id', shippingOrderId);
+              setStep('qrcode');
+              toast.info('Rider request cancelled. You can still drop off manually.');
+            }}
+          />
+        )}
+
+
         {step === 'service-points' && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Nearest DHL drop-off locations where your rider can scan the QR code</p>
