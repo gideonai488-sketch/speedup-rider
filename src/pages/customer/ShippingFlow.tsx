@@ -552,17 +552,29 @@ const ShippingFlow: React.FC = () => {
         {step === 'qrcode' && (
           <div className="space-y-6 text-center">
             <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-8 h-8 text-green-500" />
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-xl font-bold text-foreground">Shipment Created!</h2>
-              <p className="text-sm text-muted-foreground">Show this QR code at any DHL Service Point. The label will be printed on-site — no printer needed!</p>
+              <h2 className="text-xl font-bold text-foreground">Payment Confirmed!</h2>
+              <p className="text-sm text-muted-foreground">Show this QR code at any DHL Service Point. Staff will scan it to verify payment and print the shipping label on-site.</p>
               
               <QRCodeDisplay data={qrData || trackingNumber} size={220} label={trackingNumber} />
 
-              <div className="bg-muted rounded-lg p-3 text-left">
-                <p className="text-xs text-muted-foreground">Tracking Number</p>
-                <p className="font-mono font-semibold text-foreground">{trackingNumber}</p>
+              <div className="bg-muted rounded-lg p-3 text-left space-y-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Tracking Number</p>
+                  <p className="font-mono font-semibold text-foreground">{trackingNumber}</p>
+                </div>
+                {paymentReference && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Payment Reference</p>
+                    <p className="font-mono text-sm text-foreground">{paymentReference}</p>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 pt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-medium text-primary">Fully Paid</span>
+                </div>
               </div>
             </div>
 
