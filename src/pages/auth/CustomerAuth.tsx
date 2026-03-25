@@ -69,7 +69,7 @@ const CustomerAuth: React.FC = () => {
 
     setIsLoading(true);
     // Use phone as email format for Supabase auth
-    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@speup.guph`;
+    const phoneEmail = `${loginPhone.replace(/\D/g, '')}@customer.speedup.app`;
     const { error } = await signIn(phoneEmail, loginPassword);
     setIsLoading(false);
 
@@ -113,7 +113,7 @@ const CustomerAuth: React.FC = () => {
     }
 
     setIsLoading(true);
-    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@speup.guph`;
+    const phoneEmail = `${signupPhone.replace(/\D/g, '')}@customer.speedup.app`;
     const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, signupCity, undefined);
     setIsLoading(false);
     setIsLoading(false);
