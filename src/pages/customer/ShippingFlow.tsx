@@ -626,6 +626,12 @@ const ShippingFlow: React.FC = () => {
             </div>
 
             <div className="space-y-3">
+              {shippingOrderId && (
+                <Button onClick={() => setStep('bids')} className="w-full gradient-hero text-primary-foreground">
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Find a Rider for Pickup
+                </Button>
+              )}
               <Button onClick={() => { setStep('tracking'); }} variant="outline" className="w-full">
                 <Truck className="w-4 h-4 mr-2" />
                 Track This Shipment
@@ -634,7 +640,7 @@ const ShippingFlow: React.FC = () => {
                 <MapPin className="w-4 h-4 mr-2" />
                 Find Nearest DHL Drop-off
               </Button>
-              <Button onClick={() => navigate('/customer')} className="w-full gradient-hero text-primary-foreground">
+              <Button onClick={() => navigate('/customer')} variant="outline" className="w-full">
                 Back to Home
               </Button>
             </div>
@@ -642,8 +648,8 @@ const ShippingFlow: React.FC = () => {
             <div className="bg-primary/5 rounded-xl border border-primary/20 p-4 text-left">
               <p className="text-sm font-semibold text-foreground mb-2">📋 What Happens Next</p>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>1. A SpeedUp rider will come pick up your package</p>
-                <p>2. Rider takes it to the nearest DHL Service Point</p>
+                <p>1. Accept a rider's bid to pick up your package</p>
+                <p>2. Rider collects it and takes it to the nearest DHL Service Point</p>
                 <p>3. DHL staff scans the QR code to <strong className="text-foreground">verify payment</strong></p>
                 <p>4. Shipping label is printed on-site — no printer needed</p>
                 <p>5. DHL ships your package & you track it here in real-time</p>
