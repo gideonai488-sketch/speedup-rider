@@ -67,6 +67,15 @@ export const serviceCategories: ServiceCategory[] = [
     pricePerKm: 1.5,
     color: 'bg-cyan-500',
   },
+  {
+    id: 'shipping',
+    name: 'Global Shipping',
+    description: 'Ship worldwide via FedEx & DHL partners',
+    icon: '🌍',
+    basePrice: 25,
+    pricePerKm: 0,
+    color: 'bg-indigo-600',
+  },
 ];
 
 export const popularStores: Store[] = [

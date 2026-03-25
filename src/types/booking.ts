@@ -49,6 +49,23 @@ export interface DeliveryStop {
   order: number;
 }
 
+export interface ShippingDetails {
+  carrier: 'fedex' | 'dhl' | 'auto';
+  packageWeight: number;
+  packageLength: number;
+  packageWidth: number;
+  packageHeight: number;
+  destinationCountry: string;
+  destinationCity: string;
+  destinationAddress: string;
+  recipientName: string;
+  recipientPhone: string;
+  isFragile: boolean;
+  requiresInsurance: boolean;
+  declaredValue: number;
+  customsDescription: string;
+}
+
 export interface BookingFormData {
   serviceType: ServiceType | '';
   timing: DeliveryTiming;
@@ -67,6 +84,7 @@ export interface BookingFormData {
   packageDetails?: PackageDetails;
   foodDetails?: FoodDetails;
   errandDetails?: ErrandDetails;
+  shippingDetails?: ShippingDetails;
   
   // General
   description: string;

@@ -12,6 +12,7 @@ import {
   PackageDetails, 
   FoodDetails, 
   ErrandDetails,
+  ShippingDetails,
 } from '@/types/booking';
 import { toast } from 'sonner';
 import { useCreateOrder } from '@/hooks/useOrders';
@@ -26,6 +27,7 @@ import ErrandDetailsForm from '@/components/booking/ErrandDetailsForm';
 import MultiStopInput from '@/components/booking/MultiStopInput';
 import ScheduleSelector from '@/components/booking/ScheduleSelector';
 import SavedAddresses from '@/components/booking/SavedAddresses';
+import ShippingDetailsForm from '@/components/booking/ShippingDetailsForm';
 
 const DEFAULT_PACKAGE_DETAILS: PackageDetails = {
   size: 'medium',
@@ -46,6 +48,23 @@ const DEFAULT_ERRAND_DETAILS: ErrandDetails = {
   timing: 'asap',
   requireReceipt: true,
   taskDescription: '',
+};
+
+const DEFAULT_SHIPPING_DETAILS: ShippingDetails = {
+  carrier: 'auto',
+  packageWeight: 0,
+  packageLength: 0,
+  packageWidth: 0,
+  packageHeight: 0,
+  destinationCountry: '',
+  destinationCity: '',
+  destinationAddress: '',
+  recipientName: '',
+  recipientPhone: '',
+  isFragile: false,
+  requiresInsurance: false,
+  declaredValue: 0,
+  customsDescription: '',
 };
 
 const calculateDistance = (
@@ -91,6 +110,7 @@ const BookDelivery: React.FC = () => {
     packageDetails: DEFAULT_PACKAGE_DETAILS,
     foodDetails: DEFAULT_FOOD_DETAILS,
     errandDetails: DEFAULT_ERRAND_DETAILS,
+    shippingDetails: DEFAULT_SHIPPING_DETAILS,
     description: '',
     contactName: '',
     contactPhone: '',
@@ -125,6 +145,13 @@ const BookDelivery: React.FC = () => {
           <ErrandDetailsForm
             details={formData.errandDetails || DEFAULT_ERRAND_DETAILS}
             onChange={(details) => setFormData({ ...formData, errandDetails: details })}
+          />
+        );
+      case 'shipping':
+        return (
+          <ShippingDetailsForm
+            details={formData.shippingDetails || DEFAULT_SHIPPING_DETAILS}
+            onChange={(details) => setFormData({ ...formData, shippingDetails: details })}
           />
         );
       default:
@@ -177,6 +204,14 @@ const BookDelivery: React.FC = () => {
       if (formData.serviceType === 'errands' && formData.errandDetails) {
         notes += ` | Task: ${formData.errandDetails.taskType} - ${formData.errandDetails.taskDescription}`;
         if (formData.errandDetails.budgetAmount) notes += ` | Budget: GH₵${formData.errandDetails.budgetAmount}`;
+      }
+      if (formData.serviceType === 'shipping' && formData.shippingDetails) {
+        const s = formData.shippingDetails;
+        notes += ` | 🌍 GLOBAL SHIPPING: ${s.carrier.toUpperCase()} | To: ${s.destinationCountry}, ${s.destinationCity} | ${s.packageWeight}kg (${s.packageLength}x${s.packageWidth}x${s.packageHeight}cm)`;
+        if (s.recipientName) notes += ` | Recipient: ${s.recipientName} (${s.recipientPhone})`;
+        if (s.isFragile) notes += ' | FRAGILE';
+        if (s.requiresInsurance) notes += ` | INSURED ($${s.declaredValue})`;
+        if (s.customsDescription) notes += ` | Customs: ${s.customsDescription}`;
       }
 
       // Post order with NO fixed delivery fee — riders will bid
@@ -362,7 +397,7 @@ const BookDelivery: React.FC = () => {
             
             {renderServiceDetails()}
             
-            {!['packages', 'documents', 'food', 'errands'].includes(formData.serviceType) && (
+            {!['packages', 'documents', 'food', 'errands', 'shipping'].includes(formData.serviceType) && (
               <div className="p-4 bg-card rounded-xl border border-border">
                 <Label>Additional Notes</Label>
                 <Textarea
