@@ -1276,6 +1276,131 @@ export type Database = {
           },
         ]
       }
+      shipments: {
+        Row: {
+          carrier: string
+          created_at: string
+          currency: string | null
+          current_tracking_status: string | null
+          customs_description: string | null
+          declared_value: number | null
+          destination_address: string
+          destination_city: string
+          destination_country: string
+          destination_postal_code: string | null
+          dhl_label_url: string | null
+          dhl_qr_code_data: string | null
+          dhl_service_point_id: string | null
+          dhl_shipment_id: string | null
+          dhl_tracking_number: string | null
+          estimated_delivery_date: string | null
+          id: string
+          is_fragile: boolean
+          last_tracking_update: string | null
+          order_id: string | null
+          origin_address: string | null
+          origin_city: string | null
+          origin_country: string | null
+          package_height: number
+          package_length: number
+          package_weight: number
+          package_width: number
+          quoted_rate: number | null
+          recipient_email: string | null
+          recipient_name: string
+          recipient_phone: string
+          requires_insurance: boolean
+          status: string
+          tracking_events: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          carrier?: string
+          created_at?: string
+          currency?: string | null
+          current_tracking_status?: string | null
+          customs_description?: string | null
+          declared_value?: number | null
+          destination_address: string
+          destination_city: string
+          destination_country: string
+          destination_postal_code?: string | null
+          dhl_label_url?: string | null
+          dhl_qr_code_data?: string | null
+          dhl_service_point_id?: string | null
+          dhl_shipment_id?: string | null
+          dhl_tracking_number?: string | null
+          estimated_delivery_date?: string | null
+          id?: string
+          is_fragile?: boolean
+          last_tracking_update?: string | null
+          order_id?: string | null
+          origin_address?: string | null
+          origin_city?: string | null
+          origin_country?: string | null
+          package_height?: number
+          package_length?: number
+          package_weight?: number
+          package_width?: number
+          quoted_rate?: number | null
+          recipient_email?: string | null
+          recipient_name: string
+          recipient_phone: string
+          requires_insurance?: boolean
+          status?: string
+          tracking_events?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          carrier?: string
+          created_at?: string
+          currency?: string | null
+          current_tracking_status?: string | null
+          customs_description?: string | null
+          declared_value?: number | null
+          destination_address?: string
+          destination_city?: string
+          destination_country?: string
+          destination_postal_code?: string | null
+          dhl_label_url?: string | null
+          dhl_qr_code_data?: string | null
+          dhl_service_point_id?: string | null
+          dhl_shipment_id?: string | null
+          dhl_tracking_number?: string | null
+          estimated_delivery_date?: string | null
+          id?: string
+          is_fragile?: boolean
+          last_tracking_update?: string | null
+          order_id?: string | null
+          origin_address?: string | null
+          origin_city?: string | null
+          origin_country?: string | null
+          package_height?: number
+          package_length?: number
+          package_weight?: number
+          package_width?: number
+          quoted_rate?: number | null
+          recipient_email?: string | null
+          recipient_name?: string
+          recipient_phone?: string
+          requires_insurance?: boolean
+          status?: string
+          tracking_events?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stores: {
         Row: {
           address: string | null
