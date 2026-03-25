@@ -57,7 +57,9 @@ const ShippingFlow: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState(trackParam || '');
   const [qrData, setQrData] = useState('');
   const [createdShipmentId, setCreatedShipmentId] = useState('');
+  const [shippingOrderId, setShippingOrderId] = useState('');
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  const [paymentReference, setPaymentReference] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
 
   const trackingQuery = useShipmentTracking(step === 'tracking' && trackingNumber ? trackingNumber : null);
