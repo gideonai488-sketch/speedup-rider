@@ -13,8 +13,9 @@ import type { ShipmentRate, ServicePoint } from '@/hooks/useShipments';
 import QRCodeDisplay from '@/components/shipping/QRCodeDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import AddressAutocomplete from '@/components/location/AddressAutocomplete';
+import BidView from '@/components/tracking/BidView';
 
-type ShippingStep = 'details' | 'rates' | 'confirm' | 'payment' | 'qrcode' | 'service-points' | 'tracking' | 'my-shipments';
+type ShippingStep = 'details' | 'rates' | 'confirm' | 'payment' | 'qrcode' | 'bids' | 'service-points' | 'tracking' | 'my-shipments';
 
 const ShippingFlow: React.FC = () => {
   const navigate = useNavigate();
