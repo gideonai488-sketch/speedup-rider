@@ -511,7 +511,7 @@ const ShippingFlow: React.FC = () => {
                 </div>
               </div>
             ))}
-            {servicePointsMutation.data?.source === 'mock' && (
+            {(servicePointsMutation.data as any)?.source === 'mock' && (
               <p className="text-[10px] text-center text-muted-foreground">
                 📍 Sample locations — real DHL points shown when API is connected
               </p>
