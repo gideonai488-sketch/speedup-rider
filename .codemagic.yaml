@@ -87,7 +87,7 @@ jiChYGYlEYKN6llsBBT380V+TQll3sXW/JBSmh123gFy4gICJxA=
       - name: Build Android app
         script: |
           cd android
-          ./gradlew assembleRelease
+          ./gradlew bundleRelease
 
     artifacts:
       - android/app/build/outputs/**/*.apk
@@ -99,4 +99,4 @@ jiChYGYlEYKN6llsBBT380V+TQll3sXW/JBSmh123gFy4gICJxA=
           - your-email@example.com
         notify:
           success: true
-          failure: false
+          failure: true

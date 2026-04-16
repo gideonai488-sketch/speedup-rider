@@ -1,4 +1,4 @@
-package com.speedup.rider;
+package com.speedup.riders;
 
 import com.getcapacitor.BridgeActivity;
 

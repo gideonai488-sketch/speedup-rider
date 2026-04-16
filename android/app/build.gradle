@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.speedup.rider"
+    namespace = "com.speedup.riders"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.speedup.rider"
+        applicationId "com.speedup.riders"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
