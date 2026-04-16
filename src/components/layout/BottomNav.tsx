@@ -1,26 +1,12 @@
 import React from 'react';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import {
-  Home,
-  Search,
-  ClipboardList,
-  User,
   Zap,
   Wallet,
   Clock,
-  GraduationCap,
-  Users,
-  Trophy,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/AuthContext';
-
-const customerNavItems = [
-  { path: '/customer', icon: Home, label: 'Home' },
-  { path: '/search', icon: Search, label: 'Search' },
-  { path: '/orders', icon: ClipboardList, label: 'Orders' },
-  { path: '/profile', icon: User, label: 'Profile' },
-];
 
 const riderNavItems = [
   { path: '/rider', icon: Zap, label: 'Home' },
@@ -29,32 +15,10 @@ const riderNavItems = [
   { path: '/rider/profile', icon: User, label: 'Profile' },
 ];
 
-const ambassadorNavItems = [
-  { path: '/ambassador', icon: GraduationCap, label: 'Home' },
-  { path: '/ambassador/referrals', icon: Users, label: 'Referrals' },
-  { path: '/ambassador/earnings', icon: Wallet, label: 'Earnings' },
-  { path: '/ambassador/leaderboard', icon: Trophy, label: 'Ranks' },
-  { path: '/ambassador/profile', icon: User, label: 'Profile' },
-];
-
-const merchantNavItems = [
-  { path: '/merchant', icon: Home, label: 'Home' },
-  { path: '/merchant/orders', icon: ClipboardList, label: 'Orders' },
-  { path: '/merchant/products', icon: Zap, label: 'Products' },
-  { path: '/merchant/finance', icon: Wallet, label: 'Finance' },
-  { path: '/merchant/profile', icon: User, label: 'Profile' },
-];
-
 type BottomNavProps = React.ComponentPropsWithoutRef<'nav'>;
 
 const BottomNav = React.forwardRef<HTMLElement, BottomNavProps>(({ className, ...props }, ref) => {
   const location = useLocation();
-  const { profile } = useAuth();
-
-  const isMerchant = profile?.role === 'merchant' || location.pathname.startsWith('/merchant');
-  const isAmbassador = profile?.role === 'ambassador' || location.pathname.startsWith('/ambassador');
-  const isRider = profile?.role === 'rider' || location.pathname.startsWith('/rider');
-  const navItems = isMerchant ? merchantNavItems : isAmbassador ? ambassadorNavItems : isRider ? riderNavItems : customerNavItems;
 
   return (
     <nav
@@ -66,10 +30,9 @@ const BottomNav = React.forwardRef<HTMLElement, BottomNavProps>(({ className, ..
       {...props}
     >
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
-        {navItems.map(({ path, icon: Icon, label }) => {
+        {riderNavItems.map(({ path, icon: Icon, label }) => {
           const isActive =
             location.pathname === path ||
-            (path === '/profile' && location.pathname === '/profile') ||
             (path === '/rider/profile' && location.pathname === '/rider/profile');
 
           return (
@@ -109,4 +72,3 @@ const BottomNav = React.forwardRef<HTMLElement, BottomNavProps>(({ className, ..
 BottomNav.displayName = 'BottomNav';
 
 export default BottomNav;
-
