@@ -11,7 +11,7 @@ workflows:
         - app_credentials   # KEYSTORE (base64), KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
         - environment       # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
       vars:
-        PACKAGE_NAME: "app.lovable.4dd003882489427e9d138d2b4a851dbe"
+        PACKAGE_NAME: "com.speedup.riders"
     scripts:
       - name: Install dependencies
         script: npm install
@@ -41,10 +41,7 @@ workflows:
     artifacts:
       - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
-    publishing:
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal
+
 
   speedup-ios:
     name: SpeedUp iOS
@@ -61,7 +58,7 @@ workflows:
         - app_store_connect  # APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_PRIVATE_KEY
         - environment        # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
       vars:
-        PACKAGE_NAME: "app.lovable.4dd003882489427e9d138d2b4a851dbe"
+        PACKAGE_NAME: "com.speedup.riders"
     scripts:
       - name: Install dependencies
         script: npm install
