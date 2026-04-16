@@ -1,14 +1,14 @@
 workflows:
   speedup-android:
-    name: SpeedUp Android (AAB)
+    name: SpeedUp Android AAB
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
       node: 18
       java: 17
       groups:
-        - app_credentials   # KEYSTORE (base64), KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
-        - environment       # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
+        - app_credentials
+        - environment
       vars:
         PACKAGE_NAME: "com.speedup.riders"
     scripts:
@@ -53,8 +53,8 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.speedup.riders
       groups:
-        - app_store_connect  # APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_PRIVATE_KEY
-        - environment        # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
+        - app_store_connect
+        - environment
       vars:
         PACKAGE_NAME: "com.speedup.riders"
     scripts:
