@@ -7,7 +7,7 @@ workflows:
       node: 18
       java: 17
       groups:
-        - google_play       # GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (JSON, base64-encoded)
+
         - app_credentials   # KEYSTORE (base64), KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
         - environment       # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
       vars:
@@ -53,7 +53,7 @@ workflows:
       node: 18
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: app.lovable.4dd003882489427e9d138d2b4a851dbe
+        bundle_identifier: com.speedup.riders
       groups:
         - app_store_connect  # APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_PRIVATE_KEY
         - environment        # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
