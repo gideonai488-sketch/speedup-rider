@@ -5,6 +5,7 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://stvceqozldcoeaotsinf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmNlcW96bGRjb2Vhb3RzaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzE3MDEsImV4cCI6MjA5MTkwNzcwMX0.qol8622T19ociEFEWqQfaeDjiAfH5tmSW6yw9actXlM";
 export const PAYSTACK_PUBLIC_KEY = "pk_live_671fccd651daf066804466572cfd0b7c47df2471";
+export const MAPBOX_TOKEN = "pk.eyJ1IjoidHJhdmVsbWF0ZTExMjMiLCJhIjoiY21oc2hmM3g5MGo0ajJzcjg1cHgzYjFtYSJ9.5WCLBT_KSghCcRtzH3xreQ";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
