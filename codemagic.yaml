@@ -1,13 +1,12 @@
 workflows:
   speedup-android:
-    name: SpeedUp Android
+    name: SpeedUp Android (AAB)
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
       node: 18
       java: 17
       groups:
-
         - app_credentials   # KEYSTORE (base64), KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
         - environment       # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
       vars:
@@ -34,14 +33,13 @@ workflows:
           keyPassword=$KEY_PASSWORD
           EOF
           fi
-      - name: Build Android
+      - name: Build Android AAB
         script: |
           cd android
           ./gradlew bundleRelease
     artifacts:
-      - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
-
+      - android/app/build/outputs/**/*.apk
 
   speedup-ios:
     name: SpeedUp iOS
