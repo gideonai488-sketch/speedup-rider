@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">SpeedUp Rider</string>
-    <string name="title_activity_main">SpeedUp Rider</string>
-    <string name="package_name">com.speedup.riders</string>
-    <string name="custom_url_scheme">com.speedup.riders</string>
+    <string name="app_name">SpeedUp Driver</string>
+    <string name="title_activity_main">SpeedUp Driver</string>
+    <string name="package_name">com.speedup.driver</string>
+    <string name="custom_url_scheme">com.speedup.driver</string>
 </resources>

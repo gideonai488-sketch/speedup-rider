@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.speedup.riders',
-  appName: 'SpeedUp Rider',
+  appId: 'com.speedup.driver',
+  appName: 'SpeedUp Driver',
   webDir: 'dist',
 };
 
