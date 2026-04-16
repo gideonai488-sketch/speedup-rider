@@ -146,8 +146,15 @@ const RiderAuth: React.FC = () => {
       }
     }
 
+    // Auto sign-in after successful signup so session is created and redirect fires
+    const { error: signInError } = await signIn(phoneEmail, signupPassword);
     setIsLoading(false);
-    toast.success('Rider account created! Welcome to SpeedUp.');
+
+    if (signInError) {
+      toast.success('Rider account created! Please log in.');
+    } else {
+      toast.success('Rider account created! Welcome to SpeedUp.');
+    }
   };
 
   if (authLoading) {

@@ -111,10 +111,19 @@ const AmbassadorAuth: React.FC = () => {
       country,
       finalUniversity
     );
-    setIsLoading(false);
 
     if (error) {
+      setIsLoading(false);
       toast.error(error.message || 'Signup failed');
+      return;
+    }
+
+    // Auto sign-in after successful signup so session is created and redirect fires
+    const { error: signInError } = await signIn(email, password);
+    setIsLoading(false);
+
+    if (signInError) {
+      toast.success('Welcome aboard, Ambassador! Please log in.');
     } else {
       toast.success('Welcome aboard, Ambassador! 🎓🚀');
     }

@@ -115,15 +115,24 @@ const CustomerAuth: React.FC = () => {
     setIsLoading(true);
     const phoneEmail = `${signupPhone.replace(/\D/g, '')}@customer.speedup.app`;
     const { error } = await signUp(phoneEmail, signupPassword, signupName, 'customer', signupPhone, signupCity, undefined);
-    setIsLoading(false);
-    setIsLoading(false);
 
     if (error) {
+      setIsLoading(false);
       if (error.message.includes('already registered')) {
         toast.error('This phone number is already registered. Please login instead.');
       } else {
         toast.error(error.message);
       }
+      return;
+    }
+
+    // Auto sign-in after successful signup so session is created and redirect fires
+    const { error: signInError } = await signIn(phoneEmail, signupPassword);
+    setIsLoading(false);
+
+    if (signInError) {
+      toast.error('Account created! Please log in.');
+      setActiveTab('login');
     } else {
       toast.success('Account created successfully!');
     }
