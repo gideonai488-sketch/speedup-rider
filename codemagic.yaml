@@ -29,15 +29,19 @@ workflows:
         script: npx cap sync android
       - name: Set up keystore
         script: |
-          echo $CM_KEYSTORE | base64 --decode > android/app/speedup-rider.keystore
+          echo $CM_KEYSTORE | base64 --decode > /tmp/speedup-rider.keystore
+          export CM_KEYSTORE_PATH=/tmp/speedup-rider.keystore
+          export CM_KEYSTORE_PASSWORD=$(echo $CM_KEYSTORE_PASSWORD | base64 --decode)
+          export CM_KEY_ALIAS=$(echo $CM_KEY_ALIAS | base64 --decode)
+          export CM_KEY_PASSWORD=$(echo $CM_KEY_PASSWORD | base64 --decode)
       - name: Build Android AAB
         script: |
+          export CM_KEYSTORE_PATH=/tmp/speedup-rider.keystore
+          export CM_KEYSTORE_PASSWORD=$(echo $CM_KEYSTORE_PASSWORD | base64 --decode)
+          export CM_KEY_ALIAS=$(echo $CM_KEY_ALIAS | base64 --decode)
+          export CM_KEY_PASSWORD=$(echo $CM_KEY_PASSWORD | base64 --decode)
           cd android
-          ./gradlew bundleRelease \
-            -Pandroid.injected.signing.store.file=app/speedup-rider.keystore \
-            -Pandroid.injected.signing.store.password=$(echo $CM_KEYSTORE_PASSWORD | base64 --decode) \
-            -Pandroid.injected.signing.key.alias=$(echo $CM_KEY_ALIAS | base64 --decode) \
-            -Pandroid.injected.signing.key.password=$(echo $CM_KEY_PASSWORD | base64 --decode)
+          ./gradlew bundleRelease
     artifacts:
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/**/*.apk

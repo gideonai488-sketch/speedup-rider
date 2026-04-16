@@ -18,7 +18,8 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file("speedup.keystore")
+            def keystorePath = System.getenv("CM_KEYSTORE_PATH")
+            storeFile keystorePath ? file(keystorePath) : file("speedup.keystore")
             storePassword System.getenv("CM_KEYSTORE_PASSWORD") ?: "speedup123"
             keyAlias System.getenv("CM_KEY_ALIAS") ?: "speedup-alias"
             keyPassword System.getenv("CM_KEY_PASSWORD") ?: "speedup123"
