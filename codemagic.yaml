@@ -12,9 +12,7 @@ workflows:
         VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmNlcW96bGRjb2Vhb3RzaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzE3MDEsImV4cCI6MjA5MTkwNzcwMX0.qol8622T19ociEFEWqQfaeDjiAfH5tmSW6yw9actXlM"
     scripts:
       - name: Install dependencies
-        script: |
-          npm install -g pnpm
-          pnpm install
+        script: pnpm install --no-frozen-lockfile
       - name: Set up environment
         script: |
           echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
@@ -60,9 +58,7 @@ workflows:
         VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmNlcW96bGRjb2Vhb3RzaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzE3MDEsImV4cCI6MjA5MTkwNzcwMX0.qol8622T19ociEFEWqQfaeDjiAfH5tmSW6yw9actXlM"
     scripts:
       - name: Install dependencies
-        script: |
-          npm install -g pnpm
-          pnpm install
+        script: pnpm install --no-frozen-lockfile
       - name: Set up environment
         script: |
           echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
