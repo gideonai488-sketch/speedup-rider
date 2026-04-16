@@ -10,53 +10,16 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CountryProvider } from "@/context/CountryContext";
 import { initNativeUI } from "@/lib/nativeUI";
 
-// SpeedUp Pages
+// SpeedUp Rider App Pages
 import LandingPage from "./pages/LandingPage";
-import CustomerAuth from "./pages/auth/CustomerAuth";
 import RiderAuth from "./pages/auth/RiderAuth";
-import CustomerHome from "./pages/customer/CustomerHome";
-import BookDelivery from "./pages/customer/BookDelivery";
-import ShippingFlow from "./pages/customer/ShippingFlow";
-import StoreCheckout from "./pages/customer/StoreCheckout";
-import TrackDelivery from "./pages/customer/TrackDelivery";
-import StorePage from "./pages/customer/StorePage";
-import Wallet from "./pages/customer/Wallet";
-import Referral from "./pages/customer/Referral";
-import Notifications from "./pages/customer/Notifications";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import RiderProfile from "./pages/rider/RiderProfile";
 import RiderHistory from "./pages/rider/RiderHistory";
 import RiderBids from "./pages/rider/RiderBids";
-import Profile from "./pages/Profile";
-import Search from "./pages/Search";
-import Orders from "./pages/Orders";
-import BecomePartner from "./pages/BecomePartner";
-import NotFound from "./pages/NotFound";
-import CampusAmbassador from "./pages/CampusAmbassador";
-
-// Ambassador Pages
-import AmbassadorAuth from "./pages/auth/AmbassadorAuth";
-import AmbassadorDashboard from "./pages/ambassador/AmbassadorDashboard";
-
-// Merchant Pages
-import MerchantAuth from "./pages/auth/MerchantAuth";
-import MerchantDashboard from "./pages/merchant/MerchantDashboard";
-import MerchantStore from "./pages/merchant/MerchantStore";
-import MerchantProducts from "./pages/merchant/MerchantProducts";
-import MerchantOrders from "./pages/merchant/MerchantOrders";
-import MerchantFinance from "./pages/merchant/MerchantFinance";
-import MerchantCustomers from "./pages/merchant/MerchantCustomers";
-import MerchantAI from "./pages/merchant/MerchantAI";
-import MerchantProfile from "./pages/merchant/MerchantProfile";
-import AmbassadorReferrals from "./pages/ambassador/AmbassadorReferrals";
-import AmbassadorEarnings from "./pages/ambassador/AmbassadorEarnings";
-import AmbassadorLeaderboard from "./pages/ambassador/AmbassadorLeaderboard";
-import AmbassadorResources from "./pages/ambassador/AmbassadorResources";
-import AmbassadorProfile from "./pages/ambassador/AmbassadorProfile";
-
-// Rider Pages
 import RiderEarnings from "./pages/rider/RiderEarnings";
 import RiderDelivery from "./pages/rider/RiderDelivery";
+import NotFound from "./pages/NotFound";
 
 // Configure React Query
 const queryClient = new QueryClient({
@@ -88,7 +51,6 @@ const App = () => {
       setShowSplash(false);
       setIsFirstVisit(false);
     }
-    // Initialize native UI plugins (status bar, splash screen, keyboard)
     initNativeUI();
   }, []);
 
@@ -114,37 +76,14 @@ const App = () => {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/become-partner" element={<BecomePartner />} />
-                <Route path="/campus-ambassador" element={<CampusAmbassador />} />
-                <Route path="/auth" element={<CustomerAuth />} />
-                <Route path="/login" element={<CustomerAuth />} />
-                <Route path="/signup" element={<CustomerAuth />} />
                 
                 {/* Rider Auth */}
+                <Route path="/auth" element={<RiderAuth />} />
+                <Route path="/login" element={<RiderAuth />} />
+                <Route path="/signup" element={<RiderAuth />} />
                 <Route path="/rider/auth" element={<RiderAuth />} />
                 <Route path="/rider/login" element={<RiderAuth />} />
                 <Route path="/rider/signup" element={<RiderAuth />} />
-                
-                {/* Customer Routes */}
-                <Route path="/customer" element={<CustomerHome />} />
-                <Route path="/customer/home" element={<CustomerHome />} />
-                <Route path="/customer/dashboard" element={<CustomerHome />} />
-                <Route path="/customer/store/:storeId" element={<StorePage />} />
-                <Route path="/customer/store-checkout" element={<StoreCheckout />} />
-                <Route path="/customer/book" element={<BookDelivery />} />
-                <Route path="/customer/shipping" element={<ShippingFlow />} />
-                <Route path="/customer/track/:orderId" element={<TrackDelivery />} />
-                <Route path="/track/:orderId" element={<TrackDelivery />} />
-                <Route path="/customer/wallet" element={<Wallet />} />
-                <Route path="/customer/referral" element={<Referral />} />
-                <Route path="/customer/orders" element={<Orders />} />
-                <Route path="/customer/profile" element={<Profile />} />
-                <Route path="/customer/notifications" element={<Notifications />} />
-                
-                {/* Shared Routes */}
-                <Route path="/search" element={<Search />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/profile" element={<Profile />} />
                 
                 {/* Rider Routes */}
                 <Route path="/rider" element={<RiderDashboard />} />
@@ -155,32 +94,6 @@ const App = () => {
                 <Route path="/rider/deliveries" element={<RiderHistory />} />
                 <Route path="/rider/bids" element={<RiderBids />} />
                 <Route path="/rider/delivery/:orderId" element={<RiderDelivery />} />
-                
-                {/* Merchant Routes */}
-                <Route path="/merchant/auth" element={<MerchantAuth />} />
-                <Route path="/merchant/login" element={<MerchantAuth />} />
-                <Route path="/merchant/signup" element={<MerchantAuth />} />
-                <Route path="/merchant" element={<MerchantDashboard />} />
-                <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
-                <Route path="/merchant/store" element={<MerchantStore />} />
-                <Route path="/merchant/products" element={<MerchantProducts />} />
-                <Route path="/merchant/orders" element={<MerchantOrders />} />
-                <Route path="/merchant/finance" element={<MerchantFinance />} />
-                <Route path="/merchant/customers" element={<MerchantCustomers />} />
-                <Route path="/merchant/ai" element={<MerchantAI />} />
-                <Route path="/merchant/profile" element={<MerchantProfile />} />
-                <Route path="/merchant/notifications" element={<Notifications />} />
-
-                {/* Ambassador Routes */}
-                <Route path="/ambassador/auth" element={<AmbassadorAuth />} />
-                <Route path="/ambassador" element={<AmbassadorDashboard />} />
-                <Route path="/ambassador/dashboard" element={<AmbassadorDashboard />} />
-                <Route path="/ambassador/referrals" element={<AmbassadorReferrals />} />
-                <Route path="/ambassador/earnings" element={<AmbassadorEarnings />} />
-                <Route path="/ambassador/leaderboard" element={<AmbassadorLeaderboard />} />
-                <Route path="/ambassador/resources" element={<AmbassadorResources />} />
-                <Route path="/ambassador/profile" element={<AmbassadorProfile />} />
-                <Route path="/ambassador/notifications" element={<Notifications />} />
                 
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
