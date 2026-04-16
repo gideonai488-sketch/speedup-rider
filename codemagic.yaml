@@ -7,7 +7,6 @@ workflows:
       node: 22
       java: 17
       groups:
-        - app_credentials
         - environment variables
       vars:
         PACKAGE_NAME: "com.speedup.riders"
@@ -56,7 +55,6 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.speedup.riders
       groups:
-        - app_store_connect
         - environment variables
       vars:
         PACKAGE_NAME: "com.speedup.riders"
