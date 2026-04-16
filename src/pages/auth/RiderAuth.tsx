@@ -97,6 +97,7 @@ const RiderAuth: React.FC = () => {
       toast.error(error.message.includes('Invalid login credentials') ? 'Invalid phone number or password' : error.message);
     } else {
       toast.success('Welcome back, rider!');
+      navigate('/rider');
     }
   };
 
@@ -146,14 +147,15 @@ const RiderAuth: React.FC = () => {
       }
     }
 
-    // Auto sign-in after successful signup so session is created and redirect fires
+    // Auto sign-in after successful signup
     const { error: signInError } = await signIn(phoneEmail, signupPassword);
     setIsLoading(false);
 
     if (signInError) {
-      toast.success('Rider account created! Please log in.');
+      toast.success('Account created! Please log in.');
     } else {
-      toast.success('Rider account created! Welcome to SpeedUp.');
+      toast.success('Welcome to SpeedUp Rider!');
+      navigate('/rider');
     }
   };
 
