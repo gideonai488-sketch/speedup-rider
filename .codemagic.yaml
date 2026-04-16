@@ -7,6 +7,7 @@ workflows:
         CM_KEYSTORE_PASSWORD: c3BlZWR1cDEyMw==
         CM_KEY_ALIAS: c3BlZWR1cC1hbGlhcw==
         CM_KEY_PASSWORD: c3BlZWR1cDEyMw==
+        PACKAGE_NAME: com.speedup.riders
       android:
         api_level: 34
         build_tools: 34.0.0
