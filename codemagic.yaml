@@ -33,22 +33,14 @@ workflows:
       - name: Set up keystore
         script: |
           echo $CM_KEYSTORE | base64 --decode > android/app/speedup-rider.keystore
-          CM_KEYSTORE_PASSWORD_DECODED=$(echo $CM_KEYSTORE_PASSWORD | base64 --decode)
-          CM_KEY_ALIAS_DECODED=$(echo $CM_KEY_ALIAS | base64 --decode)
-          CM_KEY_PASSWORD_DECODED=$(echo $CM_KEY_PASSWORD | base64 --decode)
-          cat >> android/app/build.gradle << EOF
-android.signingConfigs.release {
-    storeFile file('speedup-rider.keystore')
-    storePassword '$CM_KEYSTORE_PASSWORD_DECODED'
-    keyAlias '$CM_KEY_ALIAS_DECODED'
-    keyPassword '$CM_KEY_PASSWORD_DECODED'
-}
-android.buildTypes.release.signingConfig android.signingConfigs.release
-EOF
       - name: Build Android AAB
         script: |
           cd android
-          ./gradlew bundleRelease
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=app/speedup-rider.keystore \
+            -Pandroid.injected.signing.store.password=$(echo $CM_KEYSTORE_PASSWORD | base64 --decode) \
+            -Pandroid.injected.signing.key.alias=$(echo $CM_KEY_ALIAS | base64 --decode) \
+            -Pandroid.injected.signing.key.password=$(echo $CM_KEY_PASSWORD | base64 --decode)
     artifacts:
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/**/*.apk
