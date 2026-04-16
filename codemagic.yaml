@@ -1,6 +1,6 @@
 workflows:
   speedup-rider-android:
-    name: SpeedUp Rider - Android AAB
+    name: SpeedUp Driver - Android AAB
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
@@ -54,7 +54,7 @@ workflows:
           failure: true
 
   speedup-rider-ios:
-    name: SpeedUp Rider - iOS
+    name: SpeedUp Driver - iOS
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
