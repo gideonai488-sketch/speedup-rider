@@ -6,10 +6,10 @@ workflows:
     environment:
       node: 22
       java: 17
-      groups:
-        - environment variables
       vars:
         PACKAGE_NAME: "com.speedup.riders"
+        VITE_SUPABASE_URL: "https://stvceqozldcoeaotsinf.supabase.co"
+        VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmNlcW96bGRjb2Vhb3RzaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzE3MDEsImV4cCI6MjA5MTkwNzcwMX0.qol8622T19ociEFEWqQfaeDjiAfH5tmSW6yw9actXlM"
     scripts:
       - name: Install dependencies
         script: |
@@ -54,10 +54,10 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.speedup.riders
-      groups:
-        - environment variables
       vars:
         PACKAGE_NAME: "com.speedup.riders"
+        VITE_SUPABASE_URL: "https://stvceqozldcoeaotsinf.supabase.co"
+        VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmNlcW96bGRjb2Vhb3RzaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzE3MDEsImV4cCI6MjA5MTkwNzcwMX0.qol8622T19ociEFEWqQfaeDjiAfH5tmSW6yw9actXlM"
     scripts:
       - name: Install dependencies
         script: |
