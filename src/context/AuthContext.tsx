@@ -171,7 +171,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   ) => {
     const redirectUrl = `${window.location.origin}/`;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -186,7 +186,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       },
     });
 
-    return { error: error as Error | null };
+    if (error) return { error: error as Error | null };
+
+    // Ensure profile row exists immediately — don't rely solely on DB trigger
+    if (data.user) {
+      await supabase.from('profiles').upsert(
+        {
+          user_id: data.user.id,
+          full_name: fullName,
+          role: role,
+          phone: phone ?? null,
+          city: city ?? null,
+          vehicle_type: vehicleType ?? null,
+        },
+        { onConflict: 'user_id' }
+      );
+    }
+
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
