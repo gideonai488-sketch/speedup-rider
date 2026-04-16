@@ -17,6 +17,7 @@ build = ["npm", "run", "build"]
 VITE_SUPABASE_URL = "https://stvceqozldcoeaotsinf.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmNlcW96bGRjb2Vhb3RzaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzE3MDEsImV4cCI6MjA5MTkwNzcwMX0.qol8622T19ociEFEWqQfaeDjiAfH5tmSW6yw9actXlM"
 VITE_SUPABASE_PROJECT_ID = "stvceqozldcoeaotsinf"
+VITE_PAYSTACK_PUBLIC_KEY = "pk_live_671fccd651daf066804466572cfd0b7c47df2471"
 
 [workflows]
 runButton = "Project"
@@ -45,3 +46,7 @@ waitForPort = 5000
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
