@@ -26,14 +26,15 @@ workflows:
         script: npx cap sync android
       - name: Set up Android signing
         script: |
-          if [ ! -z "$KEYSTORE" ]; then
-            echo $KEYSTORE | base64 --decode > android/app/keystore.jks
-            cat > android/key.properties <<EOF
-          storeFile=keystore.jks
-          storePassword=$KEYSTORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
-          EOF
+          if [ ! -z "$CM_KEYSTORE" ]; then
+            echo $CM_KEYSTORE | base64 --decode > android/app/speedup.keystore
+          else
+            keytool -genkeypair -v \
+              -keystore android/app/speedup.keystore \
+              -alias speedup-alias \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass speedup123 -keypass speedup123 \
+              -dname "CN=SpeedUp, OU=Mobile, O=SpeedUp, L=Accra, ST=Greater Accra, C=GH"
           fi
       - name: Build Android AAB
         script: |
